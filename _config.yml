@@ -1,0 +1,58 @@
+# Site
+repository: ChristopherBilg/christopherbilg.github.io
+favicon: images/favicon.ico
+
+# Personal info
+name: Chris Bilger
+title: Associate Software Engineer
+email: christopherbilg@gmail.com
+#phone: 111-111-1111
+website: chrisbilger.com
+# Social links
+# twitter_username: facespics
+github_username:  ChristopherBilg
+# dribbble_username: jekyll
+# facebook_username: jekyll
+# flickr_username: jekyll
+# instagram_username: chillwildlife
+linkedin_username: christopher-bilger
+# pinterest_username: jekyll
+# youtube_username: globalmtb
+# googleplus_username: +jekyll
+
+# About Section
+about_title: About Me
+about_profile_image: images/new_profile.jpg
+about_content: | # this will include new lines to allow paragraphs
+  Hello, my name is Chris Bilger and I work as a Software Engineer at Lockheed Martin Corporation. I am also currently pursuing a Master of Science in Computer Science degree from Georgia Institute of Technology.
+
+# Projects Section
+projects_title: Technical Experience
+
+# Experience Section
+experience_title: Professional Experience
+
+# Education Section
+educaton_title: Education
+
+# More Section
+more_title: Personal Interests
+more_content: | # this will include new lines to allow paragraphs
+  Some of my personal interests and hobbies include:
+   - Running
+   - Kayaking
+   - Biking
+   - Card Games and Puzzles
+
+# Footer
+footer_show_references: true
+
+# Build settings
+remote_theme: sproogen/resume-theme
+
+sass:
+  sass_dir: _sass
+  style: compressed
+
+plugins:
+ - jekyll-seo-tag
