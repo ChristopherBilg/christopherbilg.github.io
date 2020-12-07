@@ -24,7 +24,7 @@ linkedin_username: christopher-bilger
 about_title: About Me
 about_profile_image: images/new_profile.jpg
 about_content: | # this will include new lines to allow paragraphs
-  Hello, my name is Chris Bilger and I work as a Software Engineer at Lockheed Martin Corporation. I am also currently pursuing a Master of Science in Computer Science degree from Georgia Institute of Technology.
+  Hello, my name is Chris Bilger and I work as a Software Engineer at Lockheed Martin Corporation. I am also currently pursuing a Master of Computer Science degree from Arizona State University.
 
 # Projects Section
 projects_title: Technical Experience
