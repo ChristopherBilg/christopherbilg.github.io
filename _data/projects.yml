@@ -1,18 +1,7 @@
 - layout: top-middle
-  name: InChat Translator
-  link: github.com/ChristopherBilg/inchat-translate
-  github: ChristopherBilg/inchat-translate
+  name: ri2p
+  link: ri2p.com
+  github: ChristopherBilg/ri2p
   description: |
-    This is the culmination project of my Bachelor's degree. InChat is an SMS-like progressive web application that seamlessly translates messages while they are being forwarded to other users. This gives users of all languages the ability to communicate with one another.
-- layout: top-middle
-  name: ScheduleMaker
-  link: github.com/ChristopherBilg/schedulemaker
-  github: ChristopherBilg/schedulemaker
-  description: |
-    For my final project for my Software Design course, I worked on a schedule making web application that organizes courses and course times for the user.
-- layout: top-middle
-  name: UrlFormat
-  link: github.com/ChristopherBilg/urlformat
-  github: ChristopherBilg/urlformat
-  description: |
-    I started this project to get my feet wet with Python PEP formatting and to be able to read and understand RFC guidelines and specifications.
+    ip2 (Invisible Internet Project) is a peer-to-peer networking layer designed around anonymity and secure communications (router-to-router and end-to-end encrypted). ri2p is an implementation of the i2p specifications, that is lightweight and highly performant because it is written in the Rust systems programming language with very few external dependencies.
+    “Every day people use the network to connect with people without worry of being tracked or their data being collected.” - geti2p.net
