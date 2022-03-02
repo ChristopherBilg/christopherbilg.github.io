@@ -1,6 +1,3 @@
-# ChristopherBilg.github.io
-Chris Bilger's portfolio website
+# christopherbilg.github.io
 
-Template available here: https://github.com/sproogen/modern-resume-theme
-
-Hosted through GitHub [here](https://christopherbilg.github.io)
+Christopher Bilger's Portfolio
