@@ -1,7 +1,0 @@
-- layout: top-middle
-  name: ri2p
-  link: ri2p.com
-  github: ChristopherBilg/ri2p
-  description: |
-    ip2 (Invisible Internet Project) is a peer-to-peer networking layer designed around anonymity and secure communications (router-to-router and end-to-end encrypted). ri2p is an implementation of the i2p specifications, that is lightweight and highly performant because it is written in the Rust systems programming language with very few external dependencies.
-    “Every day people use the network to connect with people without worry of being tracked or their data being collected.” - geti2p.net
