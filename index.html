@@ -11,6 +11,12 @@
     <title>Chris Bilger | Portfolio</title>
     <link rel="stylesheet" href="./mvp.css">
 
+    <!-- Progressive Web App Tags-->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#fff">
+    <link rel="apple-touch-icon" href="./image-512x512.png">
+    <meta name="apple-mobile-web-app-status-bar" content="#fff" />
+
     <style>
          :root {
             --color: #116bee;
@@ -115,6 +121,12 @@
             <h2>Education</h2>
             <hr>
 
+            <!--
+                <aside>
+                    Ph.D. ???
+                </aside>
+            -->
+
             <aside>
                 <h3>Master of Science: Computer Science</h3>
                 <p>Arizona State University</p>
@@ -182,15 +194,9 @@
                     <li>Running</li>
                     <li>Kayaking</li>
                     <li>Biking</li>
-                </ul>
-
-                <ul>
                     <li>Card Games</li>
                     <li>Board Games</li>
                     <li>Puzzles</li>
-                </ul>
-
-                <ul>
                     <li>Research</li>
                     <li>Teaching</li>
                     <li>Software Engineering</li>
@@ -206,6 +212,14 @@
             <h3>References available upon request.</h3>
         </section>
     </footer>
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", function() {
+                navigator.serviceWorker.register("/serviceWorker.js")
+            })
+        }
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,15 @@
+{
+    "name": "Chris Bilger | Portfolio",
+    "short_name": "Chris Bilger's Portfolio",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "background_color": "#fff",
+    "theme_color": "#fff",
+    "orientation": "portrait-primary",
+    "icons": [{
+        "src": "./image-512x512.png",
+        "type": "image/png",
+        "sizes": "512x512",
+        "purpose": "any maskable"
+    }]
+}
