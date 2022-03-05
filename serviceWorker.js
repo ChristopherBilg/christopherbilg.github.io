@@ -1,4 +1,4 @@
-const cache = "chris-bilger-portfolio-v1"
+const cache = "chris-bilger-portfolio-v2"
 
 const assets = [
     "/",
