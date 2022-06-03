@@ -1,3 +1,4 @@
+/* MVP Variables */
 :root {
     --color: #116bee;
     --color-accent: #116bee15;
@@ -12,6 +13,7 @@
     --color-text-secondary: #999;
 }
 
+/* General Elements */
 hr {
     margin-top: 0em;
     margin-bottom: 0em;
@@ -39,14 +41,32 @@ figure figcaption {
     color: #767676;
 }
 
+/* IDs */
 #header-image {
     border-radius: 2em;
 }
 
-#skills {
+#skills-image img {
     margin-top: 1em;
 }
 
+@media (max-width: 749px) {
+    #skills-image {
+        display: none;
+    }
+}
+
+@media (min-width: 750px) {
+    #skills-table {
+        display: none;
+    }
+}
+
+/* Classes */
 .lockheed-martin {
-    color: #4B0082;
+    color: #800080;
+}
+
+.another-company {
+    color: #008000;
 }
