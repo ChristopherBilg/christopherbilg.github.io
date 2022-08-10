@@ -1,0 +1,103 @@
+/* MVP Variables */
+:root {
+    --color: #116bee;
+    --color-accent: #116bee15;
+    --color-bg: #fff;
+    --color-bg-secondary: #e9e9e9;
+    --color-link: #116bee;
+    --color-secondary: #920de9;
+    --color-secondary-accent: #920de90b;
+    --color-shadow: #f4f4f4;
+    --color-table: #214c8d;
+    --color-text: #000;
+    --color-text-secondary: #767676;
+}
+
+/* General Elements */
+hr {
+    margin-top: 0em;
+    margin-bottom: 0em;
+}
+
+nav {
+    margin-bottom: 0em;
+    display: flex;
+    flex-flow: wrap;
+}
+
+h2 a {
+    color: inherit;
+}
+
+table {
+    /* Top, Left/Right, Bottom */
+    margin: 1em 0.5em 0em;
+}
+
+table tr td:first-child {
+    text-align: center;
+}
+
+/* IDs */
+#header-image {
+    border-radius: 2em;
+}
+
+@media screen and (max-width: 749px) {
+    #relevant-skills-section {
+        display: none;
+    }
+}
+
+#blog-post-table tbody tr td a {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+    min-width: min(50vw, 50px);
+    max-width: min(40vw, 900px);
+}
+
+#blog-post-table tbody tr td:nth-child(1) {
+    text-align: left;
+}
+
+#blog-post-table tbody tr td:nth-child(2) {
+    text-align: right;
+}
+
+/* Classes */
+.indent {
+    text-indent: 2em;
+}
+
+.galleryContainer {
+    line-height: 2em;
+    column-gap: 0.5em;
+    column-count: 3;
+}
+
+.galleryImage {
+    width: 100% !important;
+    height: auto !important;
+}
+
+@media screen and (max-width: 900px) {
+    .galleryContainer {
+        column-count: 2;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .galleryContainer {
+        column-count: 1;
+    }
+}
+
+.lockheed-martin {
+    color: #008000;
+}
+
+.another-company {
+    color: #800000;
+}
