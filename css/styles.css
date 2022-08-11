@@ -17,12 +17,12 @@
 
 /* General Elements */
 hr {
-    margin-top: 0em;
-    margin-bottom: 0em;
+    margin-top: 0rem;
+    margin-bottom: 0rem;
 }
 
 nav {
-    margin-bottom: 0em;
+    margin-bottom: 0rem;
     display: flex;
     flex-flow: wrap;
 }
@@ -33,7 +33,7 @@ h2 a {
 
 table {
     /* Top, Left/Right, Bottom */
-    margin: 1em 0.5em 0em;
+    margin: 1rem 0.5rem 0rem;
 }
 
 table tr td:first-child {
@@ -42,7 +42,7 @@ table tr td:first-child {
 
 /* IDs */
 #header-image {
-    border-radius: 2em;
+    border-radius: 2rem;
 }
 
 @media screen and (max-width: 749px) {
@@ -71,12 +71,12 @@ table tr td:first-child {
 
 /* Classes */
 .indent {
-    text-indent: 2em;
+    text-indent: 2rem;
 }
 
 .galleryContainer {
-    line-height: 2em;
-    column-gap: 0.5em;
+    line-height: 2rem;
+    column-gap: 0.5rem;
     column-count: 3;
 }
 
