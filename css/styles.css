@@ -51,6 +51,12 @@ table tr td:first-child {
     }
 }
 
+#blog-post-filter {
+    width: 100%;
+    margin-top: 1rem;
+    display: none;
+}
+
 #blog-post-table tbody tr td a {
     overflow: hidden;
     white-space: nowrap;
