@@ -89,17 +89,28 @@
         var table = document.getElementById('blog-post-table');
         var tbody = table.getElementsByTagName('tbody')[0];
         var rows = tbody.getElementsByTagName('tr');
+        var disabledCounter = 0;
 
         Array.from(rows).forEach(element => {
             var title = element.getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
+            var date = element.getElementsByTagName('td')[1].innerHTML;
+            var titleAndDate = title + ' ' + date;
 
-            if (title.toUpperCase().includes(filter)) {
+            if (titleAndDate.toUpperCase().includes(filter)) {
                 element.style.display = 'table-row';
             }
             else {
                 element.style.display = 'none';
+                disabledCounter++;
             }
         });
+
+        if (disabledCounter === rows.length) {
+            table.style.display = 'none';
+        }
+        else {
+            table.style.display = 'inline-block';
+        }
     });
 </script>
 
