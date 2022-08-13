@@ -52,6 +52,7 @@
                         Life: Marrying the Love of My Life
                         Tech: Building Arlo, My Interpreted Programming Language, for the Future
                         Tech: Working With the NYU OSIRIS Lab for the CSAW'22 CTF Event
+                        Tech: Minimal Client-Side Password Generation
                         Life: Meeting Charlotte
                         Travel: Outer Banks, North Carolina
 
@@ -80,40 +81,40 @@
             </table>
         </section>
     </main>
-</body>
 
-<script>
-    document.getElementById('blog-post-filter').style.display = 'block';
+    <script>
+        document.getElementById('blog-post-filter').style.display = 'block';
 
-    document.getElementById('blog-post-filter').addEventListener('input', event => {
-        var filter = event.target.value.toUpperCase();
+        document.getElementById('blog-post-filter').addEventListener('input', event => {
+            var filter = event.target.value.toUpperCase();
 
-        var table = document.getElementById('blog-post-table');
-        var tbody = table.getElementsByTagName('tbody')[0];
-        var rows = tbody.getElementsByTagName('tr');
-        var disabledCounter = 0;
+            var table = document.getElementById('blog-post-table');
+            var tbody = table.getElementsByTagName('tbody')[0];
+            var rows = tbody.getElementsByTagName('tr');
+            var disabledCounter = 0;
 
-        Array.from(rows).forEach(element => {
-            var title = element.getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
-            var date = element.getElementsByTagName('td')[1].innerHTML;
-            var titleAndDate = title + ' ' + date;
+            Array.from(rows).forEach(element => {
+                var title = element.getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
+                var date = element.getElementsByTagName('td')[1].innerHTML;
+                var titleAndDate = title + ' ' + date;
 
-            if (titleAndDate.toUpperCase().includes(filter)) {
-                element.style.display = 'table-row';
+                if (titleAndDate.toUpperCase().includes(filter)) {
+                    element.style.display = 'table-row';
+                }
+                else {
+                    element.style.display = 'none';
+                    disabledCounter++;
+                }
+            });
+
+            if (disabledCounter === rows.length) {
+                table.style.display = 'none';
             }
             else {
-                element.style.display = 'none';
-                disabledCounter++;
+                table.style.display = 'inline-block';
             }
         });
-
-        if (disabledCounter === rows.length) {
-            table.style.display = 'none';
-        }
-        else {
-            table.style.display = 'inline-block';
-        }
-    });
-</script>
+    </script>
+</body>
 
 </html>
