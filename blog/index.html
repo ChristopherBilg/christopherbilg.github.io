@@ -35,9 +35,9 @@
             <h2><a href="#blog-posts">Blog Posts</a></h2>
             <hr>
 
-            <input type="text" id="blog-post-filter" placeholder="Filter Blog Posts..." hidden>
+            <input type="text" id="link-table-filter" placeholder="Filter Blog Posts..." hidden>
 
-            <table id="blog-post-table">
+            <table id="link-table">
                 <tbody>
                     <!--
                         Blog Post Ideas:
@@ -78,12 +78,12 @@
     </main>
 
     <script>
-        document.getElementById('blog-post-filter').hidden = false;
+        document.getElementById('link-table-filter').hidden = false;
 
-        document.getElementById('blog-post-filter').addEventListener('input', event => {
+        document.getElementById('link-table-filter').addEventListener('input', event => {
             const filter = event.target.value.toUpperCase();
 
-            const table = document.getElementById('blog-post-table');
+            const table = document.getElementById('link-table');
             const tbody = table.getElementsByTagName('tbody')[0];
             const rows = tbody.getElementsByTagName('tr');
             let disabledCounter = 0;

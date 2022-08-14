@@ -51,25 +51,25 @@ table tr td:first-child {
     }
 }
 
-#blog-post-filter {
+#link-table-filter {
     width: 100%;
     margin-top: 1rem;
 }
 
-#blog-post-table tbody tr td a {
+#link-table tbody tr td a {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     vertical-align: top;
-    min-width: min(50vw, 50px);
+    min-width: max(50vw, 100px, auto);
     max-width: min(40vw, 900px);
 }
 
-#blog-post-table tbody tr td:nth-child(1) {
+#link-table tbody tr td:nth-child(1) {
     text-align: left;
 }
 
-#blog-post-table tbody tr td:nth-child(2) {
+#link-table tbody tr td:nth-child(2) {
     text-align: right;
     font-family: var(--mono-font-family);
 }
