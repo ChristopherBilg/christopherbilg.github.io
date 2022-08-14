@@ -54,7 +54,6 @@ table tr td:first-child {
 #blog-post-filter {
     width: 100%;
     margin-top: 1rem;
-    display: none;
 }
 
 #blog-post-table tbody tr td a {
@@ -73,6 +72,16 @@ table tr td:first-child {
 #blog-post-table tbody tr td:nth-child(2) {
     text-align: right;
     font-family: var(--mono-font-family);
+}
+
+#full-screen-noscript-message {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
 }
 
 /* Classes */

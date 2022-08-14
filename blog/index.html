@@ -35,7 +35,7 @@
             <h2><a href="#blog-posts">Blog Posts</a></h2>
             <hr>
 
-            <input type="text" id="blog-post-filter" placeholder="Filter Blog Posts...">
+            <input type="text" id="blog-post-filter" placeholder="Filter Blog Posts..." hidden>
 
             <table id="blog-post-table">
                 <tbody>
@@ -51,6 +51,7 @@
                         Tech: Minimal Client-Side Password Generation
                         Life: Meeting Charlotte
                         Travel: Outer Banks, North Carolina
+                        Tech: Minimal Client-Side Password Generation
 
                         Conference Ideas:
 
@@ -79,35 +80,35 @@
     </main>
 
     <script>
-        document.getElementById('blog-post-filter').style.display = 'block';
+        document.getElementById('blog-post-filter').hidden = false;
 
         document.getElementById('blog-post-filter').addEventListener('input', event => {
-            var filter = event.target.value.toUpperCase();
+            const filter = event.target.value.toUpperCase();
 
-            var table = document.getElementById('blog-post-table');
-            var tbody = table.getElementsByTagName('tbody')[0];
-            var rows = tbody.getElementsByTagName('tr');
-            var disabledCounter = 0;
+            const table = document.getElementById('blog-post-table');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = tbody.getElementsByTagName('tr');
+            let disabledCounter = 0;
 
             Array.from(rows).forEach(element => {
-                var title = element.getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
-                var date = element.getElementsByTagName('td')[1].innerHTML;
-                var titleAndDate = title + ' ' + date;
+                const title = element.getElementsByTagName('td')[0].getElementsByTagName('a')[0].innerHTML;
+                const date = element.getElementsByTagName('td')[1].innerHTML;
+                const titleAndDate = title + ' ' + date;
 
                 if (titleAndDate.toUpperCase().includes(filter)) {
-                    element.style.display = 'table-row';
+                    element.hidden = false;
                 }
                 else {
-                    element.style.display = 'none';
+                    element.hidden = true;
                     disabledCounter++;
                 }
             });
 
             if (disabledCounter === rows.length) {
-                table.style.display = 'none';
+                table.hidden = true;
             }
             else {
-                table.style.display = 'inline-block';
+                table.hidden = false;
             }
         });
     </script>
