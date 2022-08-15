@@ -1,4 +1,4 @@
-/* MVP Variables */
+/* MVP Variables (and other global variables) */
 :root {
     --color: #116bee;
     --color-accent: #116bee15;
@@ -56,17 +56,16 @@ table tr td:first-child {
     margin-top: 1rem;
 }
 
-#link-table tbody tr td a {
+#link-table tbody tr td:nth-child(1) {
+    text-align: left;
+}
+
+#link-table tbody tr td:nth-child(1) a {
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     vertical-align: top;
-    min-width: max(50vw, 100px, auto);
-    max-width: min(40vw, 900px);
-}
-
-#link-table tbody tr td:nth-child(1) {
-    text-align: left;
+    max-width: 40vw;
 }
 
 #link-table tbody tr td:nth-child(2) {
