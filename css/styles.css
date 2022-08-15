@@ -58,14 +58,7 @@ table tr td:first-child {
 
 #link-table tbody tr td:nth-child(1) {
     text-align: left;
-}
-
-#link-table tbody tr td:nth-child(1) a {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    vertical-align: top;
-    max-width: 40vw;
+    white-space: normal;
 }
 
 #link-table tbody tr td:nth-child(2) {
