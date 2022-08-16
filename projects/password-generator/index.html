@@ -102,7 +102,6 @@
 
             for (let _ = 0; _ < passwordCount; _++) {
                 const passwordElement = document.createElement('li');
-                passwordElement.style.overflowWrap = 'anywhere';
                 passwordElement.innerHTML = generatePassword();
 
                 listHTMLElement.appendChild(passwordElement);
