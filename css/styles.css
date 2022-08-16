@@ -76,6 +76,11 @@ table tr td:first-child {
     font-weight: bold;
 }
 
+#generated-password-list li {
+    overflow-wrap: anywhere;
+    font-family: var(--mono-font-family);
+}
+
 /* Classes */
 .indent {
     text-indent: 2rem;
