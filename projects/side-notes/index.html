@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Christopher Bilger's Portfolio">
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog">
+    <meta name="author" content="Christopher Bilger">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Side Notes (Note-taking Web App)</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico">
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css">
+    <link rel="stylesheet" media="screen" href="../../css/styles.css">
+</head>
+
+<body>
+    <noscript id="full-screen-noscript-message">
+        Please enable JavaScript in order to use the password generator.
+    </noscript>
+
+    <main hidden>
+        <a href="/projects">Back to Projects List</a>
+
+        <h1>Side Notes (Note-taking Web App)</h1>
+
+        <p>
+            <b>Side Notes</b> is a minimal, light-weight, todo-style note keeping web application. This web application
+            keeps all data stored in the browser's internal database, meaning that all side-notes resides only on this
+            browser. Absolutely no data is ever sent away from your local browser.
+        </p>
+
+        <input type="submit" onclick="return false;" value="Create Side Note [+]" />
+
+        <div id="side-notes-container"></div>
+    </main>
+
+    <script>
+        document.getElementsByTagName('main')[0].hidden = false;
+    </script>
+</body>
+
+</html>

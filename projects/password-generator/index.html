@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Christopher Bilger's Portfolio">
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog">
+    <meta name="author" content="Christopher Bilger">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Client-Only Password Generator</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico">
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css">
+    <link rel="stylesheet" media="screen" href="../../css/styles.css">
+</head>
+
+<body>
+    <noscript id="full-screen-noscript-message">
+        Please enable JavaScript in order to use the password generator.
+    </noscript>
+
+    <main hidden>
+        <a href="/projects">Back to Projects List</a>
+
+        <h1>Client-Only Password Generator</h1>
+
+        <p>No data/information/values/generated passwords/etc. is sent away from your local browser instance.</p>
+
+        <h2>Include the following character sets:</h2>
+
+        <form onsubmit="return generatePasswords();">
+            <input type="checkbox" id="lowercase-alphabet" name="lowercase-alphabet" value="lowercase-alphabet"
+                checked />
+            <label for="lowercase-alphabet">Lowercase Alphabet (e.g. abcdef...)</label>
+            <br />
+
+            <input type="checkbox" id="uppercase-alphabet" name="uppercase-alphabet" value="uppercase-alphabet"
+                checked />
+            <label for="uppercase-alphabet">Uppercase Alphabet (e.g. ABCDEF...)</label>
+            <br />
+
+            <input type="checkbox" id="numbers" name="numbers" value="numbers" checked />
+            <label for="numbers">Numbers (e.g. 012345...)</label>
+            <br />
+
+            <input type="checkbox" id="special-characters" name="special-characters" value="special-characters"
+                checked />
+            <label for="special-characters">Special Characters (e.g. !@#$%^...)</label>
+            <br />
+
+            <label for="password-length">Password Length</label>
+            <input type="number" id="password-length" name="password-length" value="32" min="1" />
+            <br />
+
+            <label for="password-count">Password Count</label>
+            <input type="number" id="password-count" name="password-count" value="1" min="1" />
+            <br />
+
+            <input type="submit" name="generate-passwords" value="Generate Passwords" />
+
+            <ol id="generated-password-list"></ol>
+        </form>
+    </main>
+
+    <script>
+        document.getElementsByTagName('main')[0].hidden = false;
+
+        const l = 'abcdefghijklmnopqrstuvwxyz';
+        const u = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const n = '0123456789';
+        const s = '~!@#$%^&*';
+
+        const generatePasswords = () => {
+            // Clear the current password list
+            const listHTMLElement = document.getElementById('generated-password-list');
+            listHTMLElement.innerHTML = '';
+
+            // Get the form values
+            const lowercaseAlphabet = document.getElementById('lowercase-alphabet').checked;
+            const uppercaseAlphabet = document.getElementById('uppercase-alphabet').checked;
+            const numbers = document.getElementById('numbers').checked;
+            const specialCharacters = document.getElementById('special-characters').checked;
+            const passwordLength = document.getElementById('password-length').value;
+            const passwordCount = document.getElementById('password-count').value;
+
+            // Build the overall useable character list
+            let characterList = '';
+            if (lowercaseAlphabet) characterList += l;
+            if (uppercaseAlphabet) characterList += u;
+            if (numbers) characterList += n;
+            if (specialCharacters) characterList += s;
+
+            const generatePassword = () => {
+                let password = '';
+
+                for (let _ = 0; _ < passwordLength; _++) {
+                    const c = characterList.charAt(Math.floor(Math.random() * characterList.length));
+                    password += c;
+                }
+
+                return password;
+            };
+
+            for (let _ = 0; _ < passwordCount; _++) {
+                const passwordListItem = document.createElement('li');
+                const passwordCodeBlock = document.createElement('code');
+
+                passwordCodeBlock.innerHTML = generatePassword();
+
+                passwordListItem.appendChild(passwordCodeBlock);
+                listHTMLElement.appendChild(passwordListItem);
+            }
+
+            // Must return false in order to prevent the default form action
+            return false;
+        };
+    </script>
+</body>
+
+</html>
