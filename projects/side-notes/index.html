@@ -28,17 +28,76 @@
 
         <p>
             <b>Side Notes</b> is a minimal, light-weight, todo-style note keeping web application. This web application
-            keeps all data stored in the browser's internal database, meaning that all side-notes resides only on this
+            keeps all data stored in the browser's internal database, meaning that all side-notes reside only on this
             browser. Absolutely no data is ever sent away from your local browser.
         </p>
 
-        <input type="submit" onclick="return false;" value="Create Side Note [+]" />
+        <input type="submit" onclick="return createSideNote();" value="Create Side Note [+]" />
 
         <div id="side-notes-container"></div>
     </main>
 
     <script>
         document.getElementsByTagName('main')[0].hidden = false;
+        const sideNotesContainer = document.getElementById('side-notes-container');
+
+        let allSideNotes = [];
+        const SIDE_NOTE_TEMPLATE = {
+            data: '',
+        };
+
+        const updateTextArea = index => {
+            const sideNote = allSideNotes[index];
+            const data = sideNotesContainer.getElementsByTagName('aside')[index].getElementsByTagName('textarea')[0].value;
+
+            sideNote.data = data;
+            allSideNotes[index] = sideNote;
+        };
+
+        const rerenderSideNotes = () => {
+            const allSideNotesHTMLElements = [];
+            allSideNotes.forEach((note, index) => {
+                const aside = document.createElement('aside');
+
+                const header = document.createElement('p');
+                header.style.fontWeight = 'bold';
+                header.innerHTML = `Side Note #${index}`;
+                aside.appendChild(header);
+
+                const deleteButton = document.createElement('input');
+                deleteButton.type = 'submit';
+                deleteButton.onclick = () => deleteSideNote(index);
+                deleteButton.value = '[-]';
+                aside.appendChild(deleteButton);
+
+                const dataTextArea = document.createElement('textarea');
+                dataTextArea.style.width = '100%';
+                dataTextArea.style.height = '5rem';
+                dataTextArea.style.resize = 'none';
+                dataTextArea.oninput = () => updateTextArea(index);
+                // dataTextArea.value = allSideNotes[index].data;
+                aside.appendChild(dataTextArea);
+
+                allSideNotesHTMLElements.push(aside);
+            });
+
+            sideNotesContainer.innerHTML = '';
+            allSideNotesHTMLElements.forEach(e => sideNotesContainer.appendChild(e));
+        };
+
+        const createSideNote = () => {
+            allSideNotes.push(SIDE_NOTE_TEMPLATE);
+            rerenderSideNotes();
+
+            return false;
+        };
+
+        const deleteSideNote = index => {
+            allSideNotes = allSideNotes.filter((_, i) => i != index);
+            rerenderSideNotes();
+
+            return false;
+        };
     </script>
 </body>
 
