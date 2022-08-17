@@ -76,10 +76,6 @@ table tr td:first-child {
     font-weight: bold;
 }
 
-#generated-password-list li {
-    overflow-wrap: anywhere;
-}
-
 #yellow-banner {
     width: 100%;
     text-align: center;
