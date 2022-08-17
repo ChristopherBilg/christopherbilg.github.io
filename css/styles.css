@@ -80,6 +80,15 @@ table tr td:first-child {
     overflow-wrap: anywhere;
 }
 
+#yellow-banner {
+    width: 100%;
+    text-align: center;
+    padding: 1rem;
+    background-color: yellow;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
 /* Classes */
 .indent {
     text-indent: 2rem;
