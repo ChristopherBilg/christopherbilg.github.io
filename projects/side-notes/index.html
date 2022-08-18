@@ -44,6 +44,9 @@
         };
 
         let allSideNotes = loadAllSideNotesFromLocalStorage() || [];
+        const SIDE_NOTE_TEMPLATE = {
+            data: '',
+        };
 
         const saveAllSideNotesToLocalStorage = () => {
             const stringified = JSON.stringify(allSideNotes);
@@ -92,7 +95,7 @@
         rerenderSideNotes();
 
         const createSideNote = () => {
-            allSideNotes.push({ data: '' });
+            allSideNotes.push(JSON.parse(JSON.stringify(SIDE_NOTE_TEMPLATE)));
             rerenderSideNotes();
 
             saveAllSideNotesToLocalStorage();
