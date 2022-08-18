@@ -19,18 +19,116 @@
         Please enable JavaScript in order to use the password generator.
     </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
-
     <main hidden>
         <a href="/projects">Back to Projects List</a>
 
         <h1>Cube Mate (Rubik's Cube Tools)</h1>
 
-        <p>No data/information/values/etc. is sent away from your local browser instance.</p>
+        <p><b>Cube Mate</b> is an extremely minimal set of tools that I am using to learn (at my own pace) efficient
+            Rubik's Cube solving methods. If you wish to use better tools, look into the website
+            <a href="https://cstimer.net/" target="_blank">cstimer.net &nearr;</a>. No data/information/values/etc. is
+            sent away from your local browser instance.
+        </p>
+
+        <input type="submit" value="Scramble" onclick="return updateScrambleAndCross();" />
+        <h2 id="scramble"></h2>
+        <h2 id="cross"></h2>
+        <div id="cross-color"></div>
     </main>
 
     <script>
         document.getElementsByTagName('main')[0].hidden = false;
+
+        // The entirety of the 'generateRandomScramble' function's source code comes from the below resource:
+        // https://github.com/bjcarlson42/blog-post-sample-code/blob/master/Rubik's%20Cube%20JavaScript%20Scrambler/part_two.js
+        const generateRandomScramble = () => {
+            const options = ['F', 'F2', 'F\'', 'R', 'R2', 'R\'', 'U', 'U2', 'U\'', 'B', 'B2', 'B\'', 'L', 'L2', 'L\'', 'D', 'D2', 'D\''];
+            const numOptions = [0, 1, 2, 3, 4, 5]; // 0 = F, 1 = R, 2 = U, 3 = B, 4 = L, 5 = D
+            let scramble = [];
+            let scrambleMoves = [];
+            let bad = true;
+
+            const getRandomInt = max => {
+                return Math.floor(Math.random() * Math.floor(max));
+            };
+
+            const getRandomIntBetween = (min, max) => {
+                return Math.floor(Math.random() * (max - min) + min);
+            };
+
+            while (bad) {
+                scramble = [];
+                for (var i = 0; i < 20; i++) {
+                    scramble.push(numOptions[getRandomInt(6)]);
+                }
+                // check if moves directly next to each other involve the same letter
+                for (var i = 0; i < 20 - 1; i++) {
+                    if (scramble[i] == scramble[i + 1]) {
+                        bad = true;
+                        break;
+                    } else {
+                        bad = false;
+                    }
+                }
+            }
+
+            // switch numbers to letters
+            var move;
+            for (var i = 0; i < 20; i++) {
+                switch (scramble[i]) {
+                    case 0:
+                        move = options[getRandomInt(3)]; // 0,1,2
+                        scrambleMoves.push(move);
+                        break;
+                    case 1:
+                        move = options[getRandomIntBetween(3, 6)]; // 3,4,5
+                        scrambleMoves.push(move);
+                        break;
+                    case 2:
+                        move = options[getRandomIntBetween(6, 9)]; // 6,7,8
+                        scrambleMoves.push(move);
+                        break;
+                    case 3:
+                        move = options[getRandomIntBetween(9, 12)]; // 9,10,11
+                        scrambleMoves.push(move);
+                        break;
+                    case 4:
+                        move = options[getRandomIntBetween(12, 15)]; // 12,13,14
+                        scrambleMoves.push(move);
+                        break;
+                    case 5:
+                        move = options[getRandomIntBetween(15, 18)]; // 15,16,17
+                        scrambleMoves.push(move);
+                        break;
+                }
+            }
+
+            return scrambleMoves;
+        };
+
+        const colors = ['Red', 'Green', 'White', 'Blue', 'Yellow', 'Orange']
+        const generateRandomCrossColor = () => {
+            return colors[Math.floor(Math.random() * colors.length)];
+        };
+
+        const scrambleHTMLElement = document.getElementById('scramble');
+        const crossHTMLElement = document.getElementById('cross');
+        const crossColorHTMLElement = document.getElementById('cross-color');
+
+        const updateScrambleAndCross = () => {
+            const crossColor = generateRandomCrossColor();
+
+            scrambleHTMLElement.innerHTML = `Scramble: ${generateRandomScramble().join(' ')}`;
+            crossHTMLElement.innerHTML = `Cross Color: ${crossColor}`;
+
+            crossColorHTMLElement.style.width = '10rem';
+            crossColorHTMLElement.style.height = '3rem';
+            crossColorHTMLElement.style.backgroundColor = crossColor;
+            crossColorHTMLElement.style.border = '2px solid black';
+
+            return false;
+        };
+        updateScrambleAndCross();
     </script>
 </body>
 

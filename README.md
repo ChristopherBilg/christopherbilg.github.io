@@ -31,12 +31,7 @@ TECHBASH 2023                        (~November  2023) (PA)
 ## Project Ideas
 
 ```text
-Rubik's Cube Randomizer
-    - Get random scramble
-    - Get random face to solve cross on
-    - Solve timer
-    - History of past solves
-        - Calculations of past solves
+...
 ```
 
 ## Certification Ideas
@@ -55,9 +50,3 @@ Rubik's Cube Randomizer
     networks) from both theoretical and practical standpoints. <em>INSERT DATE OBTAINED - Forever</em>
 </p>
 ```
-
-## Maintenance
-
-### First of the Year
-
-- Make sure to update the current year in the footer for the blog posts
