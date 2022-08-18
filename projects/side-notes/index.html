@@ -54,9 +54,15 @@
         };
         saveAllSideNotesToLocalStorage();
 
+        const getCustomLineCountFromString = s => {
+            return s.split(/\r|\r\n|\n/).length < 2 ? 2 : s.split(/\r|\r\n|\n/).length;
+        };
+
         const updateTextArea = index => {
-            const data = sideNotesContainer.getElementsByTagName('aside')[index].getElementsByTagName('textarea')[0].value;
-            allSideNotes[index].data = data;
+            const textArea = sideNotesContainer.getElementsByTagName('aside')[index].getElementsByTagName('textarea')[0];
+            allSideNotes[index].data = textArea.value;
+
+            textArea.style.height = `${getCustomLineCountFromString(textArea.value)}rem`;
 
             saveAllSideNotesToLocalStorage();
             return false;
@@ -80,8 +86,9 @@
 
                 const dataTextArea = document.createElement('textarea');
                 dataTextArea.style.width = '80%';
-                dataTextArea.style.height = '5rem';
+                dataTextArea.style.height = `${getCustomLineCountFromString(note.data)}rem`;
                 dataTextArea.style.resize = 'none';
+                dataTextArea.style.overflow = 'hidden';
                 dataTextArea.oninput = () => updateTextArea(index);
                 dataTextArea.value = allSideNotes[index].data;
                 aside.appendChild(dataTextArea);
