@@ -19,8 +19,6 @@
         Please enable JavaScript in order to use the password generator.
     </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
-
     <main hidden>
         <a href="/projects">Back to Projects List</a>
 
@@ -41,17 +39,24 @@
         document.getElementsByTagName('main')[0].hidden = false;
         const sideNotesContainer = document.getElementById('side-notes-container');
 
-        let allSideNotes = [];
-        const SIDE_NOTE_TEMPLATE = {
-            data: '',
+        const loadAllSideNotesFromLocalStorage = () => {
+            return JSON.parse(localStorage.getItem('sideNotes'));
         };
 
-        const updateTextArea = index => {
-            const sideNote = allSideNotes[index];
-            const data = sideNotesContainer.getElementsByTagName('aside')[index].getElementsByTagName('textarea')[0].value;
+        let allSideNotes = loadAllSideNotesFromLocalStorage() || [];
 
-            sideNote.data = data;
-            allSideNotes[index] = sideNote;
+        const saveAllSideNotesToLocalStorage = () => {
+            const stringified = JSON.stringify(allSideNotes);
+            const sideNotes = localStorage.setItem('sideNotes', stringified);
+        };
+        saveAllSideNotesToLocalStorage();
+
+        const updateTextArea = index => {
+            const data = sideNotesContainer.getElementsByTagName('aside')[index].getElementsByTagName('textarea')[0].value;
+            allSideNotes[index].data = data;
+
+            saveAllSideNotesToLocalStorage();
+            return false;
         };
 
         const rerenderSideNotes = () => {
@@ -75,7 +80,7 @@
                 dataTextArea.style.height = '5rem';
                 dataTextArea.style.resize = 'none';
                 dataTextArea.oninput = () => updateTextArea(index);
-                // dataTextArea.value = allSideNotes[index].data;
+                dataTextArea.value = allSideNotes[index].data;
                 aside.appendChild(dataTextArea);
 
                 allSideNotesHTMLElements.push(aside);
@@ -84,11 +89,13 @@
             sideNotesContainer.innerHTML = '';
             allSideNotesHTMLElements.forEach(e => sideNotesContainer.appendChild(e));
         };
+        rerenderSideNotes();
 
         const createSideNote = () => {
-            allSideNotes.push(SIDE_NOTE_TEMPLATE);
+            allSideNotes.push({ data: '' });
             rerenderSideNotes();
 
+            saveAllSideNotesToLocalStorage();
             return false;
         };
 
@@ -96,6 +103,7 @@
             allSideNotes = allSideNotes.filter((_, i) => i != index);
             rerenderSideNotes();
 
+            saveAllSideNotesToLocalStorage();
             return false;
         };
     </script>
