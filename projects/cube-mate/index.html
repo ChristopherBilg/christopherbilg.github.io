@@ -53,6 +53,12 @@
         <h2 id="scramble"></h2>
         <h2 id="cross"></h2>
         <div id="cross-color"></div>
+
+        <br />
+        <hr /><br />
+        <input type="submit" value="Start/Stop Timer" onclick="return toggleTimerRunningState();" />
+        <input type="submit" value="Reset Timer" onclick="return resetTimer();" />
+        <h2 id="timer"></h2>
     </main>
 
     <script>
@@ -80,6 +86,7 @@
                 for (var i = 0; i < 20; i++) {
                     scramble.push(numOptions[getRandomInt(6)]);
                 }
+
                 // check if moves directly next to each other involve the same letter
                 for (var i = 0; i < 20 - 1; i++) {
                     if (scramble[i] == scramble[i + 1]) {
@@ -148,6 +155,32 @@
             return false;
         };
         updateScrambleAndCross();
+
+        let timerRunning = false;
+        let timerCurrentTime = 0;
+        const timerHTMLElement = document.getElementById('timer');
+
+        const convertTimeToHumanReadableString = time => {
+            return '00:00.00 seconds';
+        };
+
+        const toggleTimerRunningState = () => {
+            if (timerRunning) {
+                timerRunning = false;
+            }
+            else {
+                timerRunning = true;
+            }
+        };
+
+        const resetTimer = () => {
+            if (timerRunning) toggleTimerRunningState();
+
+            timerHTMLElement.innerHTML = convertTimeToHumanReadableString(0);
+        }
+        resetTimer();
+
+        // Timer History (saved/loaded to localStorage)
     </script>
 </body>
 
