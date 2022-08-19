@@ -8,12 +8,13 @@ Christopher Bilger's Portfolio
 Blog post title capitalization tool: https://capitalizemytitle.com/#
 Blog post URL slug creator tool:     https://slugify.online/
 
-Life: Buying Our First House
-Life: Marrying the Love of My Life
-Tech: Working With the NYU OSIRIS Lab for the CSAW'22 CTF Event
-Life: Meeting Charlotte
-Tech: Learning about AI/ML
 Travel: Outer Banks, North Carolina
+Tech: Learning about AI/ML
+    - Associated with a certification
+Life: Meeting Charlotte
+Tech: Working With the NYU OSIRIS Lab for the CSAW'22 CTF Event
+Life: Marrying the Love of My Life
+Life: Buying Our First House
 ```
 
 ## Conference Ideas
@@ -21,17 +22,19 @@ Travel: Outer Banks, North Carolina
 ```text
 Developer-related conference list:   https://dev.events/
 
-DROIDCON NYC 2023                    (~September 2023) (NY)
-REACT DAY NEW YORK                   (~September 2023) (NY)
-SMASHINGCONF NEW YORK                (~October   2023) (NY)
-DASH                                 (~October   2023) (NY)
-TECHBASH 2023                        (~November  2023) (PA)
+Conference: DROIDCON NYC 2023                    (~September 2023) (NY)
+Conference: REACT DAY NEW YORK                   (~September 2023) (NY)
+Conference: SMASHINGCONF NEW YORK                (~October   2023) (NY)
+Conference: DASH                                 (~October   2023) (NY)
+Conference: TECHBASH 2023                        (~November  2023) (PA)
 ```
 
 ## Project Ideas
 
 ```text
-...
+Experiment: The Torus Framework
+Experiment: JavaScript's Template Literal Strings
+    - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 ```
 
 ## Certification Ideas
