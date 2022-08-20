@@ -32,24 +32,6 @@
             sent away from your local browser instance.
         </p>
 
-        <h2>Learning Methods Implemented as a Tool:</h2>
-
-        <input type="checkbox" disabled="disabled" id="cross-checkbox" value="Cross" checked />
-        <label for="cross-checkbox">Cross</label>
-        <br />
-
-        <input type="checkbox" disabled="disabled" id="f2l-checkbox" value="F2L" />
-        <label for="f2l-checkbox">F2L</label>
-        <br />
-
-        <input type="checkbox" disabled="disabled" id="oll-checkbox" value="OLL" />
-        <label for="oll-checkbox">OLL</label>
-        <br />
-
-        <input type="checkbox" disabled="disabled" id="pll-checkbox" value="PLL" />
-        <label for="pll-checkbox">PLL</label>
-        <br />
-
         <hr /><br />
         <input type="submit" value="Scramble" onclick="return updateScrambleAndCross();" />
         <h2 id="scramble"></h2>
@@ -66,11 +48,9 @@
     <script>
         document.getElementsByTagName('main')[0].hidden = false;
 
-        // The entirety of the 'generateRandomScramble' function's source code comes from the below resource:
-        // https://github.com/bjcarlson42/blog-post-sample-code/blob/master/Rubik's%20Cube%20JavaScript%20Scrambler/part_two.js
         const generateRandomScramble = () => {
             const options = ['F', 'F2', 'F\'', 'R', 'R2', 'R\'', 'U', 'U2', 'U\'', 'B', 'B2', 'B\'', 'L', 'L2', 'L\'', 'D', 'D2', 'D\''];
-            const numOptions = [0, 1, 2, 3, 4, 5]; // 0 = F, 1 = R, 2 = U, 3 = B, 4 = L, 5 = D
+            const numOptions = [0, 1, 2, 3, 4, 5];
             let scramble = [];
             let scrambleMoves = [];
             let bad = true;
@@ -89,7 +69,6 @@
                     scramble.push(numOptions[getRandomInt(6)]);
                 }
 
-                // check if moves directly next to each other involve the same letter
                 for (var i = 0; i < 20 - 1; i++) {
                     if (scramble[i] == scramble[i + 1]) {
                         bad = true;
@@ -100,32 +79,31 @@
                 }
             }
 
-            // switch numbers to letters
             var move;
             for (var i = 0; i < 20; i++) {
                 switch (scramble[i]) {
                     case 0:
-                        move = options[getRandomInt(3)]; // 0,1,2
+                        move = options[getRandomInt(3)];
                         scrambleMoves.push(move);
                         break;
                     case 1:
-                        move = options[getRandomIntBetween(3, 6)]; // 3,4,5
+                        move = options[getRandomIntBetween(3, 6)];
                         scrambleMoves.push(move);
                         break;
                     case 2:
-                        move = options[getRandomIntBetween(6, 9)]; // 6,7,8
+                        move = options[getRandomIntBetween(6, 9)];
                         scrambleMoves.push(move);
                         break;
                     case 3:
-                        move = options[getRandomIntBetween(9, 12)]; // 9,10,11
+                        move = options[getRandomIntBetween(9, 12)];
                         scrambleMoves.push(move);
                         break;
                     case 4:
-                        move = options[getRandomIntBetween(12, 15)]; // 12,13,14
+                        move = options[getRandomIntBetween(12, 15)];
                         scrambleMoves.push(move);
                         break;
                     case 5:
-                        move = options[getRandomIntBetween(15, 18)]; // 15,16,17
+                        move = options[getRandomIntBetween(15, 18)];
                         scrambleMoves.push(move);
                         break;
                 }
@@ -181,6 +159,16 @@
             timerHTMLElement.innerHTML = convertTimeToHumanReadableString(0);
         }
         resetTimer();
+
+        // TODO:
+        // 1. Implement timer functionality with stop/start/reset
+        // 2. Implement timer history with automatic calculations for the following:
+        //   - PB
+        //   - Current Ao5
+        //   - Best Ao5
+        //   - Current Ao12
+        //   - Best Ao12
+        // 3. Then, and only then, remove the yellow-banner for "WORK IN PROGRESS"
     </script>
 </body>
 
