@@ -50,7 +50,7 @@
 
         const saveAllSideNotesToLocalStorage = () => {
             const stringified = JSON.stringify(allSideNotes);
-            const sideNotes = localStorage.setItem('sideNotes', stringified);
+            localStorage.setItem('sideNotes', stringified);
         };
         saveAllSideNotesToLocalStorage();
 

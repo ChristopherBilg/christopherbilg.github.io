@@ -22,6 +22,9 @@ Experiment: The Torus Framework
 Experiment: JavaScript's Tagged Template Literal Strings
     - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
     - Can be named something like `projects/experiment-2/index.js`
+Experiment: Custom JavaScript UI Framework
+    - Inspired by the Torus Framework
+    - Can be named something like `projects/experiment-3/index.js`
 ```
 
 ## Certification Ideas

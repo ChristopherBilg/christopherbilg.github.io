@@ -19,8 +19,6 @@
         Please enable JavaScript in order to use the password generator.
     </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
-
     <main hidden>
         <a href="/projects">Back to Projects List</a>
 
@@ -42,7 +40,9 @@
         <hr /><br />
         <input type="submit" value="Start/Stop Timer" onclick="return toggleTimerRunningState();" />
         <input type="submit" value="Reset Timer" onclick="return resetTimer();" />
+        <input type="submit" value="Reset Timer History" onclick="return resetTimerHistory();" />
         <h2 id="timer"></h2>
+        <div id="timer-history"></div>
     </main>
 
     <script>
@@ -140,35 +140,101 @@
         let timerCurrentTime = 0;
         const timerHTMLElement = document.getElementById('timer');
 
-        const convertTimeToHumanReadableString = time => {
-            return '00:00.00 seconds';
+        const loadTimerHistoryFromLocalStorage = () => {
+            return JSON.parse(localStorage.getItem('timerHistory'));
         };
 
-        const toggleTimerRunningState = () => {
+        const TIMER_HISTORY_TEMPLATE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        let timerHistory = loadTimerHistoryFromLocalStorage() || JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
+
+        const saveTimerHistoryToLocalStorage = () => {
+            const stringified = JSON.stringify(timerHistory);
+            localStorage.setItem('timerHistory', stringified);
+        };
+        saveTimerHistoryToLocalStorage();
+
+        const convertTimeToHumanReadableString = time => {
+            let milliseconds = Math.floor((time % 1000));
+            let seconds = Math.floor((time / 1000) % 60);
+            let hours = Math.floor((time / (1000 * 60 * 60)) % 24);
+            let minutes = Math.floor((time / (1000 * 60)) % 60);
+
+            milliseconds = (milliseconds < 100) ? ((milliseconds < 10) ? '00' + milliseconds : '0' + milliseconds) : milliseconds;
+            seconds = (seconds < 10) ? '0' + seconds : seconds;
+            minutes = (minutes < 10) ? '0' + minutes : minutes;
+            hours = (hours < 10) ? '0' + hours : hours;
+
+            return hours + ':' + minutes + ':' + seconds + '.' + milliseconds;
+        };
+
+        const timerHistoryHTMLElement = document.getElementById('timer-history');
+        const rerenderTimerHistoryHTMLElements = () => {
+            timerHistoryHTMLElement.innerHTML = '';
+
+            const pb = document.createElement('p');
+            const tempPB = convertTimeToHumanReadableString(Math.min(...timerHistory.slice(12, timerHistory.length)));
+            pb.innerHTML = `PB: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1 ? tempPB : convertTimeToHumanReadableString(0)}`;
+            timerHistoryHTMLElement.appendChild(pb);
+
+            const currentAo5 = document.createElement('p');
+            const tempAo5 = convertTimeToHumanReadableString(timerHistory.slice(-5).reduce((a, b) => (a + b)) / 5);
+            currentAo5.innerHTML = `Current Ao5: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5 ? tempAo5 : convertTimeToHumanReadableString(0)}`;
+            timerHistoryHTMLElement.appendChild(currentAo5);
+
+            const currentAo12 = document.createElement('p');
+            const tempAo12 = convertTimeToHumanReadableString(timerHistory.slice(-12).reduce((a, b) => (a + b)) / 12);
+            currentAo12.innerHTML = `Current Ao12: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12 ? tempAo12 : convertTimeToHumanReadableString(0)}`;
+            timerHistoryHTMLElement.appendChild(currentAo12);
+        };
+        rerenderTimerHistoryHTMLElements();
+
+        const addTimeToTimerHistory = time => {
+            timerHistory.push(time);
+            saveTimerHistoryToLocalStorage();
+
+            rerenderTimerHistoryHTMLElements();
+        };
+
+        const toggleTimerRunningState = async () => {
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+
             if (timerRunning) {
                 timerRunning = false;
+
+                addTimeToTimerHistory(timerCurrentTime);
+                timerCurrentTime = 0;
             }
             else {
                 timerRunning = true;
+                const startDate = Date.now();
+                let currentDate;
+
+                while (timerRunning) {
+                    currentDate = Date.now();
+                    timerCurrentTime = currentDate - startDate;
+
+                    timerHTMLElement.innerHTML = convertTimeToHumanReadableString(timerCurrentTime);
+                    await sleep(1);
+                }
             }
         };
 
         const resetTimer = () => {
-            if (timerRunning) toggleTimerRunningState();
+            if (timerRunning) {
+                timerRunning = false;
+                timerCurrentTime = 0;
+            }
 
-            timerHTMLElement.innerHTML = convertTimeToHumanReadableString(0);
+            timerHTMLElement.innerHTML = convertTimeToHumanReadableString(timerCurrentTime);
         }
         resetTimer();
 
-        // TODO:
-        // 1. Implement timer functionality with stop/start/reset
-        // 2. Implement timer history with automatic calculations for the following:
-        //   - PB
-        //   - Current Ao5
-        //   - Best Ao5
-        //   - Current Ao12
-        //   - Best Ao12
-        // 3. Then, and only then, remove the yellow-banner for "WORK IN PROGRESS"
+        const resetTimerHistory = () => {
+            timerHistory = TIMER_HISTORY_TEMPLATE;
+            saveTimerHistoryToLocalStorage();
+
+            document.location.reload();
+        };
     </script>
 </body>
 
