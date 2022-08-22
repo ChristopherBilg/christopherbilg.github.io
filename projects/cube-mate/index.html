@@ -37,7 +37,8 @@
         <div id="cross-color"></div>
 
         <br />
-        <hr /><br />
+        <hr />
+        <p><b>Note:</b> Pressing the space key on your keyboard will start and stop the timer.</p>
         <input type="submit" value="Start/Stop Timer" onclick="return toggleTimerRunningState();" />
         <input type="submit" value="Reset Timer" onclick="return resetTimer();" />
         <input type="submit" value="Reset Timer History" onclick="return resetTimerHistory();" />
@@ -236,6 +237,12 @@
                     timerHTMLElement.innerHTML = convertTimeToHumanReadableString(timerCurrentTime);
                     await sleep(1);
                 }
+            }
+        };
+        window.onkeypress = event => {
+            if (event.keyCode === 32) {
+                event.preventDefault();
+                toggleTimerRunningState();
             }
         };
 

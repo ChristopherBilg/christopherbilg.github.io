@@ -5,8 +5,8 @@ Christopher Bilger's Portfolio
 ## Blog Post Ideas
 
 ```text
-Blog post title capitalization tool: https://capitalizemytitle.com/#
-Blog post URL slug creator tool:     https://slugify.online/
+Title capitalization tool:      https://capitalizemytitle.com/#
+URL slug creator tool:          https://slugify.online/
 
 Travel: Outer Banks, North Carolina
 Life: Meeting Charlotte
