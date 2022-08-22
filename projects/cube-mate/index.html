@@ -171,6 +171,16 @@
         const rerenderTimerHistoryHTMLElements = () => {
             timerHistoryHTMLElement.innerHTML = '';
 
+            const getBestAverageOfN = n => {
+                let currentBest = Number.MAX_SAFE_INTEGER;
+                for (let i = TIMER_HISTORY_TEMPLATE.length; i <= timerHistory.length - n; i++) {
+                    const tempBest = timerHistory.slice(i, i + n).reduce((a, b) => (a + b)) / n;
+                    if (tempBest < currentBest) currentBest = tempBest;
+                }
+
+                return currentBest;
+            };
+
             const pb = document.createElement('p');
             const tempPB = convertTimeToHumanReadableString(Math.min(...timerHistory.slice(12, timerHistory.length)));
             pb.innerHTML = `PB: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1 ? tempPB : convertTimeToHumanReadableString(0)}`;
@@ -181,10 +191,20 @@
             currentAo5.innerHTML = `Current Ao5: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5 ? tempAo5 : convertTimeToHumanReadableString(0)}`;
             timerHistoryHTMLElement.appendChild(currentAo5);
 
+            const bestAo5 = document.createElement('p');
+            const tempBestAo5 = convertTimeToHumanReadableString(getBestAverageOfN(5));
+            bestAo5.innerHTML = `Best Ao5: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5 ? tempBestAo5 : convertTimeToHumanReadableString(0)}`;
+            timerHistoryHTMLElement.appendChild(bestAo5);
+
             const currentAo12 = document.createElement('p');
             const tempAo12 = convertTimeToHumanReadableString(timerHistory.slice(-12).reduce((a, b) => (a + b)) / 12);
             currentAo12.innerHTML = `Current Ao12: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12 ? tempAo12 : convertTimeToHumanReadableString(0)}`;
             timerHistoryHTMLElement.appendChild(currentAo12);
+
+            const bestAo12 = document.createElement('p');
+            const tempBestAo12 = convertTimeToHumanReadableString(getBestAverageOfN(12));
+            bestAo12.innerHTML = `Best Ao12: ${timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12 ? tempBestAo12 : convertTimeToHumanReadableString(0)}`;
+            timerHistoryHTMLElement.appendChild(bestAo12);
         };
         rerenderTimerHistoryHTMLElements();
 
@@ -230,10 +250,11 @@
         resetTimer();
 
         const resetTimerHistory = () => {
-            timerHistory = TIMER_HISTORY_TEMPLATE;
-            saveTimerHistoryToLocalStorage();
+            resetTimer();
+            timerHistory = JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
 
-            document.location.reload();
+            saveTimerHistoryToLocalStorage();
+            rerenderTimerHistoryHTMLElements();
         };
     </script>
 </body>
