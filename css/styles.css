@@ -45,12 +45,6 @@ table tr td:first-child {
     border-radius: 2rem;
 }
 
-@media screen and (max-width: 749px) {
-    #relevant-skills-section {
-        display: none;
-    }
-}
-
 #link-table-filter {
     width: 100%;
     margin-top: 1rem;
