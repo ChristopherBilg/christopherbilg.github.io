@@ -27,10 +27,6 @@ nav {
     flex-flow: wrap;
 }
 
-h2 a {
-    color: inherit;
-}
-
 table {
     /* Top, Left/Right, Bottom */
     margin: 1rem 0.5rem 0rem;
