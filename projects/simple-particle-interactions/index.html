@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Simple Particle Interactions</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">
+      Please enable JavaScript in order to view this webpage.
+    </noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Simple Particle Interactions</h1>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class SimpleParticleInteractions {
+          constructor(width, height) {
+            this._width = width;
+            this._height = height;
+
+            this._rules = {
+              green: {
+                green: Math.random() * 2 - 1,
+                red: Math.random() * 2 - 1,
+                orange: Math.random() * 2 - 1,
+                blue: Math.random() * 2 - 1,
+              },
+              red: {
+                green: Math.random() * 2 - 1,
+                red: Math.random() * 2 - 1,
+                orange: Math.random() * 2 - 1,
+                blue: Math.random() * 2 - 1,
+              },
+              orange: {
+                green: Math.random() * 2 - 1,
+                red: Math.random() * 2 - 1,
+                orange: Math.random() * 2 - 1,
+                blue: Math.random() * 2 - 1,
+              },
+              blue: {
+                green: Math.random() * 2 - 1,
+                red: Math.random() * 2 - 1,
+                orange: Math.random() * 2 - 1,
+                blue: Math.random() * 2 - 1,
+              },
+            };
+
+            this._canvas = document.createElement("canvas");
+            this._context = this._canvas.getContext("2d");
+            this._context.canvas.width = 700;
+            this._context.canvas.height = 700;
+
+            this._atoms = [];
+            this.create(100, "green");
+            this.create(100, "red");
+            this.create(100, "orange");
+            this.create(100, "blue");
+
+            this.update();
+          }
+
+          get rules() {
+            return this._rules;
+          }
+
+          get canvas() {
+            return this._canvas;
+          }
+
+          draw(x, y, c, s) {
+            this._context.fillStyle = c;
+            this._context.fillRect(x, y, s, s);
+          }
+
+          atom(x, y, c) {
+            return { x: x, y: y, vx: 0, vy: 0, color: c };
+          }
+
+          random() {
+            return Math.random() * (this._height - 100) + 50;
+          }
+
+          create(number, color) {
+            for (let _ = 0; _ < number; _++) {
+              this._atoms.push(this.atom(this.random(), this.random(), color));
+            }
+          }
+
+          applyRules(distance) {
+            for (let i = 0; i < this._atoms.length; i++) {
+              let fx = 0;
+              let fy = 0;
+
+              const a = this._atoms[i];
+              for (let j = 0; j < this._atoms.length; j++) {
+                const b = this._atoms[j];
+                const g = this._rules[a.color][b.color];
+
+                if (g !== undefined) {
+                  const dx = a.x - b.x;
+                  const dy = a.y - b.y;
+
+                  if (dx !== 0 || dy !== 0) {
+                    const d = Math.sqrt(dx * dx + dy * dy);
+
+                    if (d < distance) {
+                      const F = g / d;
+                      fx += F * dx;
+                      fy += F * dy;
+                    }
+                  }
+                }
+              }
+              a.vx = (a.vx + fx) * 0.2;
+              a.vy = (a.vy + fy) * 0.2;
+              a.x += a.vx;
+              a.y += a.vy;
+
+              if (a.x <= 0) {
+                a.vx *= -1;
+                a.x = 0;
+              }
+
+              if (a.x >= this._width) {
+                a.vx *= -1;
+                a.x = this._width;
+              }
+
+              if (a.y <= 0) {
+                a.vy *= -1;
+                a.y = 0;
+              }
+
+              if (a.y >= this._height) {
+                a.vy *= -1;
+                a.y = this._height;
+              }
+            }
+          }
+
+          update() {
+            this.applyRules(80);
+            this._context.clearRect(0, 0, this._width, this._height);
+            this.draw(0, 0, "white", this._width);
+
+            for (let i = 0; i < this._atoms.length; i += 1) {
+              this.draw(
+                this._atoms[i].x,
+                this._atoms[i].y,
+                this._atoms[i].color,
+                3
+              );
+            }
+
+            requestAnimationFrame(this.update.bind(this));
+          }
+        }
+
+        class App extends StyledComponent {
+          init() {
+            this._spi = new SimpleParticleInteractions(700, 700);
+          }
+
+          styles() {
+            return css`
+              canvas {
+                border: 1px solid black;
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                ${this._spi.canvas}
+                <pre>
+                  ${JSON.stringify(this._spi.rules, undefined, 2)}
+                </pre>
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Browser Cryptography</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">
+      Please enable JavaScript in order to view this webpage.
+    </noscript>
+
+    <main hidden></main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        const generateKey = async () => {
+          return await window.crypto.subtle.generateKey(
+            {
+              name: "AES-GCM",
+              length: 256,
+            },
+            false,
+            ["encrypt", "decrypt"]
+          );
+        };
+
+        const encryptPayload = async (key, payload) => {
+          const iv = window.crypto.getRandomValues(new Uint8Array(12));
+          const encrypted = await window.crypto.subtle.encrypt(
+            {
+              name: "AES-GCM",
+              iv,
+            },
+            key,
+            new TextEncoder().encode(payload)
+          );
+
+          return { encrypted, iv };
+        };
+
+        const decryptPayload = async (key, iv, payload) => {
+          const decrypted = await window.crypto.subtle.decrypt(
+            {
+              name: "AES-GCM",
+              iv,
+            },
+            key,
+            payload
+          );
+
+          return new TextDecoder().decode(decrypted);
+        };
+
+        const test = async () => {
+          const unencrypted = `
+            (() => {
+              class App extends Component {
+                compose() {
+                  return vdom\`
+                    <div>
+                      <a href="/projects">Back to Projects List</a>
+
+                      <h1>Browser Cryptography</h1>
+
+                      <p>
+                        <b>Browser Cryptography</b> is an extremely simple example of
+                        how JavaScript code can be stringified, encrypted, and then
+                        decrypted all within the browser. This means that, for instance,
+                        we can encrypt JavaScript code (stringified) with a password, and
+                        then only include that encrypted data in the webpage. Once the
+                        user browses to the webpage, then all of the data is client-side
+                        yet none of it is accessible because it is encrypted (securely
+                        using something like AES-GCM 256-bit) requiring a password to
+                        decrypt the key(s).
+                      </p>
+
+                      <p>
+                        All of the viewable contents of this entire webpage have been
+                        encrypted, decrypted, and then evaluated as an immediately invoked
+                        function expression (IIFE). All within the browser. How amazing!
+                      </p>
+                    </div>
+                  \`;
+                }
+              }
+
+              const app = new App();
+              document.getElementsByTagName("main")[0].appendChild(app.node);
+            })();
+          `;
+
+          const key = await generateKey();
+          const { encrypted, iv } = await encryptPayload(key, unencrypted);
+          const decrypted = await decryptPayload(key, iv, encrypted);
+
+          eval(decrypted);
+        };
+
+        test();
+      })();
+    </script>
+  </body>
+</html>

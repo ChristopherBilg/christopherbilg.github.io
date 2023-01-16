@@ -1,0 +1,125 @@
+/* MVP Variables (and other global variables) */
+:root {
+  --color: #116bee;
+  --color-accent: #116bee15;
+  --color-bg: #fff;
+  --color-bg-secondary: #e9e9e9;
+  --color-link: #116bee;
+  --color-secondary: #920de9;
+  --color-secondary-accent: #920de90b;
+  --color-shadow: #f4f4f4;
+  --color-table: #214c8d;
+  --color-text: #000;
+  --color-text-secondary: #767676;
+
+  --mono-font-family: "Courier New", Courier, monospace;
+}
+
+/* General Elements */
+html {
+  scroll-behavior: smooth;
+}
+
+hr {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+}
+
+nav {
+  margin-bottom: 0rem;
+  display: flex;
+  flex-flow: wrap;
+}
+
+table {
+  /* Top, Left/Right, Bottom */
+  margin: 1rem 0.5rem 0rem;
+  height: fit-content;
+}
+
+table tr td:first-child {
+  text-align: center;
+}
+
+input[type="submit"] {
+  padding: 0.5rem;
+}
+
+/* IDs */
+#header-image {
+  border-radius: 2rem;
+}
+
+#link-table-filter {
+  max-width: 90%;
+  margin-top: 1rem;
+}
+
+#link-table tbody tr td:nth-child(1) {
+  text-align: left;
+  white-space: normal;
+}
+
+#link-table tbody tr td:nth-child(2) {
+  text-align: right;
+  font-family: var(--mono-font-family);
+}
+
+#full-screen-noscript-message {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+#yellow-banner {
+  width: 100%;
+  text-align: center;
+  padding: 1rem;
+  background-color: yellow;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Classes */
+.galleryContainer {
+  line-height: 2rem;
+  column-gap: 0.5rem;
+  column-count: 3;
+}
+
+.galleryImage {
+  width: 100%;
+  height: auto;
+}
+
+@media screen and (max-width: 900px) {
+  .galleryContainer {
+    column-count: 2;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .galleryContainer {
+    column-count: 1;
+  }
+}
+
+.lockheed-martin {
+  color: #008000;
+}
+
+.family-medical-leave {
+  color: #800000;
+}
+
+.another-professional-experience {
+  color: #808000;
+}
+
+.external-link::after {
+  content: " \2197";
+}

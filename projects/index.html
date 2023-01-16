@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chris Bilger, M.C.S. | Projects</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../css/styles.css" />
+  </head>
+
+  <body>
+    <header>
+      <h1>Chris Bilger, M.C.S. | Projects</h1>
+      <img
+        id="header-image"
+        alt="Image of a programmer with CSS code on the wall behind him"
+        src="../images/projects.avif"
+        width="320"
+      />
+
+      <section>
+        <nav>
+          <ul>
+            <li><a href="/">Back to Portfolio</a></li>
+          </ul>
+        </nav>
+      </section>
+    </header>
+
+    <main>
+      <section>
+        <hr id="projects" />
+        <h2><a href="#projects">Projects</a></h2>
+        <hr />
+
+        <input
+          type="text"
+          id="link-table-filter"
+          placeholder="Filter Projects..."
+          hidden
+        />
+
+        <table id="link-table">
+          <tbody>
+            <tr>
+              <td>
+                <a href="/projects/desktop-environment"
+                  >Desktop Environment (Webtop)</a
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/js-web-workers">JS Web Workers</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/js-web-components">JS Web Components</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/browser-cryptography"
+                  >Browser Cryptography</a
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/simple-particle-interactions"
+                  >Simple Particle Interactions</a
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/cube-mate">Cube Mate (Rubik's Cube Tools)</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/side-notes"
+                  >Side Notes (Note-Taking Web App)</a
+                >
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/projects/password-generator"
+                  >Client-Only Password Generator</a
+                >
+              </td>
+            </tr>
+
+            <tr hidden>
+              <td>
+                <a href="/projects/tabbed-router-ui-demo"
+                  >Tabbed Router UI Demo (Torus)</a
+                >
+              </td>
+            </tr>
+
+            <tr hidden>
+              <td>
+                <a href="/projects/graphing-calculator"
+                  >Graphing Calculator (Torus)</a
+                >
+              </td>
+            </tr>
+
+            <tr hidden>
+              <td>
+                <a href="/projects/game-of-life"
+                  >Conway's Game of Life (Torus)</a
+                >
+              </td>
+            </tr>
+
+            <tr hidden>
+              <td>
+                <a href="/projects/todo-list">ToDo List (Torus)</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        document.getElementById("link-table-filter").hidden = false;
+
+        (() => {
+          const table = document.getElementById("link-table");
+          const tbody = table.getElementsByTagName("tbody")[0];
+          const rows = tbody.getElementsByTagName("tr");
+
+          Array.from(rows).forEach((element) => {
+            const content = element
+              .getElementsByTagName("td")[0]
+              .getElementsByTagName("a")[0];
+
+            if (element.hidden) {
+              content.innerHTML = "Hidden: " + content.innerHTML;
+            }
+          });
+        })();
+
+        const handleInput = (event) => {
+          const filter = event?.target?.value?.toUpperCase() || "";
+
+          const table = document.getElementById("link-table");
+          const tbody = table.getElementsByTagName("tbody")[0];
+          const rows = tbody.getElementsByTagName("tr");
+          let disabledCounter = 0;
+
+          Array.from(rows).forEach((element) => {
+            const title = element
+              .getElementsByTagName("td")[0]
+              .getElementsByTagName("a")[0]
+              .innerHTML.toUpperCase();
+
+            if (title.includes(filter)) {
+              element.hidden = false;
+            } else {
+              element.hidden = true;
+            }
+
+            if (filter.startsWith("HIDDEN") && title.startsWith("HIDDEN:")) {
+              element.hidden = false;
+            } else if (filter.startsWith("ALL!")) {
+              element.hidden = false;
+            } else if (title.startsWith("HIDDEN:")) {
+              element.hidden = true;
+            }
+
+            if (element.hidden) {
+              disabledCounter++;
+            }
+          });
+
+          if (disabledCounter === rows.length) {
+            table.hidden = true;
+          } else {
+            table.hidden = false;
+          }
+        };
+
+        // Run once on load
+        handleInput();
+
+        // Run on every input event
+        document
+          .getElementById("link-table-filter")
+          .addEventListener("input", handleInput);
+      })();
+    </script>
+  </body>
+</html>
