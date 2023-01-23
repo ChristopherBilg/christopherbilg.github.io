@@ -123,3 +123,11 @@ input[type="submit"] {
 .external-link::after {
   content: " \2197";
 }
+
+.certification-title {
+  font-size: 1.2rem;
+}
+
+.certification-date {
+  color: #767676;
+}
