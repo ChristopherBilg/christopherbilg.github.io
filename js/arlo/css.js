@@ -4,7 +4,7 @@ import { Reader } from './reader.js';
 /**
  * Helper to convert a string representation of a dict into a JavaScript object, CSS-style.
  * `stringToDict` is recursive to parse nested dictionaries.
- * 
+ *
  * @param {Reader} reader
  * @returns Nested dictionary of CSS-style objects
  */
@@ -105,7 +105,7 @@ const CSS_CACHE = new Map();
 
 /**
  * A CSS parser that takes a string and returns CSS style objects for VDOM.
- * 
+ *
  * @param {*} templateParts
  * @param  {...any} dynamicParts
  * @returns Dictionary of CSS style objects to use in the VDOM.
