@@ -4,7 +4,7 @@
  * @param {*} data
  * @returns Array of data or data if already an array type.
  */
-export const normalizeArray = data => Array.isArray(data) ? data : [data];
+export const normalizeArray = (data) => (Array.isArray(data) ? data : [data]);
 
 /**
  * Returned true if 'object' is an object; otherwise, false.
@@ -12,7 +12,7 @@ export const normalizeArray = data => Array.isArray(data) ? data : [data];
  * @param {*} object
  * @returns Boolean.
  */
-export const isObject = object => object !== null && typeof object === 'object';
+export const isObject = (object) => object !== null && typeof object === "object";
 
 /**
  * Clip the end of a given string by the length of a substring
@@ -32,11 +32,11 @@ export const clipStringEnd = (base, substr) => base.substring(0, base.length - s
  * @returns Concatenation of dynamic and template strings.
  */
 export const interpolate = (templateParts, dynamicParts) => {
-    let str = templateParts[0];
+  let str = templateParts[0];
 
-    for (let index = 1, len = dynamicParts.length; index <= len; index++) {
-        str += dynamicParts[index - 1] + templateParts[index];
-    }
+  for (let index = 1, len = dynamicParts.length; index <= len; index++) {
+    str += dynamicParts[index - 1] + templateParts[index];
+  }
 
-    return str;
+  return str;
 };
