@@ -16,7 +16,49 @@
   <body>
     <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
+    <script type="module">
+      // Arlo is not used in this project because this project is used for
+      // exploring JavaScript Web Components
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class TimeFormatted extends HTMLElement {
+          render() {
+            let date = new Date(this.getAttribute("datetime") || Date.now());
+
+            this.innerHTML = new Intl.DateTimeFormat("default", {
+              year: this.getAttribute("year") || undefined,
+              month: this.getAttribute("month") || undefined,
+              day: this.getAttribute("day") || undefined,
+              hour: this.getAttribute("hour") || undefined,
+              minute: this.getAttribute("minute") || undefined,
+              second: this.getAttribute("second") || undefined,
+              timeZoneName: this.getAttribute("time-zone-name") || undefined,
+            }).format(date);
+
+            this.style.fontWeight = "bold";
+          }
+
+          connectedCallback() {
+            if (!this.rendered) {
+              this.render();
+              this.rendered = true;
+            }
+          }
+
+          static get observedAttributes() {
+            return ["datetime", "year", "month", "day", "hour", "minute", "second", "time-zone-name"];
+          }
+
+          attributeChangedCallback(name, oldValue, newValue) {
+            this.render();
+          }
+        }
+
+        customElements.define("time-formatted", TimeFormatted);
+      })();
+    </script>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -24,7 +66,7 @@
       <h1>JS Web Components</h1>
 
       <p>
-        This project (<b>JS Web Components</b>) is an exploratory space designed for me, Chris Bilger, to learn about
+        This project (<b>JS Web Components</b>) is an exploratory space designed for me to learn about
         <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank" class="external-link"
           >JavaScript Web Components</a
         >. These have been on my radar for months and months by the time of this projects creation; however, I didn't think much of them
@@ -33,148 +75,20 @@
 
       <p>Below I am going to attach some simple web components onto the DOM and they should, hopefully, display properly.</p>
 
-      <one-dialog>
-        <span slot="heading">Web Component Heading</span>
-        <div>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Cursus risus at ultrices mi tempus imperdiet nulla. Sodales ut eu sem integer vitae justo eget magna. Purus sit amet luctus
-            venenatis lectus magna fringilla urna porttitor.
-          </p>
-        </div>
-      </one-dialog>
-
-      <input type="submit" value="Open Dialog UI" id="launch-dialog" />
+      <time-formatted
+        id="elem"
+        year="numeric"
+        month="long"
+        day="numeric"
+        hour="numeric"
+        minute="numeric"
+        second="numeric"
+        time-zone-name="short"
+      ></time-formatted>
     </main>
 
-    <script type="module">
-      // Arlo is not used in this project because this project is used for
-      // exploring JavaScript Web Components
-
-      import { LitElement, html, css } from "https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module";
-
-      (() => {
-        document.getElementsByTagName("main")[0].hidden = false;
-
-        const privateOpen = Symbol("open");
-
-        class OneDialog extends LitElement {
-          static get properties() {
-            return {
-              open: { type: Boolean, attribute: "open", reflect: true },
-            };
-          }
-
-          static get styles() {
-            return [
-              css`
-                .wrapper {
-                  opacity: 0;
-                  transition: visibility 0s, opacity 0.25s ease-in;
-                }
-                .wrapper:not(.open) {
-                  visibility: hidden;
-                }
-                .wrapper.open {
-                  align-items: center;
-                  display: flex;
-                  justify-content: center;
-                  height: 100vh;
-                  position: fixed;
-                  top: 0;
-                  left: 0;
-                  right: 0;
-                  bottom: 0;
-                  opacity: 1;
-                  visibility: visible;
-                }
-                .overlay {
-                  background: rgba(0, 0, 0, 0.8);
-                  height: 100%;
-                  position: fixed;
-                  top: 0;
-                  right: 0;
-                  bottom: 0;
-                  left: 0;
-                  width: 100%;
-                }
-                .dialog {
-                  background: #ffffff;
-                  max-width: 600px;
-                  padding: 1rem;
-                  position: fixed;
-                }
-                button {
-                  all: unset;
-                  cursor: pointer;
-                  font-size: 1.25rem;
-                  position: absolute;
-                  top: 1rem;
-                  right: 1rem;
-                }
-                button:focus {
-                  border: 2px solid blue;
-                }
-              `,
-            ];
-          }
-
-          firstUpdated() {
-            this._watchEscape = this._watchEscape.bind(this);
-          }
-
-          render() {
-            return html` <div class="wrapper ${this.open ? "open" : ""}" aria-hidden="${!this.open}">
-              <div class="overlay" @click="${this.close}"></div>
-              <div class="dialog" role="dialog" aria-labelledby="title" aria-describedby="content">
-                <button class="close" aria-label="Close" @click=${this.close}>✖️</button>
-                <h1 id="title"><slot name="heading"></slot></h1>
-                <div id="content" class="content">
-                  <slot></slot>
-                </div>
-              </div>
-            </div>`;
-          }
-
-          get open() {
-            return this[privateOpen];
-          }
-          set open(isOpen) {
-            this[privateOpen] = isOpen;
-            const { shadowRoot } = this;
-            const { activeElement } = document;
-            if (isOpen) {
-              setTimeout(() => shadowRoot.querySelector("button").focus());
-              if (activeElement) {
-                this._wasFocused = activeElement;
-              }
-              document.addEventListener("keydown", this._watchEscape);
-            } else {
-              this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
-              document.removeEventListener("keydown", this._watchEscape);
-            }
-          }
-
-          close() {
-            this.open = false;
-            const closeEvent = new CustomEvent("dialog-closed");
-            this.dispatchEvent(closeEvent);
-          }
-
-          _watchEscape(event) {
-            if (event.key === "Escape") {
-              this.close();
-            }
-          }
-        }
-
-        customElements.define("one-dialog", OneDialog);
-
-        const button = document.getElementById("launch-dialog");
-        button.addEventListener("click", () => {
-          document.querySelector("one-dialog").open = true;
-        });
-      })();
+    <script>
+      setInterval(() => elem.setAttribute("datetime", new Date()), 50);
     </script>
   </body>
 </html>
