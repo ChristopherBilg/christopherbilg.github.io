@@ -16,7 +16,49 @@
   <body>
     <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
+    <script type="module">
+      // Arlo is not used in this project because this project is used for
+      // exploring JavaScript Web Components
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class TimeFormatted extends HTMLElement {
+          render() {
+            let date = new Date(this.getAttribute("datetime") || Date.now());
+
+            this.innerHTML = new Intl.DateTimeFormat("default", {
+              year: this.getAttribute("year") || undefined,
+              month: this.getAttribute("month") || undefined,
+              day: this.getAttribute("day") || undefined,
+              hour: this.getAttribute("hour") || undefined,
+              minute: this.getAttribute("minute") || undefined,
+              second: this.getAttribute("second") || undefined,
+              timeZoneName: this.getAttribute("time-zone-name") || undefined,
+            }).format(date);
+
+            this.style.fontWeight = "bold";
+          }
+
+          connectedCallback() {
+            if (!this.rendered) {
+              this.render();
+              this.rendered = true;
+            }
+          }
+
+          static get observedAttributes() {
+            return ["datetime", "year", "month", "day", "hour", "minute", "second", "time-zone-name"];
+          }
+
+          attributeChangedCallback(name, oldValue, newValue) {
+            this.render();
+          }
+        }
+
+        customElements.define("time-formatted", TimeFormatted);
+      })();
+    </script>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -33,70 +75,20 @@
 
       <p>Below I am going to attach some simple web components onto the DOM and they should, hopefully, display properly.</p>
 
-      <one-dialog>
-        <span slot="heading">Web Component Heading</span>
-        <div>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Cursus risus at ultrices mi tempus imperdiet nulla. Sodales ut eu sem integer vitae justo eget magna. Purus sit amet luctus
-            venenatis lectus magna fringilla urna porttitor.
-          </p>
-        </div>
-      </one-dialog>
-
-      <input type="submit" value="Open Dialog UI" id="launch-dialog" />
+      <time-formatted
+        id="elem"
+        year="numeric"
+        month="long"
+        day="numeric"
+        hour="numeric"
+        minute="numeric"
+        second="numeric"
+        time-zone-name="short"
+      ></time-formatted>
     </main>
 
-    <script type="module">
-      // Arlo is not used in this project because this project is used for
-      // exploring JavaScript Web Components
-
-      (() => {
-        document.getElementsByTagName("main")[0].hidden = false;
-
-        class TimeFormatted extends HTMLElement {
-          render() {
-            // (1)
-            let date = new Date(this.getAttribute("datetime") || Date.now());
-
-            this.innerHTML = new Intl.DateTimeFormat("default", {
-              year: this.getAttribute("year") || undefined,
-              month: this.getAttribute("month") || undefined,
-              day: this.getAttribute("day") || undefined,
-              hour: this.getAttribute("hour") || undefined,
-              minute: this.getAttribute("minute") || undefined,
-              second: this.getAttribute("second") || undefined,
-              timeZoneName: this.getAttribute("time-zone-name") || undefined,
-            }).format(date);
-          }
-
-          connectedCallback() {
-            // (2)
-            if (!this.rendered) {
-              this.render();
-              this.rendered = true;
-            }
-          }
-
-          static get observedAttributes() {
-            // (3)
-            return ["datetime", "year", "month", "day", "hour", "minute", "second", "time-zone-name"];
-          }
-
-          attributeChangedCallback(name, oldValue, newValue) {
-            // (4)
-            this.render();
-          }
-        }
-
-        customElements.define("time-formatted", TimeFormatted);
-      })();
-    </script>
-
-    <time-formatted id="elem" hour="numeric" minute="numeric" second="numeric"></time-formatted>
-
     <script>
-      setInterval(() => elem.setAttribute("datetime", new Date()), 1000); // (5)
+      setInterval(() => elem.setAttribute("datetime", new Date()), 50);
     </script>
   </body>
 </html>
