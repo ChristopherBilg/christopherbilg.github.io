@@ -45,6 +45,16 @@ input[type="submit"] {
   padding: 0.5rem;
 }
 
+abbr[title]:after {
+  content: " (" attr(title) ") ";
+}
+
+@media screen and (min-width: 750px) {
+  abbr[title]:after {
+    content: "";
+  }
+}
+
 /* IDs */
 #header-image {
   border-radius: 2rem;
