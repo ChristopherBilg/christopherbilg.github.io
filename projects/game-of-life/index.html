@@ -12,9 +12,7 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <script type="module">
       import * as Arlo from "../../js/arlo/index.js";
@@ -281,13 +279,7 @@
               const remainder = (i + 1) % xCount;
 
               ctx.beginPath();
-              ctx.arc(
-                (remainder - 1) * CELL_SIZE + HALFCELL,
-                ((i - remainder + 1) / xCount) * CELL_SIZE + HALFCELL,
-                CELL_RADIUS,
-                0,
-                TAU
-              );
+              ctx.arc((remainder - 1) * CELL_SIZE + HALFCELL, ((i - remainder + 1) / xCount) * CELL_SIZE + HALFCELL, CELL_RADIUS, 0, TAU);
               ctx.fill();
             }
           }
@@ -322,10 +314,7 @@
           // Iff game is not playing, start a new interval timer that steps the game
           //  forward each time.
           if (this.timer === null) {
-            this.timer = setInterval(
-              () => this.gameCanvas.step(),
-              this.INTERVAL
-            );
+            this.timer = setInterval(() => this.gameCanvas.step(), this.INTERVAL);
             this.render();
           }
         }
@@ -401,19 +390,15 @@
           return vdom`<main>
             ${this.gameCanvas.node}
             <menu>
-                <button onclick="${() =>
-                  this.gameCanvas.clear()}">Clear</button>
-                <button onclick="${() =>
-                  this.gameCanvas.seedRandomly()}">Randomize</button>
+                <button onclick="${() => this.gameCanvas.clear()}">Clear</button>
+                <button onclick="${() => this.gameCanvas.seedRandomly()}">Randomize</button>
                 <button onclick="${() => this.gameCanvas.step()}">Step</button>
                 ${
                   this.timer === null
                     ? // Depending on whether the game is in play or not, display
                       // the appropriate button.
-                      vdom`<button onclick="${() =>
-                        this.start()}">Play</button>`
-                    : vdom`<button onclick="${() =>
-                        this.pause()}">Pause</button>`
+                      vdom`<button onclick="${() => this.start()}">Play</button>`
+                    : vdom`<button onclick="${() => this.pause()}">Pause</button>`
                 }
             </menu>
         </main>`;

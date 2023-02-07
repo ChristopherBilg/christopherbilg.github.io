@@ -14,9 +14,7 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -165,12 +163,7 @@
             this.draw(0, 0, "white", this._width);
 
             for (let i = 0; i < this._atoms.length; i += 1) {
-              this.draw(
-                this._atoms[i].x,
-                this._atoms[i].y,
-                this._atoms[i].color,
-                3
-              );
+              this.draw(this._atoms[i].x, this._atoms[i].y, this._atoms[i].color, 3);
             }
 
             requestAnimationFrame(this.update.bind(this));

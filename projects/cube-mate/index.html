@@ -14,9 +14,7 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -24,13 +22,10 @@
       <h1>Cube Mate (Rubik's Cube Tools)</h1>
 
       <p>
-        <b>Cube Mate</b> is an extremely minimal set of tools that I am using to
-        learn (at my own pace) efficient Rubik's Cube solving methods. If you
-        wish to use better tools, look into the website
-        <a href="https://cstimer.net/" target="_blank" class="external-link"
-          >cstimer.net</a
-        >. No data/information/values/etc. is sent away from your local browser
-        instance.
+        <b>Cube Mate</b> is an extremely minimal set of tools that I am using to learn (at my own pace) efficient Rubik's Cube solving
+        methods. If you wish to use better tools, look into the website
+        <a href="https://cstimer.net/" target="_blank" class="external-link">cstimer.net</a>. No data/information/values/etc. is sent away
+        from your local browser instance.
       </p>
     </main>
 
@@ -59,9 +54,7 @@
             this.timerCurrentTime = 0;
             this.timerHTMLElement = document.createElement("h2");
 
-            this.timerHistory =
-              this.loadTimerHistoryFromLocalStorage() ||
-              JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
+            this.timerHistory = this.loadTimerHistoryFromLocalStorage() || JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
 
             this.saveTimerHistoryToLocalStorage();
 
@@ -81,26 +74,7 @@
           }
 
           generateRandomScramble() {
-            const options = [
-              "F",
-              "F2",
-              "F'",
-              "R",
-              "R2",
-              "R'",
-              "U",
-              "U2",
-              "U'",
-              "B",
-              "B2",
-              "B'",
-              "L",
-              "L2",
-              "L'",
-              "D",
-              "D2",
-              "D'",
-            ];
+            const options = ["F", "F2", "F'", "R", "R2", "R'", "U", "U2", "U'", "B", "B2", "B'", "L", "L2", "L'", "D", "D2", "D'"];
             const numOptions = [0, 1, 2, 3, 4, 5];
             let scramble = [];
             let scrambleMoves = [];
@@ -164,14 +138,7 @@
           }
 
           generateRandomCrossColor() {
-            const colors = [
-              "Red",
-              "Green",
-              "White",
-              "Blue",
-              "Yellow",
-              "Orange",
-            ];
+            const colors = ["Red", "Green", "White", "Blue", "Yellow", "Orange"];
 
             return colors[Math.floor(Math.random() * colors.length)];
           }
@@ -181,9 +148,7 @@
 
             const crossColor = this.generateRandomCrossColor();
 
-            this.scrambleHTMLElement.innerHTML = `Scramble: ${this.generateRandomScramble().join(
-              " "
-            )}`;
+            this.scrambleHTMLElement.innerHTML = `Scramble: ${this.generateRandomScramble().join(" ")}`;
             this.crossHTMLElement.innerHTML = `Cross Color: ${crossColor}`;
 
             this.crossColorHTMLElement.style.backgroundColor = crossColor;
@@ -206,12 +171,7 @@
             let hours = Math.floor((time / (1000 * 60 * 60)) % 24);
             let minutes = Math.floor((time / (1000 * 60)) % 60);
 
-            milliseconds =
-              milliseconds < 100
-                ? milliseconds < 10
-                  ? "00" + milliseconds
-                  : "0" + milliseconds
-                : milliseconds;
+            milliseconds = milliseconds < 100 ? (milliseconds < 10 ? "00" + milliseconds : "0" + milliseconds) : milliseconds;
             seconds = seconds < 10 ? "0" + seconds : seconds;
             minutes = minutes < 10 ? "0" + minutes : minutes;
             hours = hours < 10 ? "0" + hours : hours;
@@ -224,13 +184,8 @@
 
             const getBestAverageOfN = (n) => {
               let currentBest = Number.MAX_SAFE_INTEGER;
-              for (
-                let i = TIMER_HISTORY_TEMPLATE.length;
-                i <= this.timerHistory.length - n;
-                i++
-              ) {
-                const tempBest =
-                  this.timerHistory.slice(i, i + n).reduce((a, b) => a + b) / n;
+              for (let i = TIMER_HISTORY_TEMPLATE.length; i <= this.timerHistory.length - n; i++) {
+                const tempBest = this.timerHistory.slice(i, i + n).reduce((a, b) => a + b) / n;
                 if (tempBest < currentBest) currentBest = tempBest;
               }
 
@@ -238,57 +193,37 @@
             };
 
             const pb = document.createElement("p");
-            const tempPB = this.convertTimeToHumanReadableString(
-              Math.min(...this.timerHistory.slice(12, this.timerHistory.length))
-            );
+            const tempPB = this.convertTimeToHumanReadableString(Math.min(...this.timerHistory.slice(12, this.timerHistory.length)));
             pb.innerHTML = `PB: ${
-              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1
-                ? tempPB
-                : this.convertTimeToHumanReadableString(0)
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1 ? tempPB : this.convertTimeToHumanReadableString(0)
             }`;
             this.timerHistoryHTMLElement.appendChild(pb);
 
             const currentAo5 = document.createElement("p");
-            const tempAo5 = this.convertTimeToHumanReadableString(
-              this.timerHistory.slice(-5).reduce((a, b) => a + b) / 5
-            );
+            const tempAo5 = this.convertTimeToHumanReadableString(this.timerHistory.slice(-5).reduce((a, b) => a + b) / 5);
             currentAo5.innerHTML = `Current Ao5: ${
-              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5
-                ? tempAo5
-                : this.convertTimeToHumanReadableString(0)
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5 ? tempAo5 : this.convertTimeToHumanReadableString(0)
             }`;
             this.timerHistoryHTMLElement.appendChild(currentAo5);
 
             const bestAo5 = document.createElement("p");
-            const tempBestAo5 = this.convertTimeToHumanReadableString(
-              getBestAverageOfN(5)
-            );
+            const tempBestAo5 = this.convertTimeToHumanReadableString(getBestAverageOfN(5));
             bestAo5.innerHTML = `Best Ao5: ${
-              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5
-                ? tempBestAo5
-                : this.convertTimeToHumanReadableString(0)
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5 ? tempBestAo5 : this.convertTimeToHumanReadableString(0)
             }`;
             this.timerHistoryHTMLElement.appendChild(bestAo5);
 
             const currentAo12 = document.createElement("p");
-            const tempAo12 = this.convertTimeToHumanReadableString(
-              this.timerHistory.slice(-12).reduce((a, b) => a + b) / 12
-            );
+            const tempAo12 = this.convertTimeToHumanReadableString(this.timerHistory.slice(-12).reduce((a, b) => a + b) / 12);
             currentAo12.innerHTML = `Current Ao12: ${
-              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12
-                ? tempAo12
-                : this.convertTimeToHumanReadableString(0)
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12 ? tempAo12 : this.convertTimeToHumanReadableString(0)
             }`;
             this.timerHistoryHTMLElement.appendChild(currentAo12);
 
             const bestAo12 = document.createElement("p");
-            const tempBestAo12 = this.convertTimeToHumanReadableString(
-              getBestAverageOfN(12)
-            );
+            const tempBestAo12 = this.convertTimeToHumanReadableString(getBestAverageOfN(12));
             bestAo12.innerHTML = `Best Ao12: ${
-              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12
-                ? tempBestAo12
-                : this.convertTimeToHumanReadableString(0)
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12 ? tempBestAo12 : this.convertTimeToHumanReadableString(0)
             }`;
             this.timerHistoryHTMLElement.appendChild(bestAo12);
           }
@@ -319,8 +254,7 @@
                 currentDate = Date.now();
                 this.timerCurrentTime = currentDate - startDate;
 
-                this.timerHTMLElement.innerHTML =
-                  this.convertTimeToHumanReadableString(this.timerCurrentTime);
+                this.timerHTMLElement.innerHTML = this.convertTimeToHumanReadableString(this.timerCurrentTime);
                 await sleep(1);
               }
             }
@@ -334,17 +268,14 @@
               this.timerCurrentTime = 0;
             }
 
-            this.timerHTMLElement.innerHTML =
-              this.convertTimeToHumanReadableString(this.timerCurrentTime);
+            this.timerHTMLElement.innerHTML = this.convertTimeToHumanReadableString(this.timerCurrentTime);
           }
 
           resetTimerHistory(event) {
             if (event) event.preventDefault();
 
             this.resetTimer();
-            this.timerHistory = JSON.parse(
-              JSON.stringify(TIMER_HISTORY_TEMPLATE)
-            );
+            this.timerHistory = JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
 
             this.saveTimerHistoryToLocalStorage();
             this.rerenderTimerHistoryHTMLElements();
@@ -370,8 +301,7 @@
                 <hr />
                 <br />
 
-                <input type="submit" value="Scramble" onclick="${() =>
-                  this.updateScrambleAndCross()}" />
+                <input type="submit" value="Scramble" onclick="${() => this.updateScrambleAndCross()}" />
                 ${this.scrambleHTMLElement}
                 ${this.crossHTMLElement}
                 ${this.crossColorHTMLElement}
@@ -384,12 +314,9 @@
                   the timer.
                 </p>
 
-                <input type="submit" value="Start/Stop Timer" onclick="${() =>
-                  this.toggleTimerRunningState()}" class="button-row" />
-                <input type="submit" value="Reset Timer" onclick="${() =>
-                  this.resetTimer()}" class="button-row" />
-                <input type="submit" value="Reset Timer History" onclick="${() =>
-                  this.resetTimerHistory()}" class="button-row" />
+                <input type="submit" value="Start/Stop Timer" onclick="${() => this.toggleTimerRunningState()}" class="button-row" />
+                <input type="submit" value="Reset Timer" onclick="${() => this.resetTimer()}" class="button-row" />
+                <input type="submit" value="Reset Timer History" onclick="${() => this.resetTimerHistory()}" class="button-row" />
 
                 ${this.timerHTMLElement}
                 ${this.timerHistoryHTMLElement}

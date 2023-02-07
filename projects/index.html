@@ -39,12 +39,7 @@
         <h2><a href="#projects">Projects</a></h2>
         <hr />
 
-        <input
-          type="text"
-          id="link-table-filter"
-          placeholder="Filter Projects..."
-          hidden
-        />
+        <input type="text" id="link-table-filter" placeholder="Filter Projects..." hidden />
 
         <table id="link-table">
           <tbody>
@@ -68,17 +63,13 @@
 
             <tr>
               <td>
-                <a href="/projects/browser-cryptography"
-                  >Browser Cryptography</a
-                >
+                <a href="/projects/browser-cryptography">Browser Cryptography</a>
               </td>
             </tr>
 
             <tr>
               <td>
-                <a href="/projects/simple-particle-interactions"
-                  >Simple Particle Interactions</a
-                >
+                <a href="/projects/simple-particle-interactions">Simple Particle Interactions</a>
               </td>
             </tr>
 
@@ -90,49 +81,37 @@
 
             <tr>
               <td>
-                <a href="/projects/side-notes"
-                  >Side Notes (Note-Taking Web App)</a
-                >
+                <a href="/projects/side-notes">Side Notes (Note-Taking Web App)</a>
               </td>
             </tr>
 
             <tr>
               <td>
-                <a href="/projects/password-generator"
-                  >Client-Only Password Generator</a
-                >
+                <a href="/projects/password-generator">Client-Only Password Generator</a>
               </td>
             </tr>
 
             <tr hidden>
               <td>
-                <a href="/projects/desktop-environment"
-                  >Desktop Environment (Webtop)</a
-                >
+                <a href="/projects/desktop-environment">Desktop Environment (Webtop)</a>
               </td>
             </tr>
 
             <tr hidden>
               <td>
-                <a href="/projects/tabbed-router-ui-demo"
-                  >Tabbed Router UI Demo (Torus)</a
-                >
+                <a href="/projects/tabbed-router-ui-demo">Tabbed Router UI Demo (Torus)</a>
               </td>
             </tr>
 
             <tr hidden>
               <td>
-                <a href="/projects/graphing-calculator"
-                  >Graphing Calculator (Torus)</a
-                >
+                <a href="/projects/graphing-calculator">Graphing Calculator (Torus)</a>
               </td>
             </tr>
 
             <tr hidden>
               <td>
-                <a href="/projects/game-of-life"
-                  >Conway's Game of Life (Torus)</a
-                >
+                <a href="/projects/game-of-life">Conway's Game of Life (Torus)</a>
               </td>
             </tr>
 
@@ -156,9 +135,7 @@
           const rows = tbody.getElementsByTagName("tr");
 
           Array.from(rows).forEach((element) => {
-            const content = element
-              .getElementsByTagName("td")[0]
-              .getElementsByTagName("a")[0];
+            const content = element.getElementsByTagName("td")[0].getElementsByTagName("a")[0];
 
             if (element.hidden) {
               content.innerHTML = "Hidden: " + content.innerHTML;
@@ -175,10 +152,7 @@
           let disabledCounter = 0;
 
           Array.from(rows).forEach((element) => {
-            const title = element
-              .getElementsByTagName("td")[0]
-              .getElementsByTagName("a")[0]
-              .innerHTML.toUpperCase();
+            const title = element.getElementsByTagName("td")[0].getElementsByTagName("a")[0].innerHTML.toUpperCase();
 
             if (title.includes(filter)) {
               element.hidden = false;
@@ -210,9 +184,7 @@
         handleInput();
 
         // Run on every input event
-        document
-          .getElementById("link-table-filter")
-          .addEventListener("input", handleInput);
+        document.getElementById("link-table-filter").addEventListener("input", handleInput);
       })();
     </script>
   </body>

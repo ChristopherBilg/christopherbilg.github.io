@@ -14,9 +14,7 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -24,33 +22,22 @@
       <h1>JS Web Components</h1>
 
       <p>
-        This project (<b>JS Web Components</b>) is an exploratory space designed
-        for me, Chris Bilger, to learn about
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/Web_Components"
-          target="_blank"
-          class="external-link"
+        This project (<b>JS Web Components</b>) is an exploratory space designed for me, Chris Bilger, to learn about
+        <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components" target="_blank" class="external-link"
           >JavaScript Web Components</a
-        >. These have been on my radar for months and months by the time of this
-        projects creation; however, I didn't think much of them until GitHub
-        converted their entire frontend stack from a JS UI Framework to JS Web
-        Components.
+        >. These have been on my radar for months and months by the time of this projects creation; however, I didn't think much of them
+        until GitHub converted their entire frontend stack from a JS UI Framework to JS Web Components.
       </p>
 
-      <p>
-        Below I am going to attach some simple web components onto the DOM and
-        they should, hopefully, display properly.
-      </p>
+      <p>Below I am going to attach some simple web components onto the DOM and they should, hopefully, display properly.</p>
 
       <one-dialog>
         <span slot="heading">Web Component Heading</span>
         <div>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Cursus
-            risus at ultrices mi tempus imperdiet nulla. Sodales ut eu sem
-            integer vitae justo eget magna. Purus sit amet luctus venenatis
-            lectus magna fringilla urna porttitor.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+            Cursus risus at ultrices mi tempus imperdiet nulla. Sodales ut eu sem integer vitae justo eget magna. Purus sit amet luctus
+            venenatis lectus magna fringilla urna porttitor.
           </p>
         </div>
       </one-dialog>
@@ -62,11 +49,7 @@
       // Arlo is not used in this project because this project is used for
       // exploring JavaScript Web Components
 
-      import {
-        LitElement,
-        html,
-        css,
-      } from "https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module";
+      import { LitElement, html, css } from "https://unpkg.com/@polymer/lit-element@latest/lit-element.js?module";
 
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
@@ -139,20 +122,10 @@
           }
 
           render() {
-            return html` <div
-              class="wrapper ${this.open ? "open" : ""}"
-              aria-hidden="${!this.open}"
-            >
+            return html` <div class="wrapper ${this.open ? "open" : ""}" aria-hidden="${!this.open}">
               <div class="overlay" @click="${this.close}"></div>
-              <div
-                class="dialog"
-                role="dialog"
-                aria-labelledby="title"
-                aria-describedby="content"
-              >
-                <button class="close" aria-label="Close" @click=${this.close}>
-                  ✖️
-                </button>
+              <div class="dialog" role="dialog" aria-labelledby="title" aria-describedby="content">
+                <button class="close" aria-label="Close" @click=${this.close}>✖️</button>
                 <h1 id="title"><slot name="heading"></slot></h1>
                 <div id="content" class="content">
                   <slot></slot>
@@ -175,9 +148,7 @@
               }
               document.addEventListener("keydown", this._watchEscape);
             } else {
-              this._wasFocused &&
-                this._wasFocused.focus &&
-                this._wasFocused.focus();
+              this._wasFocused && this._wasFocused.focus && this._wasFocused.focus();
               document.removeEventListener("keydown", this._watchEscape);
             }
           }

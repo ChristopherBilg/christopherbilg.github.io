@@ -12,9 +12,7 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <script type="module">
       import * as Arlo from "../../js/arlo/index.js";
@@ -27,16 +25,7 @@
 
       //> A swatch of colors with enough contrast to be used for graphs and
       //  graph panels in the overlay sidebar.
-      const COLORS = [
-        "#e05252",
-        "#685ebb",
-        "#649c41",
-        "#ab589d",
-        "#d08b36",
-        "#209e9e",
-        "#726f84",
-        "#58384e",
-      ];
+      const COLORS = ["#e05252", "#685ebb", "#649c41", "#ab589d", "#d08b36", "#209e9e", "#726f84", "#58384e"];
       //> We select colors by just cycling through the list, starting with the 0th one.
       let colorIdx = -1;
 
@@ -155,10 +144,7 @@
           //> We make the substitutions for things like `sin(x) -> Math.sin(x)` so the JavaScript
           //  engine can run it like normal JS functions.
           for (const [regex, sub] of Object.entries(NOTATION_SUBSTITUTES)) {
-            substitutedText = substitutedText.replace(
-              new RegExp(regex, "g"),
-              sub
-            );
+            substitutedText = substitutedText.replace(new RegExp(regex, "g"), sub);
           }
           try {
             //> We try to construct a function that computes the given operation, as a
@@ -186,10 +172,7 @@
           this.graphProps = graphProps;
 
           //> We create a new list view to hold panels of function controls.
-          this.functionList = new FunctionList(
-            this.functionStore,
-            functionStore
-          );
+          this.functionList = new FunctionList(this.functionStore, functionStore);
 
           //> There are a bunch of methods here that we need to bind, so we can call them
           //  as event listeners in our render step.
@@ -568,24 +551,16 @@
         }
 
         compose(props) {
-          return vdom`<div class="panel functionPanel ${
-            props.hidden ? "hidden" : ""
-          }">
+          return vdom`<div class="panel functionPanel ${props.hidden ? "hidden" : ""}">
             <div class="inputArea">
                 <div class="yPrefix">y =</div>
-                <input type="text" value="${props.text}" onblur="${
-            this.updateFunctionText
-          }"
-                    onkeyup="${
-                      this.keyUp
-                    }" placeholder="log(), sqrt(), abs(), trig supported"
+                <input type="text" value="${props.text}" onblur="${this.updateFunctionText}"
+                    onkeyup="${this.keyUp}" placeholder="log(), sqrt(), abs(), trig supported"
                     class="${props.invalid ? "invalid" : ""}" />
             </div>
             <div class="buttonArea">
                 <button onclick="${this.removeCallback}">Delete</button>
-                <button onclick="${this.toggleHidden}">${
-            props.hidden ? "🙈 Show" : "👀 Hide"
-          }</button>
+                <button onclick="${this.toggleHidden}">${props.hidden ? "🙈 Show" : "👀 Hide"}</button>
                 <button onclick="${this.duplicate}">Duplicate</button>
                 <button onclick="${this.updateColor}">🎨 Color</button>
             </div>
@@ -650,8 +625,7 @@
             const graphPropsSummary = this.graphProps.summarize();
 
             //> Destructure properties from graphProps
-            const { centerX, centerY, zoom, resolution, detectAsymptotes } =
-              graphPropsSummary;
+            const { centerX, centerY, zoom, resolution, detectAsymptotes } = graphPropsSummary;
             const centerXScreen = width / 2;
             const centerYScreen = height / 2;
             //> These values represent min/max values _on the graph_, and help us
@@ -695,11 +669,7 @@
                 const diff = y - lastY;
                 const diffSign = y * lastY < 0;
                 lastY = y;
-                if (
-                  detectAsymptotes &&
-                  Math.abs(diff * zoom) > height &&
-                  diffSign
-                ) {
+                if (detectAsymptotes && Math.abs(diff * zoom) > height && diffSign) {
                   //> If there is an asymptote as we've defined it, don't connect from
                   //  the previous point; just go to a new point.
                   ctx.moveTo(xToCoord(x), yToCoord(clamp(y, minY, maxY)));
@@ -737,10 +707,7 @@
 
           //> Given a collection of functions, create a list of views that
           //  each render their function to their own canvas.
-          this.functionGraphs = new GraphCollection(
-            functionStore,
-            this.graphProps
-          );
+          this.functionGraphs = new GraphCollection(functionStore, this.graphProps);
 
           //> We bind `redraw` a bit differently than normal here because we want to be
           //  efficient about when we re-render the entire graph from scratch. We really
@@ -1005,8 +972,7 @@
 
         styles() {
           return {
-            "font-family":
-              '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+            "font-family": '-apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
             footer: {
               position: "fixed",
               right: "0",

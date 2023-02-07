@@ -14,19 +14,14 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">
-      Please enable JavaScript in order to view this webpage.
-    </noscript>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>Client-Only Password Generator</h1>
 
-      <p>
-        No data/information/values/etc. is sent away from your local browser
-        instance.
-      </p>
+      <p>No data/information/values/etc. is sent away from your local browser instance.</p>
 
       <h2>Include the following character sets:</h2>
     </main>
@@ -51,23 +46,16 @@
 
           generatePasswords() {
             // Clear the current password list
-            const listHTMLElement = document.getElementById(
-              "generated-password-list"
-            );
+            const listHTMLElement = document.getElementById("generated-password-list");
             listHTMLElement.innerHTML = "";
 
             // Get the form values
-            const lowercaseAlphabet =
-              document.getElementById("lowercase-alphabet").checked;
-            const uppercaseAlphabet =
-              document.getElementById("uppercase-alphabet").checked;
+            const lowercaseAlphabet = document.getElementById("lowercase-alphabet").checked;
+            const uppercaseAlphabet = document.getElementById("uppercase-alphabet").checked;
             const numbers = document.getElementById("numbers").checked;
-            const specialCharacters =
-              document.getElementById("special-characters").checked;
-            const passwordLength =
-              document.getElementById("password-length").value;
-            const passwordCount =
-              document.getElementById("password-count").value;
+            const specialCharacters = document.getElementById("special-characters").checked;
+            const passwordLength = document.getElementById("password-length").value;
+            const passwordCount = document.getElementById("password-count").value;
 
             // Build the overall useable character list
             let characterList = "";
@@ -80,9 +68,7 @@
               let password = "";
 
               for (let _ = 0; _ < passwordLength; _++) {
-                const c = characterList.charAt(
-                  Math.floor(Math.random() * characterList.length)
-                );
+                const c = characterList.charAt(Math.floor(Math.random() * characterList.length));
 
                 password += c;
               }
