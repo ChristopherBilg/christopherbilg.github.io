@@ -65,6 +65,10 @@ abbr[title]:after {
   }
 }
 
+ol {
+  padding-inline-start: 1rem;
+}
+
 /* IDs */
 #header-image {
   border-radius: 2rem;
@@ -159,11 +163,11 @@ abbr[title]:after {
 
 .typewriter h1 {
   overflow: hidden;
+  white-space: nowrap;
   border-right: 0.3rem solid black;
   padding-right: 0.3rem;
-  white-space: nowrap;
   margin: 1.34rem auto;
-  animation: typing 2s steps(30, end), blink-caret 0.75s step-end infinite;
+  animation: typing 1.2s steps(20, end), blink-caret 0.75s step-end infinite;
 }
 
 @keyframes typing {
