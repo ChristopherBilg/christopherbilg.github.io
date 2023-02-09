@@ -48,7 +48,11 @@
         setInterval(() => {
           navigator.clipboard
             .readText()
-            .then((clipText) => (document.querySelector("#clipboard-contents").innerText = clipText || "No clipboard contents found."))
+            .then(
+              (clipText) =>
+                (document.querySelector("#clipboard-contents").innerText =
+                  clipText || "No clipboard contents found or clipboard contains non-text contents.")
+            )
             .catch(() => {});
         }, 250);
       })();
