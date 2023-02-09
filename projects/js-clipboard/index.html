@@ -16,25 +16,41 @@
   <body>
     <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
 
-    <div id="yellow-banner">WORK IN PROGRESS</div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Clipboard</h1>
 
-      <p>Description...</p>
+      <p>
+        The <b>JavaScript Clipboard API</b> is a tool for web developers that allows them to access and interact with the clipboard of a
+        user's device. This can include copying and pasting text, images, or other data to and from the clipboard.
+      </p>
+
+      <p>
+        Imagine you have some text on a web page that you want to quickly copy to your computer's clipboard so you can paste it into another
+        document. Normally, you would have to right-click the text and select "copy" from the menu. However, with the Clipboard API, a web
+        developer can add a button to their page that, when clicked, automatically copies the text to your clipboard.
+      </p>
+
+      <h2>Current Clipboard Contents:</h2>
+
+      <p id="clipboard-contents" style="color: rgb(136, 6, 6)">Please enable Clipboard access in order to view this project completely.</p>
     </main>
 
     <script type="module">
-      import * as Arlo from "../../js/arlo/index.js";
-
-      for (const exportedName in Arlo) {
-        window[exportedName] = Arlo[exportedName];
-      }
+      // Arlo is not used in this project because this project is too simple to justify it
 
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
+
+        const domElement = document.querySelector("#clipboard-contents");
+
+        setInterval(() => {
+          navigator.clipboard
+            .readText()
+            .then((clipText) => (document.querySelector("#clipboard-contents").innerText = clipText || "No clipboard contents found."))
+            .catch(() => {});
+        }, 250);
       })();
     </script>
   </body>
