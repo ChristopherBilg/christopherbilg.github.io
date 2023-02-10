@@ -46,6 +46,41 @@
 
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends Component {
+          init() {
+            this.response = { data: {} };
+            fetch("https://beta.pokeapi.co/graphql/v1beta", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query: `query QUERY_NAME {
+                  pokemon_v2_ability {
+                    id,
+                    name
+                  }
+                }`,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                this.response = data;
+                this.render();
+              })
+              .catch(() => {});
+          }
+
+          compose() {
+            return vdom`
+              <pre>${JSON.stringify(this.response, undefined, 2)}</pre>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
       })();
     </script>
   </body>
