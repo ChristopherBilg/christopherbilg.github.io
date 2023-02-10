@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Blog" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>PokeAPI - GraphQL</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
+
+    <div id="yellow-banner">WORK IN PROGRESS</div>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>PokeAPI - GraphQL</h1>
+
+      <p>
+        The <b>PokeAPI</b> is a RESTful API (and soon-to-be GraphQL API) that provides access to information about the Pokémon universe,
+        including Pokémon species, abilities, moves, and more. It was created as a project by the community for the community and is open
+        for anyone to use.
+      </p>
+
+      <p>
+        The PokeAPI provides a wealth of information for Pokémon fans and developers alike, allowing them to access data in a convenient and
+        standardized format. With the PokeAPI, you can retrieve information about specific Pokémon, such as their height, weight, types, and
+        abilities. You can also retrieve information about moves, abilities, and other game mechanics, making it a valuable resource for
+        developing Pokémon-related projects and applications.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+      })();
+    </script>
+  </body>
+</html>
