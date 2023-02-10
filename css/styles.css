@@ -102,7 +102,7 @@ ol {
 #yellow-banner {
   width: 100%;
   text-align: center;
-  padding: 1rem;
+  padding: 1rem 0;
   background-color: yellow;
   font-size: 2rem;
   font-weight: bold;
