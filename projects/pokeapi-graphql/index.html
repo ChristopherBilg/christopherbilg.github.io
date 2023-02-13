@@ -70,7 +70,14 @@
           }
 
           capitalizeFirstLetter(string) {
-            return string.charAt(0).toUpperCase() + string.slice(1);
+            return string
+              .split("-")
+              .map((substring) =>
+                ["M", "F"].includes(substring.toUpperCase())
+                  ? `(${substring.charAt(0).toUpperCase()})`
+                  : substring.charAt(0).toUpperCase() + substring.slice(1)
+              )
+              .join(" ");
           }
 
           styles() {
