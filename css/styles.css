@@ -140,12 +140,12 @@ ol {
   color: #800000;
 }
 
-.soma-notes {
-  color: #4834b3;
-}
-
 .another-professional-experience {
   color: #800080;
+}
+
+.yet-another-professional-experience {
+  color: #4834b3;
 }
 
 .external-link::after {
