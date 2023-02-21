@@ -6,40 +6,93 @@
     <meta name="keywords" content="Resume, Portfolio, Personal, Blog" />
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
 
-    <title>Victoria Bilger | Homepage</title>
+    <title>Victoria Bilger | Love Letters</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../css/styles.css" />
   </head>
 
   <body>
+    <noscript id="full-screen-noscript-message"> Please enable JavaScript in order to view this webpage. </noscript>
+
+    <div id="yellow-banner">WORK IN PROGRESS</div>
+
     <header>
       <div class="typewriter">
-        <h1>Victoria Bilger | Homepage</h1>
+        <h1>Victoria Bilger | Love Letters</h1>
       </div>
     </header>
 
-    <main>
-      <section>
-        <hr id="what-is-this" />
-        <h2><a href="#what-is-this">What is this?</a></h2>
-        <hr />
-
-        <p>
-          This is a temporary landing page for the
-          <a href="https://victoriabilger.com/" target="_blank" class="external-link">victoriabilger.com</a>
-          domain. For now, you can safely ignore this page and carry on with your day.
-        </p>
-      </section>
-    </main>
+    <main></main>
 
     <footer>
       <hr />
 
       <section>
-        <h3>Temporary homepage for Victoria Bilger.</h3>
+        <h3>Love letters written to my wife, Victoria Bilger. For her eyes only.</h3>
       </section>
     </footer>
+
+    <script type="module">
+      import * as Arlo from "../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        class App extends StyledComponent {
+          init() {
+            this.loveLetters = [
+              {
+                publishDate: "1970-01-01",
+                prettyDate: "January 1st, 1970",
+                title: "Love Letter #1",
+                body: ["Paragraph 1", "Paragraph 2", "Paragraph 3"],
+              },
+            ];
+          }
+
+          styles() {
+            return css`
+              section {
+                margin-bottom: 2rem;
+
+                p.date {
+                  font-weight: bold;
+                }
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                ${this.loveLetters
+                  .sort((a, b) => (a.publishDate < b.publishDate ? 1 : -1))
+                  .map(
+                    (letter) => vdom`
+                      <section>
+                        <hr id="${letter.publishDate}" />
+                        <h2><a href="#${letter.publishDate}">${letter.title}</a></h2>
+                        <hr />
+
+                        <p class="date">${letter.prettyDate}</p>
+
+                        ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
+                      </section>
+                    `
+                  )}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
   </body>
 </html>
