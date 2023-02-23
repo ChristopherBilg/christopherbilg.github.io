@@ -140,23 +140,23 @@ ol {
   color: #800000;
 }
 
-.another-professional-experience {
-  color: #800080;
+.for-future-you {
+  color: #4834b3;
 }
 
-.yet-another-professional-experience {
-  color: #4834b3;
+.another-professional-experience {
+  color: #800080;
 }
 
 .external-link::after {
   content: " \2197";
 }
 
-.certification-title {
+.certification-and-course-title {
   font-size: 1.2rem;
 }
 
-.certification-date {
+.certification-and-course-date {
   color: #767676;
 }
 
