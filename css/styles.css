@@ -69,6 +69,10 @@ ol {
   padding-inline-start: 1rem;
 }
 
+a[target="_blank"]::after {
+  content: " \2197";
+}
+
 /* IDs */
 #header-image {
   border-radius: 2rem;
@@ -140,16 +144,12 @@ ol {
   color: #800000;
 }
 
-.for-future-you {
-  color: #4834b3;
-}
-
-.another-professional-experience {
+.talkiatry {
   color: #800080;
 }
 
-.external-link::after {
-  content: " \2197";
+.for-future-you {
+  color: #4834b3;
 }
 
 .certification-and-course-title {
