@@ -6,4 +6,4 @@ Christopher Bilger's Portfolio
 
 - Update resume and upload new version to this repo.
 - Update LinkedIn with old position timeline and new position timeline
-- Update GitHub profile for "Senior" level?
+- Update GitHub profile for "Senior" level
