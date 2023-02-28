@@ -1,4 +1,4 @@
-import { normalizeArray, isObject } from "./common.js";
+import { isObject, normalizeArray } from "./common.js";
 import { Component } from "./component.js";
 
 // We keep track of unique class names already injected into the
