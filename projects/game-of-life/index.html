@@ -279,7 +279,13 @@
               const remainder = (i + 1) % xCount;
 
               ctx.beginPath();
-              ctx.arc((remainder - 1) * CELL_SIZE + HALFCELL, ((i - remainder + 1) / xCount) * CELL_SIZE + HALFCELL, CELL_RADIUS, 0, TAU);
+              ctx.arc(
+                (remainder - 1) * CELL_SIZE + HALFCELL,
+                ((i - remainder + 1) / xCount) * CELL_SIZE + HALFCELL,
+                CELL_RADIUS,
+                0,
+                TAU
+              );
               ctx.fill();
             }
           }

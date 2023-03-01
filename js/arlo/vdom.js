@@ -505,7 +505,9 @@ export const vdom = (tplParts, ...dynamicParts) => {
     return VDOM_CACHE.get(cacheKey)(dynamicParts);
   } catch (e) {
     console.error(
-      `vdom parse error.\ncheck for mismatched brackets, tags, quotes.\n${interpolate(tplParts, dynamicParts)}\n${e.stack || e}`
+      `vdom parse error.\ncheck for mismatched brackets, tags, quotes.\n${interpolate(tplParts, dynamicParts)}\n${
+        e.stack || e
+      }`
     );
     return "";
   }
