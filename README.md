@@ -6,3 +6,4 @@ Christopher Bilger's Portfolio
 
 - Update LinkedIn with old position timeline and new position timeline
 - Update GitHub profile for "Senior" level
+- Reset this repo's commit history (master branch)
