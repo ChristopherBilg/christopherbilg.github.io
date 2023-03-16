@@ -14,3 +14,5 @@ Christopher Bilger's Portfolio
 - Anything to do with leaving Lockheed:
   - Contact DCSA about not requiring clearance anymore
   - Transfer 401k
+- Update all relevant dates for leaving/joining Lockheed/Talkiatry respectively
+- Update index.html if anything is different between L2-2 and L2-1
