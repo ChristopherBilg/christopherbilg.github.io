@@ -2,16 +2,19 @@
 
 Christopher Bilger's Portfolio
 
-## TODO
+## TODO - Talkiatry
 
+- ~~Update GitHub profile for "Senior" level~~
 - Update LinkedIn with old position timeline and new position timeline
-- Update LinkedIn Secret clearance end-date
 - Update Linkedin Headline
 - Update LinkedIn Bio
-- Update GitHub profile for "Senior" level
-- Reset this repo's commit history (master branch)
-- Update Sceret clearance date on this website
-- Anything to do with leaving Lockheed:
-  - Contact DCSA about not requiring clearance anymore
-  - Transfer 401k
+- Update Secret clearance date everywhere
+- Transfer 401k
 - Update all relevant dates for leaving/joining Lockheed/Talkiatry respectively
+- Reset this repo's commit history (master branch)
+- Make this repo public then cancel GitHub Pro
+
+## TODO - Other
+
+- `victoriabilger.com`: Love Letters
+- `charlottebilger.com`: Love Letters

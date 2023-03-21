@@ -12,4 +12,4 @@ import { Store, StoreOf } from "./store.js";
 import { Styled, StyledComponent } from "./styled.js";
 import { vdom } from "./vdom.js";
 
-export { Component, css, List, ListOf, Record, Router, Store, StoreOf, Styled, StyledComponent, vdom };
+export { Component, List, ListOf, Record, Router, Store, StoreOf, Styled, StyledComponent, css, vdom };
