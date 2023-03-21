@@ -4,16 +4,14 @@ Christopher Bilger's Portfolio
 
 ## TODO - Talkiatry
 
-- ~~Update GitHub profile for "Senior" level~~
 - Update LinkedIn with old position timeline and new position timeline
 - Update Linkedin Headline
 - Update LinkedIn Bio
-- Update Secret clearance date everywhere
-- Transfer 401k
-- Update all relevant dates for leaving/joining Lockheed/Talkiatry respectively
-- Reset this repo's commit history (master branch)
+- Update all relevant dates for leaving Lockheed and joining Talkiatry
+- Merge this branch into `master`; squashing all commits into one
 
-## TODO - Other
+## TODO
 
 - `victoriabilger.com`: Love Letters
 - `charlottebilger.com`: Love Letters
+- Transfer 401k

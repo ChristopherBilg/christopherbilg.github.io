@@ -12,7 +12,8 @@
   --color-text: #000;
   --color-text-secondary: #767676;
 
-  --mono-font-family: "Courier New", Courier, monospace;
+  --mono-font-family: "Nimbus Mono PS", "Courier New", "Cutive Mono", monospace;
+  --handwritten-font-family: "Segoe Print", "Bradley Hand", Chilanka, TSCu_Comic, casual, cursive;
 }
 
 /* General Elements */

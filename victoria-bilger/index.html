@@ -44,19 +44,22 @@
           init() {
             this.letters = [
               {
-                title: "Letter 1",
-                date: "Date 1",
-                body: ["Body paragraph 1-1", "Body paragraph 1-2", "Body paragraph 1-3"],
+                title: "Example Letter Title 1",
+                date: "19700101",
+                prettyDate: "January 1st, 1970",
+                body: ["Example body paragraph 1-1", "Example body paragraph 1-2", "Example body paragraph 1-3"],
               },
               {
-                title: "Letter 2",
-                date: "Date 2",
-                body: ["Body paragraph 2-1", "Body paragraph 2-2", "Body paragraph 2-3"],
+                title: "Example Letter Title 2",
+                date: "19700102",
+                prettyDate: "January 2nd, 1970",
+                body: ["Example body paragraph 2-1", "Example body paragraph 2-2", "Example body paragraph 2-3"],
               },
               {
-                title: "Letter 3",
-                date: "Date 3",
-                body: ["Body paragraph 3-1", "Body paragraph 3-2", "Body paragraph 3-3"],
+                title: "Example Letter Title 3",
+                date: "19700103",
+                prettyDate: "January 3rd, 1970",
+                body: ["Example body paragraph 3-1", "Example body paragraph 3-2", "Example body paragraph 3-3"],
               },
             ];
           }
@@ -64,8 +67,12 @@
           styles() {
             return css`
               div {
-                display: flex;
-                justify-content: space-between;
+                font-family: var(--handwritten-font-family);
+
+                div {
+                  display: flex;
+                  justify-content: space-between;
+                }
               }
             `;
           }
@@ -74,17 +81,19 @@
             return vdom`
               <div>
                 ${this.letters
-                  .sort((a, b) => a.date < b.date)
+                  .sort((a, b) => (a.date > b.date ? -1 : 1))
                   .map(
                     (letter, index) => vdom`
                       <div>
-                        <h2>${letter.title}</h2>
-                        <h3>${letter.date}</h3>
+                        <hr />
+
+                        <div>
+                          <h2>${letter.title}</h2>
+                          <h3>${letter.prettyDate}</h3>
+                        </div>
+
+                        ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
                       </div>
-
-                      ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
-
-                      ${index < this.letters.length - 1 ? vdom`<hr />` : ""}
                     `
                   )}
               </div>
