@@ -12,7 +12,6 @@ Christopher Bilger's Portfolio
 - Transfer 401k
 - Update all relevant dates for leaving/joining Lockheed/Talkiatry respectively
 - Reset this repo's commit history (master branch)
-- Make this repo public then cancel GitHub Pro
 
 ## TODO - Other
 

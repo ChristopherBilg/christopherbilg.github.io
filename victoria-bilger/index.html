@@ -7,7 +7,7 @@
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Victoria Bilger | Homepage</title>
+    <title>Victoria Bilger | Love Letters</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../css/styles.css" />
@@ -16,30 +16,85 @@
   <body>
     <header>
       <div class="typewriter">
-        <h1>Victoria Bilger | Homepage</h1>
+        <h1>Victoria Bilger | Love Letters</h1>
       </div>
     </header>
 
-    <main>
-      <section>
-        <hr id="what-is-this" />
-        <h2><a href="#what-is-this">What is this?</a></h2>
-        <hr />
-
-        <p>
-          This is a temporary landing page for the
-          <a href="https://victoriabilger.com/" target="_blank">victoriabilger.com</a>
-          domain. For now, you can safely ignore this page and carry on with your day.
-        </p>
-      </section>
-    </main>
+    <main hidden></main>
 
     <footer>
       <hr />
 
       <section>
-        <h3>Temporary homepage for Victoria Bilger.</h3>
+        <h3>Love letters for Victoria Bilger's eyes only.</h3>
       </section>
     </footer>
+
+    <script type="module">
+      import * as Arlo from "../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {
+            this.letters = [
+              {
+                title: "Letter 1",
+                date: "Date 1",
+                body: ["Body paragraph 1-1", "Body paragraph 1-2", "Body paragraph 1-3"],
+              },
+              {
+                title: "Letter 2",
+                date: "Date 2",
+                body: ["Body paragraph 2-1", "Body paragraph 2-2", "Body paragraph 2-3"],
+              },
+              {
+                title: "Letter 3",
+                date: "Date 3",
+                body: ["Body paragraph 3-1", "Body paragraph 3-2", "Body paragraph 3-3"],
+              },
+            ];
+          }
+
+          styles() {
+            return css`
+              div {
+                display: flex;
+                justify-content: space-between;
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                ${this.letters
+                  .sort((a, b) => a.date < b.date)
+                  .map(
+                    (letter, index) => vdom`
+                      <div>
+                        <h2>${letter.title}</h2>
+                        <h3>${letter.date}</h3>
+                      </div>
+
+                      ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
+
+                      ${index < this.letters.length - 1 ? vdom`<hr />` : ""}
+                    `
+                  )}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
   </body>
 </html>
