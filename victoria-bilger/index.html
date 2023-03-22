@@ -30,6 +30,7 @@
       </section>
     </footer>
 
+    <script type="text/javascript" src="../js/crypto-js-4.1.1/index.js"></script>
     <script type="module">
       import * as Arlo from "../js/arlo/index.js";
 
@@ -42,26 +43,23 @@
 
         class App extends StyledComponent {
           init() {
-            this.letters = [
-              {
-                title: "Example Letter Title 1",
-                date: "19700101",
-                prettyDate: "January 1st, 1970",
-                body: ["Example body paragraph 1-1", "Example body paragraph 1-2", "Example body paragraph 1-3"],
-              },
-              {
-                title: "Example Letter Title 2",
-                date: "19700102",
-                prettyDate: "January 2nd, 1970",
-                body: ["Example body paragraph 2-1", "Example body paragraph 2-2", "Example body paragraph 2-3"],
-              },
-              {
-                title: "Example Letter Title 3",
-                date: "19700103",
-                prettyDate: "January 3rd, 1970",
-                body: ["Example body paragraph 3-1", "Example body paragraph 3-2", "Example body paragraph 3-3"],
-              },
-            ];
+            this.password = prompt("What is the password?");
+
+            // this.plainTextLetters = [];
+            // this.encrypted = CryptoJS.AES.encrypt(JSON.stringify(this.plainTextLetters), this.password).toString();
+            // console.log("Encrypted Data:", this.encrypted);
+
+            this.cipherTextLetters =
+              "U2FsdGVkX1/Hb8SyUNAIdiod1GdzMdC6INxqKzurUOmS31FFH6z1tB8OR2QBnAUePdSuD/jyIRMqGpwSsvzDV75IJxoBV8xNDj7GpmKFTVzJ+SW+M/0k32G0tQf4NOlwhoW3MZ4bUv4ZRFHz0ePL1CM52eqhpX8YwmcUIZi5kV71Mm6cL3gpRzzt0qbdfSLJ0VS1mK2M+BPYZKV1Ad4FGs871w354DZkw+0B6XxfOQ3nzcJl7IKl8bPeK9JqC0vZIm0s3Q2pR2H/erSW5w7VtbwXZL9dlhVElYSCE6wLy3hUqdmHzvwgciBJXsP212wpkuHCd0Mc9OwSxmp1ohIHzcDnIgukL7zDho3N55AqzvzWnBQoSZudF08n7Xk44KmXy/svvTWR5JEzrIJxnDFzijP/IE6BXfemF3ofVEKn58uN5SQmZXkmP86BwMfiG7Gu3Qgx43xF/SuxjmFZmX059meQkhOW0TDfBwd1icW6VFIIB21QtUw1MQahFruCnYYit/20IsJ5u1aeLv3kbUNVAdkgG7rBAI2ofnWAn5g5yCSM9QppbHLWOOpQY9qmEamB2dZeyq+uxSAWW2fAgifhq6UPw35D07Gaag3sFlTbUyj/C8WxjE3rxCIAoslwTA0rUmetLLvqQw4RuWDo4Fp130Q/MZVlKRzUZBbZePfvMqQgi6qdPKqtWLENT4MZv/QE2Fqc5Fu6TTR7NJdaP8YuMRO250cKusDacZsUyFoZWUS+bhKHZAhwpAQ949I2BgV7";
+            this.decrypted = [];
+            try {
+              this.decrypted = JSON.parse(
+                CryptoJS.AES.decrypt(this.cipherTextLetters, this.password).toString(CryptoJS.enc.Utf8)
+              );
+            } catch (e) {
+              // Do nothing
+            }
+            // console.log("Decrypted Data:", this.decrypted);
           }
 
           styles() {
@@ -80,7 +78,7 @@
           compose() {
             return vdom`
               <div>
-                ${this.letters
+                ${this.decrypted
                   .sort((a, b) => (a.date > b.date ? -1 : 1))
                   .map(
                     (letter, index) => vdom`

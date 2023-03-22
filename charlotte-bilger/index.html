@@ -7,7 +7,7 @@
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Charlotte Bilger | Homepage</title>
+    <title>Charlotte Bilger | Love Letters</title>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../css/styles.css" />
@@ -16,30 +16,92 @@
   <body>
     <header>
       <div class="typewriter">
-        <h1>Charlotte Bilger | Homepage</h1>
+        <h1>Charlotte Bilger | Love Letters</h1>
       </div>
     </header>
 
-    <main>
-      <section>
-        <hr id="what-is-this" />
-        <h2><a href="#what-is-this">What is this?</a></h2>
-        <hr />
-
-        <p>
-          This is a temporary landing page for the
-          <a href="https://charlottebilger.com/" target="_blank">charlottebilger.com</a>
-          domain. For now, you can safely ignore this page and carry on with your day.
-        </p>
-      </section>
-    </main>
+    <main hidden></main>
 
     <footer>
       <hr />
 
       <section>
-        <h3>Temporary homepage for Charlotte Bilger.</h3>
+        <h3>Love letters for Charlotte Bilger's eyes only.</h3>
       </section>
     </footer>
+
+    <script type="text/javascript" src="../js/crypto-js-4.1.1/index.js"></script>
+    <script type="module">
+      import * as Arlo from "../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {
+            this.password = prompt("What is the password?");
+
+            // this.plainTextLetters = [];
+            // this.encrypted = CryptoJS.AES.encrypt(JSON.stringify(this.plainTextLetters), this.password).toString();
+            // console.log("Encrypted Data:", this.encrypted);
+
+            this.cipherTextLetters =
+              "U2FsdGVkX1/Hb8SyUNAIdiod1GdzMdC6INxqKzurUOmS31FFH6z1tB8OR2QBnAUePdSuD/jyIRMqGpwSsvzDV75IJxoBV8xNDj7GpmKFTVzJ+SW+M/0k32G0tQf4NOlwhoW3MZ4bUv4ZRFHz0ePL1CM52eqhpX8YwmcUIZi5kV71Mm6cL3gpRzzt0qbdfSLJ0VS1mK2M+BPYZKV1Ad4FGs871w354DZkw+0B6XxfOQ3nzcJl7IKl8bPeK9JqC0vZIm0s3Q2pR2H/erSW5w7VtbwXZL9dlhVElYSCE6wLy3hUqdmHzvwgciBJXsP212wpkuHCd0Mc9OwSxmp1ohIHzcDnIgukL7zDho3N55AqzvzWnBQoSZudF08n7Xk44KmXy/svvTWR5JEzrIJxnDFzijP/IE6BXfemF3ofVEKn58uN5SQmZXkmP86BwMfiG7Gu3Qgx43xF/SuxjmFZmX059meQkhOW0TDfBwd1icW6VFIIB21QtUw1MQahFruCnYYit/20IsJ5u1aeLv3kbUNVAdkgG7rBAI2ofnWAn5g5yCSM9QppbHLWOOpQY9qmEamB2dZeyq+uxSAWW2fAgifhq6UPw35D07Gaag3sFlTbUyj/C8WxjE3rxCIAoslwTA0rUmetLLvqQw4RuWDo4Fp130Q/MZVlKRzUZBbZePfvMqQgi6qdPKqtWLENT4MZv/QE2Fqc5Fu6TTR7NJdaP8YuMRO250cKusDacZsUyFoZWUS+bhKHZAhwpAQ949I2BgV7";
+            this.decrypted = [];
+            try {
+              this.decrypted = JSON.parse(
+                CryptoJS.AES.decrypt(this.cipherTextLetters, this.password).toString(CryptoJS.enc.Utf8)
+              );
+            } catch (e) {
+              // Do nothing
+            }
+            // console.log("Decrypted Data:", this.decrypted);
+          }
+
+          styles() {
+            return css`
+              div {
+                font-family: var(--handwritten-font-family);
+
+                div {
+                  display: flex;
+                  justify-content: space-between;
+                }
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                ${this.decrypted
+                  .sort((a, b) => (a.date > b.date ? -1 : 1))
+                  .map(
+                    (letter, index) => vdom`
+                      <div>
+                        <hr />
+
+                        <div>
+                          <h2>${letter.title}</h2>
+                          <h3>${letter.prettyDate}</h3>
+                        </div>
+
+                        ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
+                      </div>
+                    `
+                  )}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
   </body>
 </html>
