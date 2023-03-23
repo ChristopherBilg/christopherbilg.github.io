@@ -8,6 +8,10 @@ Christopher Bilger's Portfolio
   - Update to use native JS cryptography libraries: https://github.com/ChristopherBilg/webcrypto-example
 - `charlottebilger.com`: Love Letters
   - Update to use native JS cryptography libraries: https://github.com/ChristopherBilg/webcrypto-example
+- PBKDF2 JS Project for Encrypting/Decrypting Data
+  - This will remove the need to comment/uncomment the Love Letters sites each time a letter change is made
+  - Can probably be a **hidden** project
+- WebAssembly JS Project ???
 
 ## TODO - Talkiatry
 
