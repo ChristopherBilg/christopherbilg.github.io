@@ -30,7 +30,6 @@
       </section>
     </footer>
 
-    <script type="text/javascript" src="../js/crypto-js-4.1.1/index.js"></script>
     <script type="module">
       import * as Arlo from "../js/arlo/index.js";
 
@@ -43,23 +42,102 @@
 
         class App extends StyledComponent {
           init() {
+            this.encoder = new TextEncoder();
+            this.decoder = new TextDecoder();
+
             this.password = prompt("What is the password?");
 
-            // this.plainTextLetters = [];
-            // this.encrypted = CryptoJS.AES.encrypt(JSON.stringify(this.plainTextLetters), this.password).toString();
-            // console.log("Encrypted Data:", this.encrypted);
-
             this.cipherTextLetters =
-              "U2FsdGVkX1/Hb8SyUNAIdiod1GdzMdC6INxqKzurUOmS31FFH6z1tB8OR2QBnAUePdSuD/jyIRMqGpwSsvzDV75IJxoBV8xNDj7GpmKFTVzJ+SW+M/0k32G0tQf4NOlwhoW3MZ4bUv4ZRFHz0ePL1CM52eqhpX8YwmcUIZi5kV71Mm6cL3gpRzzt0qbdfSLJ0VS1mK2M+BPYZKV1Ad4FGs871w354DZkw+0B6XxfOQ3nzcJl7IKl8bPeK9JqC0vZIm0s3Q2pR2H/erSW5w7VtbwXZL9dlhVElYSCE6wLy3hUqdmHzvwgciBJXsP212wpkuHCd0Mc9OwSxmp1ohIHzcDnIgukL7zDho3N55AqzvzWnBQoSZudF08n7Xk44KmXy/svvTWR5JEzrIJxnDFzijP/IE6BXfemF3ofVEKn58uN5SQmZXkmP86BwMfiG7Gu3Qgx43xF/SuxjmFZmX059meQkhOW0TDfBwd1icW6VFIIB21QtUw1MQahFruCnYYit/20IsJ5u1aeLv3kbUNVAdkgG7rBAI2ofnWAn5g5yCSM9QppbHLWOOpQY9qmEamB2dZeyq+uxSAWW2fAgifhq6UPw35D07Gaag3sFlTbUyj/C8WxjE3rxCIAoslwTA0rUmetLLvqQw4RuWDo4Fp130Q/MZVlKRzUZBbZePfvMqQgi6qdPKqtWLENT4MZv/QE2Fqc5Fu6TTR7NJdaP8YuMRO250cKusDacZsUyFoZWUS+bhKHZAhwpAQ949I2BgV7";
+              "6X4JAE9sdHhJ/RCH4iteSBCu0Rbou8S6Jv7A/NC35JqKlb1yZMsJD3x2PoZr15wJf6SoBhrRP/Hf+MHgqKiTw+uw1spQTp35+TeMPp33Fb4ychVrOm1c4mGj8fM/nwKHQBxHxNXJ8Ih6y7OtfboBX252T6K3NyWPEQNwy8XAS4YiDoQ+9/jQQCJKP2BLBR79t2gqlGAGJSHhHEuYzEs+pLO0SlM06Pjl9hLL2GCqZZglcfbEpHKQIcG2PnxlctcQof2oycU4hoVOUnO3uD4IXJhuH80OMEw+zzCLP39lZEwDchsoKF503BnbunWCa9NbJo7mUtFd+4Zd+lyYjkbu1A+cOXSTDxrUSib8LYISZj7ViIYqVE8Y8eR+HS5caa097vTGPFHO2dUSNUg+SD9LDR8213p8FScNxVW4R1je2S3cl+UL36WNwqFLyyDAfC7Mn9Yr3SzRDv+x3wqV7cCD0pSB+JN29Z54v8b4PUAG/sYzVoJ3xL73i4kZPyhPtm6A+VswQ05VYllRQYIKHjzQcmRNms1V0tBov/o916bon02HgPU8z3rTiQ1Jt1f3z/F5eOhxr1xxys3r67gchwAgVGXa4Ahc06ndT7eIY8doEBmce2b06xDu9Kh5xsuTb/Gs3BP1pqlB4PHsv0oReKdSZ8yQNCVXtXfDR5drftugZFI2TrTa4FBGDBz2L0u0MBi66rcfoFjjNnt+SyBAjj3FngUCOPDWTNqA1n+9lGdIIfohOd17+Qwz23+dgnmzgr2Vltt4s5vgmElohTjjbXsF";
+
             this.decrypted = [];
+            this.decryptData(this.cipherTextLetters, this.password)
+              .then((plaintextString) => {
+                this.decrypted = JSON.parse(plaintextString);
+                console.log("Decrypted Data:", this.decrypted);
+                this.render();
+
+                return this.encryptData(JSON.stringify(this.decrypted), this.password);
+              })
+              .then((ciphertextString) => console.log(ciphertextString))
+              .catch((error) => console.error(error));
+          }
+
+          bufferToBase64(buffer) {
+            return btoa(new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), ""));
+          }
+
+          base64ToBuffer(base64) {
+            return Uint8Array.from(atob(base64), (c) => c.charCodeAt(null));
+          }
+
+          getPasswordKey(password) {
+            return window.crypto.subtle.importKey("raw", this.encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
+          }
+
+          deriveKey(passwordKey, salt, keyUsage) {
+            return window.crypto.subtle.deriveKey(
+              {
+                name: "PBKDF2",
+                salt: salt,
+                iterations: 250000,
+                hash: "SHA-256",
+              },
+              passwordKey,
+              { name: "AES-GCM", length: 256 },
+              false,
+              keyUsage
+            );
+          }
+
+          async encryptData(plaintext, password) {
             try {
-              this.decrypted = JSON.parse(
-                CryptoJS.AES.decrypt(this.cipherTextLetters, this.password).toString(CryptoJS.enc.Utf8)
+              const salt = window.crypto.getRandomValues(new Uint8Array(16));
+              const iv = window.crypto.getRandomValues(new Uint8Array(12));
+              const passwordKey = await this.getPasswordKey(password);
+              const aesKey = await this.deriveKey(passwordKey, salt, ["encrypt"]);
+              const encryptedData = await window.crypto.subtle.encrypt(
+                {
+                  name: "AES-GCM",
+                  iv: iv,
+                },
+                aesKey,
+                this.encoder.encode(plaintext)
               );
+
+              const encryptedDataArray = new Uint8Array(encryptedData);
+              let buffer = new Uint8Array(salt.byteLength + iv.byteLength + encryptedDataArray.byteLength);
+              buffer.set(salt, 0);
+              buffer.set(iv, salt.byteLength);
+              buffer.set(encryptedDataArray, salt.byteLength + iv.byteLength);
+              return this.bufferToBase64(buffer);
             } catch (e) {
-              // Do nothing
+              console.log(`Error - ${e}`);
+              return "";
             }
-            // console.log("Decrypted Data:", this.decrypted);
+          }
+
+          async decryptData(ciphertext, password) {
+            try {
+              const encryptedDataBuffer = this.base64ToBuffer(ciphertext);
+              const salt = encryptedDataBuffer.slice(0, 16);
+              const iv = encryptedDataBuffer.slice(16, 16 + 12);
+              const data = encryptedDataBuffer.slice(16 + 12);
+              const passwordKey = await this.getPasswordKey(password);
+              const aesKey = await this.deriveKey(passwordKey, salt, ["decrypt"]);
+              const decryptedData = await window.crypto.subtle.decrypt(
+                {
+                  name: "AES-GCM",
+                  iv: iv,
+                },
+                aesKey,
+                data
+              );
+              return this.decoder.decode(decryptedData);
+            } catch (e) {
+              console.log(`Error - ${e}`);
+              return "";
+            }
           }
 
           styles() {
@@ -78,10 +156,10 @@
           compose() {
             return vdom`
               <div>
-                ${this.decrypted
-                  .sort((a, b) => (a.date > b.date ? -1 : 1))
-                  .map(
-                    (letter, index) => vdom`
+               ${this.decrypted
+                 .sort((a, b) => (a.date > b.date ? -1 : 1))
+                 .map(
+                   (letter, index) => vdom`
                       <div>
                         <hr />
 
@@ -93,7 +171,7 @@
                         ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
                       </div>
                     `
-                  )}
+                 )}
               </div>
             `;
           }
