@@ -9,4 +9,3 @@ Christopher Bilger's Portfolio
 - Update LinkedIn Bio
 - Update all relevant dates for leaving Lockheed and joining Talkiatry
 - Merge this branch into `master`; squashing into 1 commit
-- Transfer 401k
