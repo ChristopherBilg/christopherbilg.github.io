@@ -53,7 +53,9 @@
                 .then((response) => response.text())
                 .then((ciphertextString) => this.decryptData(ciphertextString, this.password))
                 .then((plaintextString) => {
-                  this.decrypted = JSON.parse(plaintextString);
+                  try {
+                    this.decrypted = JSON.parse(plaintextString);
+                  } catch {}
 
                   return this.encryptData(JSON.stringify(this.decrypted), this.password);
                 })
@@ -115,8 +117,8 @@
               buffer.set(iv, salt.byteLength);
               buffer.set(encryptedDataArray, salt.byteLength + iv.byteLength);
               return this.bufferToBase64(buffer);
-            } catch (e) {
-              console.log(`Error - ${e}`);
+            } catch (error) {
+              console.log(`Error - ${error}`);
               return "";
             }
           }
@@ -138,8 +140,8 @@
                 data
               );
               return this.decoder.decode(decryptedData);
-            } catch (e) {
-              console.log(`Error - ${e}`);
+            } catch (error) {
+              console.log(`Error - ${error}`);
               return "";
             }
           }
@@ -148,6 +150,10 @@
             return css`
               div {
                 font-family: var(--handwritten-font-family);
+
+                h2 {
+                  text-align: center;
+                }
 
                 div {
                   display: flex;
@@ -160,22 +166,31 @@
           compose() {
             return vdom`
               <div>
-                ${this.decrypted
-                  .sort((a, b) => (a.date > b.date ? -1 : 1))
-                  .map(
-                    (letter, index) => vdom`
+                ${
+                  this.decrypted.length === 0
+                    ? vdom`
                       <div>
                         <hr />
-
-                        <div>
-                          <h2>${letter.title}</h2>
-                          <h3>${letter.prettyDate}</h3>
-                        </div>
-
-                        ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
+                        <h2>Nothing to see here.</h2>
                       </div>
                     `
-                  )}
+                    : this.decrypted
+                        .sort((a, b) => (a.date > b.date ? -1 : 1))
+                        .map(
+                          (letter) => vdom`
+                            <div>
+                              <hr />
+
+                              <div>
+                                <h2>${letter.title}</h2>
+                                <h3>${letter.prettyDate}</h3>
+                              </div>
+
+                              ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
+                            </div>
+                          `
+                        )
+                }
               </div>
             `;
           }
