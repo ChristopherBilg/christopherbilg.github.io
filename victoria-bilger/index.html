@@ -44,23 +44,25 @@
           init() {
             this.encoder = new TextEncoder();
             this.decoder = new TextDecoder();
-
-            this.password = prompt("What is the password?");
-
-            this.cipherTextLetters =
-              "6X4JAE9sdHhJ/RCH4iteSBCu0Rbou8S6Jv7A/NC35JqKlb1yZMsJD3x2PoZr15wJf6SoBhrRP/Hf+MHgqKiTw+uw1spQTp35+TeMPp33Fb4ychVrOm1c4mGj8fM/nwKHQBxHxNXJ8Ih6y7OtfboBX252T6K3NyWPEQNwy8XAS4YiDoQ+9/jQQCJKP2BLBR79t2gqlGAGJSHhHEuYzEs+pLO0SlM06Pjl9hLL2GCqZZglcfbEpHKQIcG2PnxlctcQof2oycU4hoVOUnO3uD4IXJhuH80OMEw+zzCLP39lZEwDchsoKF503BnbunWCa9NbJo7mUtFd+4Zd+lyYjkbu1A+cOXSTDxrUSib8LYISZj7ViIYqVE8Y8eR+HS5caa097vTGPFHO2dUSNUg+SD9LDR8213p8FScNxVW4R1je2S3cl+UL36WNwqFLyyDAfC7Mn9Yr3SzRDv+x3wqV7cCD0pSB+JN29Z54v8b4PUAG/sYzVoJ3xL73i4kZPyhPtm6A+VswQ05VYllRQYIKHjzQcmRNms1V0tBov/o916bon02HgPU8z3rTiQ1Jt1f3z/F5eOhxr1xxys3r67gchwAgVGXa4Ahc06ndT7eIY8doEBmce2b06xDu9Kh5xsuTb/Gs3BP1pqlB4PHsv0oReKdSZ8yQNCVXtXfDR5drftugZFI2TrTa4FBGDBz2L0u0MBi66rcfoFjjNnt+SyBAjj3FngUCOPDWTNqA1n+9lGdIIfohOd17+Qwz23+dgnmzgr2Vltt4s5vgmElohTjjbXsF";
-
             this.decrypted = [];
-            this.decryptData(this.cipherTextLetters, this.password)
-              .then((plaintextString) => {
-                this.decrypted = JSON.parse(plaintextString);
-                console.log("Decrypted Data:", this.decrypted);
-                this.render();
 
-                return this.encryptData(JSON.stringify(this.decrypted), this.password);
-              })
-              .then((ciphertextString) => console.log(ciphertextString))
-              .catch((error) => console.error(error));
+            setTimeout(() => {
+              this.password = prompt("What is the password?");
+
+              this.cipherTextLetters =
+                "6X4JAE9sdHhJ/RCH4iteSBCu0Rbou8S6Jv7A/NC35JqKlb1yZMsJD3x2PoZr15wJf6SoBhrRP/Hf+MHgqKiTw+uw1spQTp35+TeMPp33Fb4ychVrOm1c4mGj8fM/nwKHQBxHxNXJ8Ih6y7OtfboBX252T6K3NyWPEQNwy8XAS4YiDoQ+9/jQQCJKP2BLBR79t2gqlGAGJSHhHEuYzEs+pLO0SlM06Pjl9hLL2GCqZZglcfbEpHKQIcG2PnxlctcQof2oycU4hoVOUnO3uD4IXJhuH80OMEw+zzCLP39lZEwDchsoKF503BnbunWCa9NbJo7mUtFd+4Zd+lyYjkbu1A+cOXSTDxrUSib8LYISZj7ViIYqVE8Y8eR+HS5caa097vTGPFHO2dUSNUg+SD9LDR8213p8FScNxVW4R1je2S3cl+UL36WNwqFLyyDAfC7Mn9Yr3SzRDv+x3wqV7cCD0pSB+JN29Z54v8b4PUAG/sYzVoJ3xL73i4kZPyhPtm6A+VswQ05VYllRQYIKHjzQcmRNms1V0tBov/o916bon02HgPU8z3rTiQ1Jt1f3z/F5eOhxr1xxys3r67gchwAgVGXa4Ahc06ndT7eIY8doEBmce2b06xDu9Kh5xsuTb/Gs3BP1pqlB4PHsv0oReKdSZ8yQNCVXtXfDR5drftugZFI2TrTa4FBGDBz2L0u0MBi66rcfoFjjNnt+SyBAjj3FngUCOPDWTNqA1n+9lGdIIfohOd17+Qwz23+dgnmzgr2Vltt4s5vgmElohTjjbXsF";
+
+              this.decryptData(this.cipherTextLetters, this.password)
+                .then((plaintextString) => {
+                  this.decrypted = JSON.parse(plaintextString);
+                  console.log("Decrypted Data:", this.decrypted);
+                  this.render();
+
+                  return this.encryptData(JSON.stringify(this.decrypted), this.password);
+                })
+                .then((ciphertextString) => console.log(ciphertextString))
+                .catch((error) => console.error(error));
+            }, 2000);
           }
 
           bufferToBase64(buffer) {
