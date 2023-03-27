@@ -160,10 +160,10 @@
           compose() {
             return vdom`
               <div>
-               ${this.decrypted
-                 .sort((a, b) => (a.date > b.date ? -1 : 1))
-                 .map(
-                   (letter, index) => vdom`
+                ${this.decrypted
+                  .sort((a, b) => (a.date > b.date ? -1 : 1))
+                  .map(
+                    (letter, index) => vdom`
                       <div>
                         <hr />
 
@@ -175,7 +175,7 @@
                         ${letter.body.map((paragraph) => vdom`<p>${paragraph}</p>`)}
                       </div>
                     `
-                 )}
+                  )}
               </div>
             `;
           }
