@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>JS Web Workers</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>JS Web Workers</h1>
+
+      <p>
+        <b>JS Web Workers</b>
+        are designed for running JavaScript in background threads, such that they do not block execution of the main
+        (generally UI) thread. Generally speaking, it makes the most sense to place long network IO and large compute
+        tasks onto web worker threads.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        if (!window.Worker) return;
+
+        class App extends Component {
+          init() {
+            this.allValues = [];
+
+            this.worker = new Worker("./worker.js");
+            this.worker.onmessage = (message) => {
+              const value = message.data.value;
+              this.allValues.push(value);
+              this.render();
+            };
+
+            this.index = 1;
+            this.iterations = 30;
+            this.intervalMillis = 250;
+
+            setInterval(() => {
+              if (this.index > this.iterations) {
+                this.worker.terminate();
+              }
+
+              this.worker.postMessage({ value: this.index++ });
+            }, this.intervalMillis);
+          }
+
+          compose() {
+            return vdom`
+              <ol>
+                ${this.allValues.map((value) => {
+                  return vdom`
+                    <li>Value received from web worker: ${value}</li>
+                  `;
+                })}
+              </ol>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

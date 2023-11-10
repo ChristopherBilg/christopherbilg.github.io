@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Kebab-Case</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Kebab-Case</h1>
+
+      <p>
+        <b>Kebab-Case</b>
+        converts an arbitrary string into kebab-case (hopefully correctly). Nothing entered into this website will ever
+        be stored in your browser nor will it ever be sent outside of your browser. Absolutely no data is ever sent away
+        from your local browser.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends Component {
+          init() {
+            this.input = "";
+            this.output = "";
+
+            this.copiedOutputs = [];
+          }
+
+          onInput(event) {
+            this.input = event.target.value;
+
+            if (!this.input) {
+              this.output = "";
+            } else {
+              this.output = this.input
+                .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
+                .join("-")
+                .toLowerCase();
+            }
+
+            this.render();
+          }
+
+          copyToClipboard() {
+            navigator.clipboard.writeText(this.output);
+
+            this.copiedOutputs.unshift(this.output);
+            this.render();
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                <h2>Input</h2>
+                <div>
+                  <input type="text" placeholder="Enter text to convert to kebab-case" oninput="${(e) =>
+                    this.onInput(e)}" onchange="${(e) => this.onInput(e)}" autofocus />
+                </div>
+
+                <h2>Output</h2>
+                <div>
+                  <input type="text" readonly value="${this.output}" />
+                </div>
+
+                <button onclick="${() => this.copyToClipboard()}">Copy text</button>
+                ${this.copiedOutputs.map((string) => vdom`<p>Copied "<b>${string}</b>" to the clipboard!</p>`)}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

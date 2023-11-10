@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>PokeAPI - GraphQL</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>PokeAPI - GraphQL</h1>
+
+      <p>
+        The
+        <b>PokeAPI</b>
+        is a GraphQL API that provides access to information about the Pokémon universe, including Pokémon species,
+        abilities, moves, and more. It was created as a project by the community for the community and is open for
+        anyone to use.
+      </p>
+
+      <p>
+        The PokeAPI provides a wealth of information for Pokémon fans and developers alike, allowing them to access data
+        in a convenient and standardized format. With the PokeAPI, you can retrieve information about specific Pokémon,
+        such as their height, weight, types, and abilities. You can also retrieve information about moves, abilities,
+        and other game mechanics, making it a valuable resource for developing Pokémon-related projects and
+        applications.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {
+            this.response = { data: {} };
+            fetch("https://beta.pokeapi.co/graphql/v1beta", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query: `query myCustomQuery {
+                  gen3_species: pokemon_v2_pokemonspecies(order_by: { id: asc }) {
+                    name
+                    id
+                  }
+                }`,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                this.response = data;
+                this.render();
+              })
+              .catch(() => {});
+          }
+
+          capitalizeFirstLetter(string) {
+            return string
+              .split("-")
+              .map((substring) =>
+                ["M", "F"].includes(substring.toUpperCase())
+                  ? `(${substring.charAt(0).toUpperCase()})`
+                  : substring.charAt(0).toUpperCase() + substring.slice(1)
+              )
+              .join(" ");
+          }
+
+          styles() {
+            return css`
+              div {
+                border: 1px solid black;
+                display: inline-block;
+                width: 110px;
+                margin: 0.5rem;
+
+                p {
+                  text-align: center;
+                }
+
+                img {
+                  width: 96px;
+                  margin-left: 7px;
+                  margin-right: 7px;
+                }
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+                    <div>
+                      ${
+                        this.response.data.gen3_species
+                          ? this.response.data.gen3_species.map((data) => {
+                              return vdom`
+                                <div>
+                                  <p>${this.capitalizeFirstLetter(data.name)}</p>
+                                  <p>${data.id}</p>
+                                  <img
+                                    src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
+                                      data.id
+                                    }.png"
+                                    alt="${data.name}"
+                                    loading="lazy"
+                                  />
+                                </div>
+                              `;
+                            })
+                          : ""
+                      }
+                    </div>
+                  `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

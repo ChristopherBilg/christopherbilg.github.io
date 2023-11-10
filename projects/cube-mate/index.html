@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Cube Mate (Rubik's Cube Tools)</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Cube Mate (Rubik's Cube Tools)</h1>
+
+      <p>
+        <b>Cube Mate</b>
+        is an extremely minimal set of tools that I am using to learn (at my own pace) efficient Rubik's Cube solving
+        methods. If you wish to use better tools, look into the website
+        <a href="https://cstimer.net/" target="_blank">cstimer.net</a>
+        . No data/information/values/etc. is sent away from your local browser instance.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        const TIMER_HISTORY_TEMPLATE = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        class App extends StyledComponent {
+          init() {
+            this.scrambleHTMLElement = document.createElement("h2");
+            this.crossHTMLElement = document.createElement("h2");
+            this.crossColorHTMLElement = document.createElement("div");
+            this.crossColorHTMLElement.id = "cross-color-div";
+
+            this.updateScrambleAndCross();
+
+            this.timerRunning = false;
+            this.timerCurrentTime = 0;
+            this.timerHTMLElement = document.createElement("h2");
+
+            this.timerHistory =
+              this.loadTimerHistoryFromLocalStorage() || JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
+
+            this.saveTimerHistoryToLocalStorage();
+
+            this.timerHistoryHTMLElement = document.createElement("div");
+            this.rerenderTimerHistoryHTMLElements();
+
+            window.onkeypress = (event) => {
+              if (!event) return;
+
+              if (event.keyCode === 32) {
+                event.preventDefault();
+                this.toggleTimerRunningState();
+              }
+            };
+
+            this.resetTimer();
+          }
+
+          generateRandomScramble() {
+            const options = [
+              "F",
+              "F2",
+              "F'",
+              "R",
+              "R2",
+              "R'",
+              "U",
+              "U2",
+              "U'",
+              "B",
+              "B2",
+              "B'",
+              "L",
+              "L2",
+              "L'",
+              "D",
+              "D2",
+              "D'",
+            ];
+            const numOptions = [0, 1, 2, 3, 4, 5];
+            let scramble = [];
+            let scrambleMoves = [];
+            let bad = true;
+
+            const getRandomInt = (max) => {
+              return Math.floor(Math.random() * Math.floor(max));
+            };
+
+            const getRandomIntBetween = (min, max) => {
+              return Math.floor(Math.random() * (max - min) + min);
+            };
+
+            while (bad) {
+              scramble = [];
+              for (var i = 0; i < 20; i++) {
+                scramble.push(numOptions[getRandomInt(6)]);
+              }
+
+              for (var i = 0; i < 20 - 1; i++) {
+                if (scramble[i] == scramble[i + 1]) {
+                  bad = true;
+                  break;
+                } else {
+                  bad = false;
+                }
+              }
+            }
+
+            var move;
+            for (var i = 0; i < 20; i++) {
+              switch (scramble[i]) {
+                case 0:
+                  move = options[getRandomInt(3)];
+                  scrambleMoves.push(move);
+                  break;
+                case 1:
+                  move = options[getRandomIntBetween(3, 6)];
+                  scrambleMoves.push(move);
+                  break;
+                case 2:
+                  move = options[getRandomIntBetween(6, 9)];
+                  scrambleMoves.push(move);
+                  break;
+                case 3:
+                  move = options[getRandomIntBetween(9, 12)];
+                  scrambleMoves.push(move);
+                  break;
+                case 4:
+                  move = options[getRandomIntBetween(12, 15)];
+                  scrambleMoves.push(move);
+                  break;
+                case 5:
+                  move = options[getRandomIntBetween(15, 18)];
+                  scrambleMoves.push(move);
+                  break;
+              }
+            }
+
+            return scrambleMoves;
+          }
+
+          generateRandomCrossColor() {
+            const colors = ["Red", "Green", "White", "Blue", "Yellow", "Orange"];
+
+            return colors[Math.floor(Math.random() * colors.length)];
+          }
+
+          updateScrambleAndCross(event) {
+            if (event) event.preventDefault();
+
+            const crossColor = this.generateRandomCrossColor();
+
+            this.scrambleHTMLElement.innerHTML = `Scramble: ${this.generateRandomScramble().join(" ")}`;
+            this.crossHTMLElement.innerHTML = `Cross Color: ${crossColor}`;
+
+            this.crossColorHTMLElement.style.backgroundColor = crossColor;
+
+            return false;
+          }
+
+          loadTimerHistoryFromLocalStorage() {
+            return JSON.parse(localStorage.getItem("timerHistory"));
+          }
+
+          saveTimerHistoryToLocalStorage() {
+            const stringified = JSON.stringify(this.timerHistory);
+            localStorage.setItem("timerHistory", stringified);
+          }
+
+          convertTimeToHumanReadableString(time) {
+            let milliseconds = Math.floor(time % 1000);
+            let seconds = Math.floor((time / 1000) % 60);
+            let hours = Math.floor((time / (1000 * 60 * 60)) % 24);
+            let minutes = Math.floor((time / (1000 * 60)) % 60);
+
+            milliseconds =
+              milliseconds < 100 ? (milliseconds < 10 ? "00" + milliseconds : "0" + milliseconds) : milliseconds;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            hours = hours < 10 ? "0" + hours : hours;
+
+            return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
+          }
+
+          rerenderTimerHistoryHTMLElements() {
+            this.timerHistoryHTMLElement.innerHTML = "";
+
+            const getBestAverageOfN = (n) => {
+              let currentBest = Number.MAX_SAFE_INTEGER;
+              for (let i = TIMER_HISTORY_TEMPLATE.length; i <= this.timerHistory.length - n; i++) {
+                const tempBest = this.timerHistory.slice(i, i + n).reduce((a, b) => a + b) / n;
+                if (tempBest < currentBest) currentBest = tempBest;
+              }
+
+              return currentBest;
+            };
+
+            const pb = document.createElement("p");
+            const tempPB = this.convertTimeToHumanReadableString(
+              Math.min(...this.timerHistory.slice(12, this.timerHistory.length))
+            );
+            pb.innerHTML = `PB: ${
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1
+                ? tempPB
+                : this.convertTimeToHumanReadableString(0)
+            }`;
+            this.timerHistoryHTMLElement.appendChild(pb);
+
+            const currentAo5 = document.createElement("p");
+            const tempAo5 = this.convertTimeToHumanReadableString(
+              this.timerHistory.slice(-5).reduce((a, b) => a + b) / 5
+            );
+            currentAo5.innerHTML = `Current Ao5: ${
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5
+                ? tempAo5
+                : this.convertTimeToHumanReadableString(0)
+            }`;
+            this.timerHistoryHTMLElement.appendChild(currentAo5);
+
+            const bestAo5 = document.createElement("p");
+            const tempBestAo5 = this.convertTimeToHumanReadableString(getBestAverageOfN(5));
+            bestAo5.innerHTML = `Best Ao5: ${
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5
+                ? tempBestAo5
+                : this.convertTimeToHumanReadableString(0)
+            }`;
+            this.timerHistoryHTMLElement.appendChild(bestAo5);
+
+            const currentAo12 = document.createElement("p");
+            const tempAo12 = this.convertTimeToHumanReadableString(
+              this.timerHistory.slice(-12).reduce((a, b) => a + b) / 12
+            );
+            currentAo12.innerHTML = `Current Ao12: ${
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12
+                ? tempAo12
+                : this.convertTimeToHumanReadableString(0)
+            }`;
+            this.timerHistoryHTMLElement.appendChild(currentAo12);
+
+            const bestAo12 = document.createElement("p");
+            const tempBestAo12 = this.convertTimeToHumanReadableString(getBestAverageOfN(12));
+            bestAo12.innerHTML = `Best Ao12: ${
+              this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12
+                ? tempBestAo12
+                : this.convertTimeToHumanReadableString(0)
+            }`;
+            this.timerHistoryHTMLElement.appendChild(bestAo12);
+          }
+
+          addTimeToTimerHistory(time) {
+            this.timerHistory.push(time);
+            this.saveTimerHistoryToLocalStorage();
+
+            this.rerenderTimerHistoryHTMLElements();
+          }
+
+          async toggleTimerRunningState(event) {
+            if (event) event.preventDefault();
+
+            const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+            if (this.timerRunning) {
+              this.timerRunning = false;
+
+              this.addTimeToTimerHistory(this.timerCurrentTime);
+              this.timerCurrentTime = 0;
+            } else {
+              this.timerRunning = true;
+              const startDate = Date.now();
+              let currentDate;
+
+              while (this.timerRunning) {
+                currentDate = Date.now();
+                this.timerCurrentTime = currentDate - startDate;
+
+                this.timerHTMLElement.innerHTML = this.convertTimeToHumanReadableString(this.timerCurrentTime);
+                await sleep(1);
+              }
+            }
+          }
+
+          resetTimer(event) {
+            if (event) event.preventDefault();
+
+            if (this.timerRunning) {
+              this.timerRunning = false;
+              this.timerCurrentTime = 0;
+            }
+
+            this.timerHTMLElement.innerHTML = this.convertTimeToHumanReadableString(this.timerCurrentTime);
+          }
+
+          resetTimerHistory(event) {
+            if (event) event.preventDefault();
+
+            this.resetTimer();
+            this.timerHistory = JSON.parse(JSON.stringify(TIMER_HISTORY_TEMPLATE));
+
+            this.saveTimerHistoryToLocalStorage();
+            this.rerenderTimerHistoryHTMLElements();
+          }
+
+          styles() {
+            return css`
+              #cross-color-div {
+                width: 10rem;
+                height: 3rem;
+                border: 2px solid black;
+              }
+
+              .button-row {
+                margin-right: 0.5rem;
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                <hr />
+                <br />
+
+                <input type="submit" value="Scramble" onclick="${() => this.updateScrambleAndCross()}" />
+                ${this.scrambleHTMLElement}
+                ${this.crossHTMLElement}
+                ${this.crossColorHTMLElement}
+
+                <br />
+                <hr />
+
+                <p>
+                  <b>Note:</b> Pressing the space key on your keyboard will start and stop
+                  the timer.
+                </p>
+
+                <input type="submit" value="Start/Stop Timer" onclick="${() =>
+                  this.toggleTimerRunningState()}" class="button-row" />
+                <input type="submit" value="Reset Timer" onclick="${() => this.resetTimer()}" class="button-row" />
+                <input type="submit" value="Reset Timer History" onclick="${() =>
+                  this.resetTimerHistory()}" class="button-row" />
+
+                ${this.timerHTMLElement}
+                ${this.timerHistoryHTMLElement}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

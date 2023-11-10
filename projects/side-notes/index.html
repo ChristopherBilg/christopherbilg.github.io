@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Side Notes (Note-Taking Web App)</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Side Notes (Note-Taking Web App)</h1>
+
+      <p>
+        <b>Side Notes</b>
+        is a minimal, light-weight, todo-style note keeping web application. Side Notes are emphemeral, short lasting
+        and residing solely in your browser storage. This web application keeps all data stored in the browser's
+        internal database, meaning that all side-notes reside only on this browser. Absolutely no data is ever sent away
+        from your local browser.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {
+            this.SIDE_NOTE_TEMPLATE = {
+              data: "",
+            };
+
+            this.allSideNotes = this.loadAllSideNotesFromLocalStorage() || [];
+            this.saveAllSideNotesToLocalStorage();
+
+            this.deletedSideNotes = [];
+          }
+
+          loadAllSideNotesFromLocalStorage() {
+            return JSON.parse(localStorage.getItem("sideNotes"));
+          }
+
+          saveAllSideNotesToLocalStorage() {
+            const stringified = JSON.stringify(this.allSideNotes);
+            localStorage.setItem("sideNotes", stringified);
+          }
+
+          createSideNote() {
+            this.allSideNotes.push(JSON.parse(JSON.stringify(this.SIDE_NOTE_TEMPLATE)));
+          }
+
+          deleteSideNote(index) {
+            this.deletedSideNotes.push(this.allSideNotes[index]);
+
+            this.allSideNotes = this.allSideNotes.filter((_, i) => i != index);
+          }
+
+          getCustomLineCountFromString(s, defaultLineCount = 2) {
+            const calculatedLineCount = s.split(/\r|\r\n|\n/).length;
+
+            if (calculatedLineCount <= defaultLineCount) return defaultLineCount;
+            else return calculatedLineCount;
+          }
+
+          shiftNoteUp(index) {
+            if (index === 0) return;
+
+            const temp = this.allSideNotes[index - 1];
+            this.allSideNotes[index - 1] = this.allSideNotes[index];
+            this.allSideNotes[index] = temp;
+          }
+
+          shiftNoteDown(index) {
+            if (index === this.allSideNotes.length - 1) return;
+
+            const temp = this.allSideNotes[index + 1];
+            this.allSideNotes[index + 1] = this.allSideNotes[index];
+            this.allSideNotes[index] = temp;
+          }
+
+          undoLastDeletedNote() {
+            if (this.deletedSideNotes.length === 0) return;
+
+            this.allSideNotes.push(this.deletedSideNotes.pop());
+          }
+
+          styles() {
+            return css`
+              #main-buttons {
+                display: flex;
+                justify-content: space-between;
+              }
+
+              div {
+                aside {
+                  div {
+                    display: flex;
+                    margin-bottom: 0.5rem;
+
+                    p {
+                      font-weight: bold;
+                      margin: auto;
+                    }
+
+                    input {
+                      margin: auto 0.25rem;
+                    }
+
+                    .delete {
+                      background-color: red;
+                      border: 2px solid red;
+                    }
+                  }
+
+                  textarea {
+                    resize: none;
+                    overflow: hidden;
+                    max-width: calc(100% - 1.6rem);
+                  }
+                }
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <div>
+                <div id="main-buttons">
+                  <input
+                    type="submit"
+                    value="Create Side Note [+]"
+                    onclick="${() => {
+                      this.createSideNote();
+                      this.saveAllSideNotesToLocalStorage();
+                      this.render();
+                    }}"
+                  />
+
+                  <input
+                    type="submit"
+                    value="Undo Last Delete [↶]"
+                    onclick="${() => {
+                      this.undoLastDeletedNote();
+                      this.saveAllSideNotesToLocalStorage();
+                      this.render();
+                    }}"
+                    disabled="${this.deletedSideNotes.length === 0}"
+                  />
+                </div>
+
+                <div>
+                  ${this.allSideNotes.map((note, index) => {
+                    return vdom`
+                      <aside>
+                        <div>
+                          <p>Side Note #${index + 1}</p>
+
+                          <input
+                            type="submit"
+                            onclick="${() => {
+                              this.shiftNoteUp(index);
+                              this.saveAllSideNotesToLocalStorage();
+                              this.render();
+                            }}"
+                            value="[↑]"
+                          />
+
+                          <input
+                            type="submit"
+                            onclick="${() => {
+                              this.shiftNoteDown(index);
+                              this.saveAllSideNotesToLocalStorage();
+                              this.render();
+                            }}"
+                            value="[↓]"
+                          />
+
+                          <input
+                            type="submit"
+                            onclick="${() => {
+                              this.deleteSideNote(index);
+                              this.saveAllSideNotesToLocalStorage();
+                              this.render();
+                            }}"
+                            value="[-]"
+                            class="delete"
+                          />
+                        </div>
+
+                        <textarea
+                          style="height: ${this.getCustomLineCountFromString(this.allSideNotes[index].data) * 15}px;"
+                          oninput="${(e) => {
+                            this.allSideNotes[index].data = e.target.value;
+                            this.saveAllSideNotesToLocalStorage();
+                            this.render();
+                          }}"
+                          value="${this.allSideNotes[index].data}"
+                        >
+                        </textarea>
+                      </aside>
+                    `;
+                  })}
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

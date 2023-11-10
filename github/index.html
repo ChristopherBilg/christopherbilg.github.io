@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chris Bilger, M.C.S. | GitHub</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../css/styles.css" />
+
+    <script type="module" src="../js/theo/index.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <div class="typewriter">
+        <h1>Chris Bilger, M.C.S. | GitHub</h1>
+      </div>
+
+      <figure>
+        <img
+          class="rounded-image"
+          alt="Image of an example Git branching workflow"
+          src="../images/github.avif"
+          width="320"
+          height="163.95"
+          style="padding: 1rem; border: 2px solid #000000"
+          loading="lazy"
+        />
+        <figcaption>An image of an example Git branching workflow</figcaption>
+      </figure>
+
+      <section>
+        <nav>
+          <ul>
+            <li><a href="/">Back to Portfolio</a></li>
+            <li><a href="https://github.com/ChristopherBilg" target="_blank">GitHub Profile</a></li>
+          </ul>
+        </nav>
+      </section>
+
+      <p>Check out this list of my public GitHub projects; keep in mind that it's not exhaustive. Enjoy!</p>
+    </header>
+
+    <main hidden></main>
+
+    <script type="module">
+      import * as Arlo from "../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {
+            this.githubUser = "ChristopherBilg";
+            this.githubPerPage = 100;
+            this.githubPages = 2;
+
+            this.githubData = [];
+            this.fetchGithubData(this.githubUser, this.githubPerPage, this.githubPages).then((githubData) => {
+              this.githubData = githubData;
+            });
+
+            setInterval(() => {
+              this.render();
+            }, 100);
+          }
+
+          async fetchGithubData(githubUser, githubPerPage, githubPages) {
+            const githubData = [];
+
+            for (let page = 1; page <= githubPages; page++) {
+              try {
+                const response = await fetch(
+                  `https://api.github.com/users/${githubUser}/repos?per_page=${githubPerPage}&page=${page}`
+                );
+                const json = await response.json();
+                githubData.push(...json);
+              } catch (error) {}
+            }
+
+            return githubData;
+          }
+
+          styles() {
+            return css`
+              aside {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+
+                hr {
+                  margin: 2px auto;
+                }
+
+                div {
+                  p {
+                    max-height: 6rem;
+                    overflow: hidden;
+                  }
+                }
+
+                .metadata {
+                  display: flex;
+                  justify-content: space-around;
+                }
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+              <section>
+                <hr id="github-repositories" />
+                <h2><a href="#github-repositories">GitHub Repositories</a></h2>
+                <hr />
+
+                ${
+                  this.githubData.length > 0
+                    ? this.githubData
+                        .sort((a, b) => {
+                          // Find the most recent `*_at` date for `a` and `b`
+                          const aDate = new Date(
+                            Math.max(
+                              Date.parse(a?.pushed_at || ""),
+                              Date.parse(a?.created_at || ""),
+                              Date.parse(a?.updated_at || "")
+                            )
+                          );
+                          const bDate = new Date(
+                            Math.max(
+                              Date.parse(b?.pushed_at || ""),
+                              Date.parse(b?.created_at || ""),
+                              Date.parse(b?.updated_at || "")
+                            )
+                          );
+                          return bDate - aDate;
+                        })
+                        .map((data, index) => {
+                          const name = data?.name || "";
+                          const description = data?.description || "";
+                          const language = data?.language || "";
+                          const stargazersCount = data?.stargazers_count || "";
+
+                          return vdom`
+                            <aside>
+                              <a href="https://github.com/${this.githubUser}/${name}">${name}</a>
+
+                              <div>
+                                <p>${description}</p>
+                              </div>
+
+                              <hr />
+
+                              <div class="metadata">
+                                <span>${language}</span>
+                                <span>&#9733; ${stargazersCount}</span>
+                              </div>
+                            </aside>
+                          `;
+                        })
+                    : vdom`
+                        <aside>
+                          <p>Loading...</p>
+                        </aside>
+                      `
+                }
+              </section>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

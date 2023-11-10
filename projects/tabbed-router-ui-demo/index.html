@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      const Tab = Component.from((number, content) => {
+        return vdom`
+          <div>
+            <h2>Tab #${number}</h2>
+            <p>${content}</p>
+          </div>
+        `;
+      });
+
+      const TabButton = (number, active) => {
+        return vdom`
+          <button style="background:${active ? "#555" : "#fff"};color:${active ? "#fff" : "#000"}"
+            onclick="${() => router.go(`/projects/tabbed-router-ui-demo/tab/${number}`)}">Switch to tab #${number}
+          </button>
+        `;
+      };
+
+      class App extends StyledComponent {
+        init(router) {
+          this.tabs = [
+            new Tab(0, "The first tab's content is pretty bland, nothing special here."),
+            new Tab(1, "The second tab is a bit more interesting, but it's really nothing of substance."),
+            new Tab(2, "The third tab embarks on a dazzling discourse of human fallacies."),
+          ];
+
+          this.setActiveTab(0);
+
+          this.bind(router, ([name, params]) => {
+            switch (name) {
+              case "tab":
+                this.setActiveTab(params.tabNumber);
+                break;
+              default:
+                this.setActiveTab(0);
+                break;
+            }
+
+            document.title = `Tab ${params.tabNumber || 0} | Arlo Tabbed UI`;
+          });
+        }
+
+        styles() {
+          return {
+            "font-family": "system-ui, sans-serif",
+          };
+        }
+
+        setActiveTab(tabNumber) {
+          this.activeTab = this.tabs[tabNumber];
+          this.render();
+        }
+
+        compose() {
+          return vdom`
+            <main>
+              <h1>Tabbed View</h1>
+              <ul>${this.tabs.map((tab, number) => {
+                return TabButton(number, tab === this.activeTab);
+              })}</ul>
+              ${this.activeTab.node}
+            </main>
+          `;
+        }
+      }
+
+      const router = new Router({
+        tab: "/projects/tabbed-router-ui-demo/tab/:tabNumber",
+        default: "/projects/tabbed-router-ui-demo",
+      });
+
+      const app = new App(router);
+      document.body.appendChild(app.node);
+    </script>
+  </body>
+</html>

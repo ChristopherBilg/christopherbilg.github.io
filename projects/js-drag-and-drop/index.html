@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Electronics" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>JS Drag and Drop</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>JS Drag and Drop</h1>
+
+      <p>
+        The
+        <b>JS Drag and Drop API</b>
+        is designed to allow the users the interact with content on the webpage by "dragging and dropping" the content
+        from one location to another.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends StyledComponent {
+          init() {}
+
+          allowDrop(e) {
+            e.preventDefault();
+          }
+
+          drag(e) {
+            e.dataTransfer.setData("text", e.target.id);
+          }
+
+          drop(e) {
+            e.preventDefault();
+            var data = e.dataTransfer.getData("text");
+            e.target.appendChild(document.getElementById(data));
+          }
+
+          styles() {
+            return css`
+              .droppable-div {
+                float: left;
+                width: 200px;
+                height: 200px;
+                margin: 10px;
+                padding: 10px;
+                border: 1px solid black;
+              }
+            `;
+          }
+
+          compose() {
+            return vdom`
+                    <div>
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      >
+                        <img
+                          src="https://picsum.photos/200/200"
+                          id="drag1"
+                          width="200"
+                          height="200"
+                          draggable="true"
+                          ondragstart="${(e) => this.drag(e)}"
+                          loading="lazy"
+                        />
+                      </div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+
+                      <div
+                        class="droppable-div"
+                        ondrop="${(e) => this.drop(e)}"
+                        ondragover="${(e) => this.allowDrop(e)}"
+                      ></div>
+                    </div>
+                  `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>
