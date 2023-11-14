@@ -4,6 +4,7 @@ Christopher Bilger's Portfolio
 
 ## To-Do
 
+- [ ] Beta Landing Page
 - [ ] Paternity Leave #2
   - [ ] Rename the `theo` JS project based on our second child's name
   - [ ] Buy a domain matching our second child's full name
