@@ -7,24 +7,61 @@
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Chris Bilger, M.C.S.</title>
+    <title>Chris Bilger</title>
     <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
 
     <style>
-      h1 {
-        font-family: "Roboto", sans-serif;
-        font-size: 3rem;
-        font-weight: 700;
-        color: #000000;
-        text-align: center;
+      body {
+        margin: 3rem;
+        background-color: #fff5f5;
       }
 
-      h2 {
-        font-family: "Roboto", sans-serif;
-        font-size: 2rem;
-        font-weight: 700;
-        color: #000000;
-        text-align: center;
+      #intro-1 {
+        font-size: 6rem;
+        margin: 2rem 0;
+      }
+
+      #intro-2 {
+        font-size: 3rem;
+        margin: 2rem 0;
+        max-width: 900px;
+      }
+
+      #current-title {
+        font-weight: bold;
+      }
+
+      #navigation {
+        max-width: 900px;
+
+        & ul {
+          display: flex;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+
+          & li {
+            margin-right: 1rem;
+            font-size: 1.5rem;
+          }
+        }
+      }
+
+      .details {
+        font-size: 1.5rem;
+        margin: 2rem 0;
+        max-width: 900px;
+      }
+
+      a {
+        color: gray;
+        transition: color 0.15s ease-in-out;
+        font-style: italic;
+        font-family: Georgia, "Times New Roman", Times, serif;
+
+        &:hover {
+          color: #000;
+        }
       }
     </style>
   </head>
@@ -32,25 +69,46 @@
   <body>
     <main>
       <header>
-        <h1>Hi, I'm Chris Bilger</h1>
+        <h1 id="intro-1">Hi, I'm Christopher Bilger</h1>
 
-        <h2>
-          I'm a Software Engineer specializing in Product Development, working at the intersection of technology and
-          mental health.
-        </h2>
+        <h2 id="intro-2">I'm a Software Engineer specializing in Product Development.</h2>
       </header>
 
-      <p>Content</p>
-      <p>Content</p>
-      <p>Content</p>
+      <p class="details">
+        You might know me from places like
+        <a href="https://www.lockheedmartin.com/en-us/index.html">Lockheed Martin</a>
+        or
+        <a href="https://somanotes.com/">Soma Notes</a>
+        .
+      </p>
+
+      <p class="details">
+        I like to
+        <a href="https://chrisbilger.com/projects/">experiment</a>
+        with and
+        <a href="https://chrisbilger.com/github/">create</a>
+        new technologies, both software and
+        <a href="https://chrisbilger.com/electronics/">hardware.</a>
+      </p>
+
+      <p class="details">
+        I'm a
+        <span id="current-title">Senior Software Engineer</span>
+        at Talkiatry where I'm building a platform to make mental health care more accessible.
+      </p>
+
+      <p class="details">
+        Wish to contact me?
+        <a href="mailto:christopherbilg@gmail.com">Email</a>
+        is the best way.
+      </p>
 
       <header>
-        <nav>
+        <nav id="navigation">
           <ul>
-            <li><a href="https://www.linkedin.com/in/chris-bilger/">LinkedIn</a></li>
-            <li><a href="https://www.linkedin.com/in/chris-bilger/">Portfolio</a></li>
-            <li><a href="https://www.linkedin.com/in/chris-bilger/">GitHub</a></li>
-            <li><a href="https://www.linkedin.com/in/chris-bilger/">LinkedIn</a></li>
+            <li><a href="https://www.linkedin.com/in/christopher-bilger/">LinkedIn</a></li>
+            <li><a href="https://chrisbilger.com/">Portfolio</a></li>
+            <li><a href="https://github.com/ChristopherBilg">GitHub</a></li>
           </ul>
         </nav>
       </header>
