@@ -159,11 +159,11 @@
       altKey: true,
       desc: "Notify 'alt+1' || 'alt+1' was pressed.",
       callback: function (_ev) {
-        window.location.href = "/";
+        window.location.href = "/portfolio/";
       },
       commandDesc: "Go to Portfolio",
       commandFunc: function () {
-        window.location.href = "/";
+        window.location.href = "/portfolio/";
       },
       label: "alt+1",
     },
@@ -244,6 +244,19 @@
         window.location.href = "/electronics/";
       },
       label: "alt+7",
+    },
+    {
+      key: "8",
+      altKey: true,
+      desc: "Notify 'alt+8' || 'alt+8' was pressed.",
+      callback: function (_ev) {
+        window.location.href = "/";
+      },
+      commandDesc: "Go to Landing Page",
+      commandFunc: function () {
+        window.location.href = "/";
+      },
+      label: "alt+8",
     },
   ];
 
