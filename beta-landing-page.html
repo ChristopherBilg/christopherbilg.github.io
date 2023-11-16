@@ -13,12 +13,35 @@
     <style>
       body {
         margin: 3rem;
-        background-color: #fff5f5;
+        background-color: #e7dfdf;
+      }
+
+      a {
+        color: gray;
+        transition: color 0.15s ease-in-out;
+        font-style: italic;
+        font-family: Georgia, "Times New Roman", Times, serif;
+
+        &:hover {
+          color: #000;
+        }
+      }
+
+      #intro-header {
+        max-width: 1400px;
+        margin: 0 auto;
       }
 
       #intro-1 {
         font-size: 6rem;
-        margin: 2rem 0;
+        margin: 2rem 0 0 0;
+      }
+
+      #content-wrapper {
+        display: flex;
+        justify-content: space-between;
+        max-width: 1400px;
+        margin: 0 auto;
       }
 
       #intro-2 {
@@ -47,71 +70,84 @@
         }
       }
 
+      #image-wrapper {
+        margin: auto 0;
+      }
+
+      #image {
+        max-width: 500px;
+      }
+
+      @media only screen and (max-width: 1100px) {
+        #image {
+          display: none;
+        }
+      }
+
       .details {
         font-size: 1.5rem;
         margin: 2rem 0;
         max-width: 900px;
-      }
-
-      a {
-        color: gray;
-        transition: color 0.15s ease-in-out;
-        font-style: italic;
-        font-family: Georgia, "Times New Roman", Times, serif;
-
-        &:hover {
-          color: #000;
-        }
       }
     </style>
   </head>
 
   <body>
     <main>
-      <header>
-        <h1 id="intro-1">Hi, I'm Christopher Bilger</h1>
+      <div id="intro-header">
+        <div>
+          <h1 id="intro-1">Hi, I'm Christopher Bilger</h1>
+        </div>
+      </div>
 
-        <h2 id="intro-2">I'm a Software Engineer specializing in Product Development.</h2>
-      </header>
+      <div id="content-wrapper">
+        <div>
+          <h2 id="intro-2">I'm a Software Engineer specializing in Product Development.</h2>
 
-      <p class="details">
-        You might know me from places like
-        <a href="https://www.lockheedmartin.com/en-us/index.html">Lockheed Martin</a>
-        or
-        <a href="https://somanotes.com/">Soma Notes</a>
-        .
-      </p>
+          <p class="details">
+            You might know me from places like
+            <a href="https://www.talkiatry.com/">Talkiatry,</a>
+            <a href="https://www.lockheedmartin.com/en-us/index.html">Lockheed Martin</a>
+            or
+            <a href="https://somanotes.com/">Soma Notes.</a>
+          </p>
 
-      <p class="details">
-        I like to
-        <a href="https://chrisbilger.com/projects/">experiment</a>
-        with and
-        <a href="https://chrisbilger.com/github/">create</a>
-        new technologies, both software and
-        <a href="https://chrisbilger.com/electronics/">hardware.</a>
-      </p>
+          <p class="details">
+            I like to
+            <a href="https://chrisbilger.com/projects/">experiment</a>
+            with, and
+            <a href="https://chrisbilger.com/github/">create</a>
+            new technologies, including both software and
+            <a href="https://chrisbilger.com/electronics/">hardware.</a>
+          </p>
 
-      <p class="details">
-        I'm a
-        <span id="current-title">Senior Software Engineer</span>
-        at Talkiatry where I'm building a platform to make mental health care more accessible.
-      </p>
+          <p class="details">
+            I'm a
+            <span id="current-title">Senior Software Engineer</span>
+            at Talkiatry where I'm building a platform to make mental health care more accessible.
+          </p>
 
-      <p class="details">
-        Wish to contact me?
-        <a href="mailto:christopherbilg@gmail.com">Email</a>
-        is the best way.
-      </p>
+          <p class="details">
+            Wish to contact me?
+            <a href="mailto:christopherbilg@gmail.com">Email</a>
+            is the best way.
+          </p>
 
-      <header>
-        <nav id="navigation">
-          <ul>
-            <li><a href="https://www.linkedin.com/in/christopher-bilger/">LinkedIn</a></li>
-            <li><a href="https://chrisbilger.com/">Portfolio</a></li>
-            <li><a href="https://github.com/ChristopherBilg">GitHub</a></li>
-          </ul>
-        </nav>
-      </header>
+          <header>
+            <nav id="navigation">
+              <ul>
+                <li><a href="https://www.linkedin.com/in/christopher-bilger/">LinkedIn</a></li>
+                <li><a href="https://chrisbilger.com/">Portfolio</a></li>
+                <li><a href="https://github.com/ChristopherBilg">GitHub</a></li>
+              </ul>
+            </nav>
+          </header>
+        </div>
+
+        <div id="image-wrapper">
+          <img id="image" src="./images/landing.png" alt="Chris Bilger" />
+        </div>
+      </div>
     </main>
   </body>
 </html>
