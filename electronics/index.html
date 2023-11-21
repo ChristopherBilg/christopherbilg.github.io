@@ -51,9 +51,19 @@
         </h2>
         <hr />
 
-        <p>Light Sensors</p>
-        <p>Distance Sensors</p>
-        <p>WS2812B LEDs</p>
+        <p>
+          Most recently I worked on the modules for light sensors, distance sensors, and WS2812B LED strips. The light
+          sensors and distance sensors proved quite straight forward, with each having a single input and a single
+          output pin.
+        </p>
+
+        <p>
+          The WS2812B LED strips, however, proved to be a bit more challenging. I had to do a bit of research to figure
+          out how to properly interface with the WS2812B LEDs. I found a few libraries that I could use, and ended up
+          using the FastLED library. I also found a few examples of how to use the FastLED library, which helped me
+          figure out how to properly interface with the WS2812B LEDs and create the output that is shown in the image
+          below.
+        </p>
 
         <figure>
           <img
@@ -73,6 +83,18 @@
             loading="lazy"
           />
           <figcaption>An image of the serial output showing how the value from the distance sensor changes</figcaption>
+        </figure>
+
+        <figure>
+          <img
+            class="electronics-image"
+            alt="Image of the WS2812B LED strip displaying a rainbow pattern via the FastLED library"
+            src="../images/electronics/initial-experiment-of-fast-led-library-on-ws2812b-led-strip.avif"
+            loading="lazy"
+          />
+          <figcaption>
+            An image of the WS2812B LED strip displaying a rainbow pattern via the FastLED library
+          </figcaption>
         </figure>
       </section>
 
