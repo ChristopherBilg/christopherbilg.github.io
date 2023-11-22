@@ -13,12 +13,23 @@
     <script type="module" src="./js/theo/index.js"></script>
 
     <style>
+      html {
+        height: 100%;
+      }
+
       body {
-        margin: 3rem;
+        height: 100%;
+        margin: 0;
+        display: flex;
+      }
+
+      main {
+        margin: auto;
+        padding: 3rem;
       }
 
       a {
-        color: gray;
+        color: #808080;
         transition: color 0.15s ease-in-out;
         font-style: italic;
         font-family: Georgia, "Times New Roman", Times, serif;
@@ -28,21 +39,25 @@
         }
       }
 
-      #intro-header {
+      .details {
+        font-size: 1.5rem;
+        margin: 2rem 0;
+        max-width: 900px;
+      }
+
+      #introduction {
         max-width: 1400px;
-        margin: 0 auto;
       }
 
       #name {
         font-size: 7rem;
-        margin: 2rem 0 0 0;
+        margin: 0;
       }
 
       #content {
         display: flex;
         justify-content: space-between;
         max-width: 1400px;
-        margin: 0 auto;
       }
 
       #description {
@@ -109,8 +124,8 @@
       }
 
       @media only screen and (max-width: 700px) {
-        body {
-          margin: 2rem;
+        main {
+          padding: 2rem;
         }
 
         #name {
@@ -123,8 +138,8 @@
       }
 
       @media only screen and (max-width: 525px) {
-        body {
-          margin: 1rem;
+        main {
+          padding: 1rem;
         }
 
         #name {
@@ -146,18 +161,12 @@
           }
         }
       }
-
-      .details {
-        font-size: 1.5rem;
-        margin: 2rem 0;
-        max-width: 900px;
-      }
     </style>
   </head>
 
   <body>
     <main>
-      <div id="intro-header">
+      <div id="introduction">
         <div>
           <h1 id="name">Hi, I'm Christopher Bilger</h1>
         </div>
