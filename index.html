@@ -45,6 +45,10 @@
         max-width: 900px;
       }
 
+      .red {
+        color: #8a0505;
+      }
+
       #introduction {
         max-width: 1400px;
       }
@@ -168,13 +172,16 @@
     <main>
       <div id="introduction">
         <div>
-          <h1 id="name">Hi, I'm Christopher Bilger</h1>
+          <h1 id="name">Hi, I'm <span class="red">Christopher Bilger</span></h1>
         </div>
       </div>
 
       <div id="content">
         <div>
-          <h2 id="description">I'm a Software Engineer specializing in Product Development.</h2>
+          <h2 id="description">
+            I'm a Software Engineer specializing in
+            <span class="red">Product Development</span>.
+          </h2>
 
           <p class="details">
             You might know me from places like
@@ -194,7 +201,7 @@
 
           <p class="details">
             I'm a
-            <span id="title">Senior Software Engineer</span>
+            <span id="title" class="red">Senior Software Engineer</span>
             at Talkiatry where I'm building a platform to make mental health care more accessible.
           </p>
 
