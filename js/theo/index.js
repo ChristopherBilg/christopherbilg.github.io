@@ -211,11 +211,11 @@
       altKey: true,
       desc: "Notify 'alt+5' || 'alt+5' was pressed.",
       callback: function (_ev) {
-        window.location.href = "/Christopher-Bilger-Resume-August-2023.pdf";
+        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
       },
       commandDesc: "Go to Resume",
       commandFunc: function () {
-        window.location.href = "/Christopher-Bilger-Resume-August-2023.pdf";
+        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
       },
       label: "alt+5",
     },
@@ -237,26 +237,13 @@
       altKey: true,
       desc: "Notify 'alt+7' || 'alt+7' was pressed.",
       callback: function (_ev) {
-        window.location.href = "/electronics/";
-      },
-      commandDesc: "Go to Electronics",
-      commandFunc: function () {
-        window.location.href = "/electronics/";
-      },
-      label: "alt+7",
-    },
-    {
-      key: "8",
-      altKey: true,
-      desc: "Notify 'alt+8' || 'alt+8' was pressed.",
-      callback: function (_ev) {
         window.location.href = "/";
       },
       commandDesc: "Go to Landing Page",
       commandFunc: function () {
         window.location.href = "/";
       },
-      label: "alt+8",
+      label: "alt+7",
     },
   ];
 
