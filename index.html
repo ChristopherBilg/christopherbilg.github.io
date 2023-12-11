@@ -13,6 +13,8 @@
     <script type="module" src="./js/theo/index.js"></script>
 
     <style>
+      @import "https://fonts.googleapis.com/css?family=Roboto:400,500";
+
       html {
         height: 100%;
       }
@@ -26,16 +28,16 @@
       main {
         margin: auto;
         padding: 3rem;
+        font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+        color: #566b78;
       }
 
       a {
-        color: #000000;
-        font-style: italic;
-        font-family: Georgia, "Times New Roman", Times, serif;
-        font-weight: bold;
+        color: #118bee;
+        font-weight: 500;
 
         &:hover {
-          color: #118bee;
+          filter: brightness(80%);
         }
       }
 
@@ -45,8 +47,8 @@
         max-width: 900px;
       }
 
-      .blue {
-        color: #118bee;
+      .black {
+        color: #000000;
       }
 
       #introduction {
@@ -71,7 +73,7 @@
       }
 
       #title {
-        font-weight: bold;
+        font-weight: 500;
       }
 
       #navigation {
@@ -172,7 +174,7 @@
     <main>
       <div id="introduction">
         <div>
-          <h1 id="name">Hi, I'm <span class="blue">Christopher Bilger</span></h1>
+          <h1 id="name">Hi, I'm <span class="black">Christopher Bilger</span></h1>
         </div>
       </div>
 
@@ -180,7 +182,7 @@
         <div>
           <h2 id="description">
             I'm a Software Engineer specializing in
-            <span class="blue">Product Development</span>.
+            <span class="black">Product Development</span>.
           </h2>
 
           <p class="details">
@@ -200,7 +202,7 @@
 
           <p class="details">
             I'm a
-            <span id="title" class="blue">Senior Software Engineer</span>
+            <span id="title" class="black">Senior Software Engineer</span>
             at Talkiatry where I'm building a platform to make mental health care more accessible.
           </p>
 
