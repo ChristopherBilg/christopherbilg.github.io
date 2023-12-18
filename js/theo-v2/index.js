@@ -17,8 +17,14 @@ export class TheoCommandPalette extends HTMLElement {
     style.textContent = `
       :host {
         position: fixed;
-        top: 0;
-        left: 0;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 400px;
+        background-color: #fff;
+        border-radius: 4px;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.2);
       }
     `;
 
@@ -33,6 +39,22 @@ export class TheoCommandPalette extends HTMLElement {
   }
 
   setupKeyboard() {
+    const handleLayoutShift = () => {
+      // Toggle the ability to scroll the body and set the padding so there isn't any reflow.
+      const widthWithScrollBar = document.body.offsetWidth;
+      document.body.style.overflow = !this.hidden ? "hidden" : "auto";
+      const widthWithoutScrollBar = document.body.offsetWidth;
+
+      const paddingRight = widthWithoutScrollBar - widthWithScrollBar;
+      document.body.style.paddingRight = `${Math.max(paddingRight, 0)}px`;
+
+      // Blur all elements that aren't the command palette.
+      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(theo-command-palette):not(script)"));
+      elementsToBlur.forEach((element) => {
+        element.style.filter = this.hidden ? "" : "blur(4px)";
+      });
+    };
+
     Keyboard.attach(document);
 
     Keyboard.add_binding({
@@ -45,6 +67,8 @@ export class TheoCommandPalette extends HTMLElement {
         } else {
           this.hidden = true;
         }
+
+        handleLayoutShift();
       },
     });
 
@@ -57,6 +81,8 @@ export class TheoCommandPalette extends HTMLElement {
         } else {
           this.hidden = true;
         }
+
+        handleLayoutShift();
       },
     });
 
@@ -65,6 +91,8 @@ export class TheoCommandPalette extends HTMLElement {
       desc: "Close the command palette",
       callback: () => {
         this.hidden = true;
+
+        handleLayoutShift();
       },
     });
 
