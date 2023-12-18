@@ -3,19 +3,14 @@ import { Keyboard } from "./keyboard.js";
 export class TheoCommandPalette extends HTMLElement {
   constructor() {
     super();
-    this.visible = false;
-    this.div = null;
+    this.hidden = true;
   }
 
   static get observedAttributes() {
-    return ["visible"];
+    return [];
   }
 
-  attributeChangedCallback(attributeName, _oldValue, newValue) {
-    if (attributeName === "visible") {
-      this.visible = newValue;
-    }
-  }
+  attributeChangedCallback(attributeName, _oldValue, _newValue) {}
 
   connectedCallback() {
     const style = document.createElement("style");
@@ -24,33 +19,32 @@ export class TheoCommandPalette extends HTMLElement {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
       }
     `;
 
-    this.div = document.createElement("div");
-    this.div.setAttribute("visible", this.visible);
-    this.div.style.display = "none";
-    this.div.textContent = "Hello, World!";
+    const div = document.createElement("div");
+    div.textContent = "Command Palette!";
 
     this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(style);
-    this.shadowRoot.appendChild(this.div);
+    this.shadowRoot.appendChild(div);
 
     this.setupKeyboard();
   }
 
   setupKeyboard() {
-    Keyboard.attach(this);
+    Keyboard.attach(document);
 
     Keyboard.add_binding({
       key: "k",
       ctrlKey: true,
       desc: "Show the command palette",
       callback: () => {
-        this.visible = !this.visible;
-        this.div.style.display = this.visible ? "block" : "none";
+        if (this.hidden) {
+          this.hidden = undefined;
+        } else {
+          this.hidden = true;
+        }
       },
     });
 
@@ -58,8 +52,11 @@ export class TheoCommandPalette extends HTMLElement {
       key: "/",
       desc: "Show the command palette",
       callback: () => {
-        this.visible = !this.visible;
-        this.div.style.display = this.visible ? "block" : "none";
+        if (this.hidden) {
+          this.hidden = undefined;
+        } else {
+          this.hidden = true;
+        }
       },
     });
 
@@ -67,8 +64,16 @@ export class TheoCommandPalette extends HTMLElement {
       key: "Escape",
       desc: "Close the command palette",
       callback: () => {
-        this.visible = false;
-        this.div.style.display = "none";
+        this.hidden = true;
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "1",
+      ctrlKey: true,
+      desc: "Go to Portfolio",
+      callback: () => {
+        window.location.href = "/portfolio";
       },
     });
   }
