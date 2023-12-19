@@ -39,6 +39,14 @@ export class TheoCommandPalette extends HTMLElement {
   }
 
   setupKeyboard() {
+    const toggleCommandPaletteHidden = (hidden?: boolean) => {
+      if (this.hidden) {
+        this.hidden = undefined;
+      } else {
+        this.hidden = true;
+      }
+    }
+
     const handleLayoutShift = () => {
       // Toggle the ability to scroll the body and set the padding so there isn't any reflow.
       const widthWithScrollBar = document.body.offsetWidth;
@@ -60,13 +68,9 @@ export class TheoCommandPalette extends HTMLElement {
     Keyboard.add_binding({
       key: "k",
       ctrlKey: true,
-      desc: "Show the command palette",
+      desc: "Notify 'ctrl+k' || 'ctrl+k' was pressed.",
       callback: () => {
-        if (this.hidden) {
-          this.hidden = undefined;
-        } else {
-          this.hidden = true;
-        }
+        toggleCommandPaletteHidden();
 
         handleLayoutShift();
       },
@@ -74,13 +78,9 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "/",
-      desc: "Show the command palette",
+      desc: "Notify '/' || '/' was pressed.",
       callback: () => {
-        if (this.hidden) {
-          this.hidden = undefined;
-        } else {
-          this.hidden = true;
-        }
+        toggleCommandPaletteHidden();
 
         handleLayoutShift();
       },
@@ -98,10 +98,92 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "1",
-      ctrlKey: true,
-      desc: "Go to Portfolio",
+      altKey: true,
+      desc: "Notify 'alt+1' || 'alt+1' was pressed.",
+      callback: () => {
+        window.location.href = "/";
+      },
+      commandDesc: "Go to Landing Page",
+      commandFunc: function () {
+        window.location.href = "/";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "2",
+      altKey: true,
+      desc: "Notify 'alt+2' || 'alt+2' was pressed.",
       callback: () => {
         window.location.href = "/portfolio";
+      },
+      commandDesc: "Go to Portfolio Page",
+      commandFunc: function () {
+        window.location.href = "/portfolio";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "3",
+      altKey: true,
+      desc: "Notify 'alt+3' || 'alt+3' was pressed.",
+      callback: () => {
+        window.location.href = "/projects";
+      },
+      commandDesc: "Go to Projects Page",
+      commandFunc: function () {
+        window.location.href = "/projects";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "4",
+      altKey: true,
+      desc: "Notify 'alt+4' || 'alt+4' was pressed.",
+      callback: () => {
+        window.location.href = "/github";
+      },
+      commandDesc: "Go to GitHub Page",
+      commandFunc: function () {
+        window.location.href = "/github";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "5",
+      altKey: true,
+      desc: "Notify 'alt+5' || 'alt+5' was pressed.",
+      callback: () => {
+        window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
+      },
+      commandDesc: "Go to LinkedIn Profile",
+      commandFunc: function () {
+        window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "6",
+      altKey: true,
+      desc: "Notify 'alt+6' || 'alt+6' was pressed.",
+      callback: () => {
+        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
+      },
+      commandDesc: "Go to Resume (PDF)",
+      commandFunc: function () {
+        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
+      },
+    });
+
+    Keyboard.add_binding({
+      key: "7",
+      altKey: true,
+      desc: "Notify 'alt+7' || 'alt+7' was pressed.",
+      callback: () => {
+        window.location.href = "mailto:christopherbilg@gmail.com";
+      },
+      commandDesc: "Email Chris",
+      commandFunc: function () {
+        window.location.href = "mailto:christopherbilg@gmail.com";
       },
     });
   }
