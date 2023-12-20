@@ -37,13 +37,25 @@ export class TheoCommandPalette extends HTMLElement {
     `;
 
     const div = document.createElement("div");
-    div.textContent = "Command Palette!";
 
     this.attachShadow({ mode: "open" });
     this.shadowRoot.appendChild(style);
     this.shadowRoot.appendChild(div);
 
     this.setupKeyboard();
+
+    Keyboard.private.bindings
+      .filter((binding) => !!binding.commandDesc)
+      .forEach((binding) => {
+        const command = document.createElement("div");
+
+        command.textContent = binding.commandDesc;
+        command.onclick = () => {
+          binding.commandFunc();
+        };
+
+        div.appendChild(command);
+      });
   }
 
   setupKeyboard() {
@@ -99,7 +111,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "Escape",
-      desc: "Close the command palette",
+      desc: "Notify 'Escape' || 'Escape' was pressed.",
       callback: () => {
         toggleCommandPaletteHidden(true);
         handleLayoutShift();
