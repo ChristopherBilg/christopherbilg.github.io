@@ -43,6 +43,12 @@ export class TheoCommandPalette extends HTMLElement {
         gap: 1rem;
       }
 
+      :host > div > span {
+        font-size: 2rem;
+        font-weight: bold;
+        align-self: center;
+      }
+
       :host > div > div {
         display: flex;
         justify-content: space-between;
@@ -73,6 +79,14 @@ export class TheoCommandPalette extends HTMLElement {
     this.shadowRoot.appendChild(div);
 
     this.setupKeyboard();
+
+    const header = document.createElement("span");
+    header.textContent = "Command Palette";
+    div.appendChild(header);
+
+    const divider = document.createElement("hr");
+    divider.style.width = "100%";
+    div.appendChild(divider);
 
     Keyboard.private.bindings
       .filter((binding) => !!binding.commandDesc)
