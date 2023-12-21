@@ -28,11 +28,41 @@ export class TheoCommandPalette extends HTMLElement {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 400px;
-        height: 400px;
+        max-width: 400px;
+        max-height: 400px;
         background-color: #fff;
         border-radius: 4px;
         box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        overflow-y: auto;
+      }
+
+      :host > div {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      :host > div > div {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      :host > div > div > button {
+        font-size: 1rem;
+        background-color: transparent;
+        border: 1px solid #000;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      :host > div > div > span {
+        font-size: 1rem;
+        font-weight: bold;
+        align-self: center;
       }
     `;
 
@@ -47,14 +77,24 @@ export class TheoCommandPalette extends HTMLElement {
     Keyboard.private.bindings
       .filter((binding) => !!binding.commandDesc)
       .forEach((binding) => {
-        const command = document.createElement("div");
+        const commandContainer = document.createElement("div");
 
+        const command = document.createElement("button");
         command.textContent = binding.commandDesc;
         command.onclick = () => {
           binding.commandFunc();
         };
+        commandContainer.appendChild(command);
 
-        div.appendChild(command);
+        const commandShortcut = document.createElement("span");
+        commandShortcut.textContent = "(";
+        commandShortcut.textContent += binding.ctrlKey ? "ctrl+" : "";
+        commandShortcut.textContent += binding.altKey ? "alt+" : "";
+        commandShortcut.textContent += binding.key ? binding.key : "";
+        commandShortcut.textContent += ")";
+        commandContainer.appendChild(commandShortcut);
+
+        div.appendChild(commandContainer);
       });
   }
 
@@ -120,7 +160,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "1",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+1' || 'alt+1' was pressed.",
       callback: () => {
         window.location.href = "/";
@@ -133,7 +173,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "2",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+2' || 'alt+2' was pressed.",
       callback: () => {
         window.location.href = "/portfolio";
@@ -146,7 +186,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "3",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+3' || 'alt+3' was pressed.",
       callback: () => {
         window.location.href = "/projects";
@@ -159,7 +199,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "4",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+4' || 'alt+4' was pressed.",
       callback: () => {
         window.location.href = "/github";
@@ -172,7 +212,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "5",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+5' || 'alt+5' was pressed.",
       callback: () => {
         window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
@@ -185,7 +225,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "6",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+6' || 'alt+6' was pressed.",
       callback: () => {
         window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
@@ -198,7 +238,7 @@ export class TheoCommandPalette extends HTMLElement {
 
     Keyboard.add_binding({
       key: "7",
-      altKey: true,
+      ctrlKey: true,
       desc: "Notify 'alt+7' || 'alt+7' was pressed.",
       callback: () => {
         window.location.href = "mailto:christopherbilg@gmail.com";
