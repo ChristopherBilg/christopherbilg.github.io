@@ -55,7 +55,7 @@ export class TheoCommandPalette extends HTMLElement {
         gap: 1rem;
       }
 
-      :host > div > div > button {
+      :host > div > div > a {
         font-size: 1rem;
         background-color: transparent;
         border: 1px solid #000;
@@ -63,6 +63,8 @@ export class TheoCommandPalette extends HTMLElement {
         padding: 0.5rem 1rem;
         cursor: pointer;
         width: 100%;
+        color: #000;
+        text-decoration: none;
       }
 
       :host > div > div > span {
@@ -93,12 +95,12 @@ export class TheoCommandPalette extends HTMLElement {
       .forEach((binding) => {
         const commandContainer = document.createElement("div");
 
-        const command = document.createElement("button");
-        command.textContent = binding.commandDesc;
-        command.onclick = () => {
-          binding.commandFunc();
-        };
-        commandContainer.appendChild(command);
+        if (binding.commandHref) {
+          const commandAnchor = document.createElement("a");
+          commandAnchor.textContent = binding.commandDesc;
+          commandAnchor.href = binding.commandHref;
+          commandContainer.appendChild(commandAnchor);
+        }
 
         const commandShortcut = document.createElement("span");
         commandShortcut.textContent = "(";
@@ -180,9 +182,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "/";
       },
       commandDesc: "Go to Landing Page",
-      commandFunc: function () {
-        window.location.href = "/";
-      },
+      commandHref: "/",
     });
 
     Keyboard.add_binding({
@@ -193,9 +193,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "/portfolio";
       },
       commandDesc: "Go to Portfolio Page",
-      commandFunc: function () {
-        window.location.href = "/portfolio";
-      },
+      commandHref: "/portfolio",
     });
 
     Keyboard.add_binding({
@@ -206,9 +204,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "/projects";
       },
       commandDesc: "Go to Projects Page",
-      commandFunc: function () {
-        window.location.href = "/projects";
-      },
+      commandHref: "/projects",
     });
 
     Keyboard.add_binding({
@@ -219,9 +215,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "/github";
       },
       commandDesc: "Go to GitHub Page",
-      commandFunc: function () {
-        window.location.href = "/github";
-      },
+      commandHref: "/github",
     });
 
     Keyboard.add_binding({
@@ -232,9 +226,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
       },
       commandDesc: "Go to LinkedIn Profile",
-      commandFunc: function () {
-        window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
-      },
+      commandHref: "https://www.linkedin.com/in/christopher-bilger/",
     });
 
     Keyboard.add_binding({
@@ -245,9 +237,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
       },
       commandDesc: "Go to Resume (PDF)",
-      commandFunc: function () {
-        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
-      },
+      commandHref: "/Christopher-Bilger-Resume-November-2023.pdf",
     });
 
     Keyboard.add_binding({
@@ -258,9 +248,7 @@ export class TheoCommandPalette extends HTMLElement {
         window.location.href = "mailto:christopherbilg@gmail.com";
       },
       commandDesc: "Email Chris",
-      commandFunc: function () {
-        window.location.href = "mailto:christopherbilg@gmail.com";
-      },
+      commandHref: "mailto:christopherbilg@gmail.com",
     });
   }
 }
