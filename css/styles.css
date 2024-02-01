@@ -112,7 +112,7 @@ figure {
   width: 100%;
   text-align: center;
   padding: 1rem 0;
-  background-color: var(--color-secondary);
+  background-color: #ffff00;
   font-size: 2rem;
   font-weight: bold;
 }
