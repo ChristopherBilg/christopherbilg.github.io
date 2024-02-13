@@ -234,10 +234,10 @@ export class TheoCommandPalette extends HTMLElement {
       ctrlKey: true,
       desc: "Notify 'alt+6' || 'alt+6' was pressed.",
       callback: () => {
-        window.location.href = "/Christopher-Bilger-Resume-November-2023.pdf";
+        window.location.href = "/Christopher-Bilger-Resume-February-2024.pdf";
       },
       commandDesc: "Go to Resume (PDF)",
-      commandHref: "/Christopher-Bilger-Resume-November-2023.pdf",
+      commandHref: "/Christopher-Bilger-Resume-February-2024.pdf",
     });
 
     Keyboard.add_binding({
