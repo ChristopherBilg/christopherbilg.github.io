@@ -1,14 +1,14 @@
 /**
- * Theo is a JavaScript UI component for creating a command palette.
+ * Nova is a JavaScript UI component for creating a command palette.
  *
- * Theo was built almost entirely using GitHub's Copilot tool for AI generated code.
+ * Nova was built almost entirely using GitHub's Copilot tool for AI generated code.
  *
- * Theo was named after ... TODO: finish this sentence.
+ * Nova was named after our first family dog, Ava.
  */
 
 import { Keyboard } from "./keyboard.js";
 
-export class TheoCommandPalette extends HTMLElement {
+export class NovaCommandPalette extends HTMLElement {
   constructor() {
     super();
     this.hidden = true;
@@ -138,7 +138,7 @@ export class TheoCommandPalette extends HTMLElement {
       document.body.style.paddingRight = `${Math.max(paddingRight, 0)}px`;
 
       // Blur all elements that aren't the command palette.
-      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(theo-command-palette):not(script)"));
+      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(nova-command-palette):not(script)"));
       elementsToBlur.forEach((element) => {
         element.style.filter = this.hidden ? "" : "blur(4px)";
       });
@@ -253,4 +253,4 @@ export class TheoCommandPalette extends HTMLElement {
   }
 }
 
-customElements.define("theo-command-palette", TheoCommandPalette);
+customElements.define("nova-command-palette", NovaCommandPalette);
