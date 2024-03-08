@@ -156,11 +156,13 @@
 
         #navigation {
           & ul {
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
 
             & li {
               margin-right: 0;
               margin-bottom: 1rem;
+              text-align: center;
             }
           }
         }
