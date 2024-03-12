@@ -117,6 +117,10 @@ figure {
   font-weight: bold;
 }
 
+#work-in-progress:after {
+  content: "WORK IN PROGRESS";
+}
+
 /* Classes */
 .rounded-image {
   border-radius: 2rem;

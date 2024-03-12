@@ -16,14 +16,15 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress">WORK IN PROGRESS</div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Geolocation</h1>
 
-      <p>Description...</p>
+      <p>
+        The <b>Geolocation API</b> allows the user to provide their location to web applications if they so desire. For
+        privacy reasons, the user is asked for permission to report location information.
+      </p>
     </main>
 
     <script type="module">
@@ -36,11 +37,90 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
-          init() {}
+        class App extends StyledComponent {
+          init() {
+            this.content = "Loading...";
+            this.ok = false;
+
+            this.getLocation();
+
+            setInterval(() => {
+              this.render();
+            }, 100);
+          }
+
+          getLocation() {
+            if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  this.content = {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    accuracy: position.coords.accuracy,
+                  };
+
+                  this.status = true;
+                  this.render();
+                },
+                (error) => {
+                  switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                      this.content = "User denied the request for Geolocation.";
+                      break;
+                    case error.POSITION_UNAVAILABLE:
+                      this.content = "Location information is unavailable.";
+                      break;
+                    case error.TIMEOUT:
+                      this.content = "The request to get user location timed out.";
+                      break;
+                    case error.UNKNOWN_ERROR:
+                      this.content = "An unknown error occurred.";
+                      break;
+                  }
+
+                  this.status = false;
+                  this.render();
+                }
+              );
+            } else {
+              this.content = "Geolocation is not supported by this browser.";
+              this.status = false;
+              this.render();
+            }
+          }
+
+          styles() {
+            return css`
+              h3 {
+                color: ${this.status ? "green" : "red"};
+              }
+            `;
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <h2>Geolocation</h2>
+
+                <h3>${this.status ? "Success" : "Failed"}</h3>
+
+                ${
+                  this.status
+                    ? vdom`
+                      <pre>
+                        Latitude: ${this.content.latitude}
+                        <br />
+                        Longitude: ${this.content.longitude}
+                        <br />
+                        Accuracy: ${this.content.accuracy}
+                      </pre>
+                    `
+                    : vdom`
+                      <p>${this.content}</p>
+                    `
+                }
+              </div>
+            `;
           }
         }
 
