@@ -37,8 +37,8 @@
       <p>The top level of JSON Canvas contains two arrays:</p>
 
       <ul>
-        <li><code class="language-plaintext highlighter-rouge">nodes</code> (optional, array of nodes)</li>
-        <li><code class="language-plaintext highlighter-rouge">edges</code> (optional, array of edges)</li>
+        <li><code>nodes</code> (optional, array of nodes)</li>
+        <li><code>edges</code> (optional, array of edges)</li>
       </ul>
 
       <h2 id="nodes">Nodes</h2>
@@ -50,39 +50,22 @@
       <p>All nodes include the following attributes:</p>
 
       <ul>
+        <li><code>id</code> (required, string) is a unique ID for the node.</li>
         <li
-          ><code class="language-plaintext highlighter-rouge">id</code> (required, string) is a unique ID for the
-          node.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">type</code> (required, string) is the node type.
+          ><code>type</code> (required, string) is the node type.
           <ul>
-            <li><code class="language-plaintext highlighter-rouge">text</code></li>
-            <li><code class="language-plaintext highlighter-rouge">file</code></li>
-            <li><code class="language-plaintext highlighter-rouge">link</code></li>
-            <li><code class="language-plaintext highlighter-rouge">group</code></li>
+            <li><code>text</code></li>
+            <li><code>file</code></li>
+            <li><code>link</code></li>
+            <li><code>group</code></li>
           </ul>
         </li>
+        <li><code>x</code> (required, integer) is the <code>x</code> position of the node in pixels.</li>
+        <li><code>y</code> (required, integer) is the <code>y</code> position of the node in pixels.</li>
+        <li><code>width</code> (required, integer) is the width of the node in pixels.</li>
+        <li><code>height</code> (required, integer) is the height of the node in pixels.</li>
         <li
-          ><code class="language-plaintext highlighter-rouge">x</code> (required, integer) is the
-          <code class="language-plaintext highlighter-rouge">x</code> position of the node in pixels.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">y</code> (required, integer) is the
-          <code class="language-plaintext highlighter-rouge">y</code> position of the node in pixels.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">width</code> (required, integer) is the width of the node
-          in pixels.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">height</code> (required, integer) is the height of the
-          node in pixels.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">color</code> (optional,
-          <code class="language-plaintext highlighter-rouge">canvasColor</code>) is the color of the node, see the Color
-          section.</li
+          ><code>color</code> (optional, <code>canvasColor</code>) is the color of the node, see the Color section.</li
         >
       </ul>
 
@@ -91,10 +74,7 @@
       <p>Text type nodes store text, and include the following attribute:</p>
 
       <ul>
-        <li
-          ><code class="language-plaintext highlighter-rouge">text</code> (required, string) in plain text with Markdown
-          syntax.</li
-        >
+        <li><code>text</code> (required, string) in plain text with Markdown syntax.</li>
       </ul>
 
       <h3 id="file-type-nodes">File type nodes</h3>
@@ -105,14 +85,10 @@
       >
 
       <ul>
+        <li><code>file</code> (required, string) is the path to the file within the system.</li>
         <li
-          ><code class="language-plaintext highlighter-rouge">file</code> (required, string) is the path to the file
-          within the system.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">subpath</code> (optional, string) is a subpath that may
-          link to a heading or a block. Always starts with a
-          <code class="language-plaintext highlighter-rouge">#</code>.</li
+          ><code>subpath</code> (optional, string) is a subpath that may link to a heading or a block. Always starts
+          with a <code>#</code>.</li
         >
       </ul>
 
@@ -121,7 +97,7 @@
       <p>Link type nodes reference a URL, and include the following attribute:</p>
 
       <ul>
-        <li><code class="language-plaintext highlighter-rouge">url</code> (required, string)</li>
+        <li><code>url</code> (required, string)</li>
       </ul>
 
       <h3 id="group-type-nodes">Group type nodes</h3>
@@ -129,30 +105,14 @@
       <p>Group type nodes are used as a visual container for nodes within it. They include the following attributes:</p>
 
       <ul>
+        <li><code>label</code> (optional, string) is a text label for the group.</li>
+        <li><code>background</code> (optional, string) is the path to the background image.</li>
         <li
-          ><code class="language-plaintext highlighter-rouge">label</code> (optional, string) is a text label for the
-          group.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">background</code> (optional, string) is the path to the
-          background image.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">backgroundStyle</code> (optional, string) is the rendering
-          style of the background image. Valid values:
+          ><code>backgroundStyle</code> (optional, string) is the rendering style of the background image. Valid values:
           <ul>
-            <li
-              ><code class="language-plaintext highlighter-rouge">cover</code> fills the entire width and height of the
-              node.</li
-            >
-            <li
-              ><code class="language-plaintext highlighter-rouge">ratio</code> maintains the aspect ratio of the
-              background image.</li
-            >
-            <li
-              ><code class="language-plaintext highlighter-rouge">repeat</code> repeats the image as a pattern in both
-              x/y directions.</li
-            >
+            <li><code>cover</code> fills the entire width and height of the node.</li>
+            <li><code>ratio</code> maintains the aspect ratio of the background image.</li>
+            <li><code>repeat</code> repeats the image as a pattern in both x/y directions.</li>
           </ul>
         </li>
       </ul>
@@ -162,81 +122,62 @@
       <p>Edges are lines that connect one node to another.</p>
 
       <ul>
+        <li><code>id</code> (required, string) is a unique ID for the edge.</li>
+        <li><code>fromNode</code> (required, string) is the node <code>id</code> where the connection starts.</li>
         <li
-          ><code class="language-plaintext highlighter-rouge">id</code> (required, string) is a unique ID for the
-          edge.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">fromNode</code> (required, string) is the node
-          <code class="language-plaintext highlighter-rouge">id</code> where the connection starts.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">fromSide</code> (optional, string) is the side where this
-          edge starts. Valid values:
+          ><code>fromSide</code> (optional, string) is the side where this edge starts. Valid values:
           <ul>
-            <li><code class="language-plaintext highlighter-rouge">top</code></li>
-            <li><code class="language-plaintext highlighter-rouge">right</code></li>
-            <li><code class="language-plaintext highlighter-rouge">bottom</code></li>
-            <li><code class="language-plaintext highlighter-rouge">left</code></li>
+            <li><code>top</code></li>
+            <li><code>right</code></li>
+            <li><code>bottom</code></li>
+            <li><code>left</code></li>
           </ul>
         </li>
         <li
-          ><code class="language-plaintext highlighter-rouge">fromEnd</code> (optional, string) is the shape of the
-          endpoint at the edge start. Valid values:
+          ><code>fromEnd</code> (optional, string) is the shape of the endpoint at the edge start. Valid values:
           <ul>
-            <li><code class="language-plaintext highlighter-rouge">none</code></li>
-            <li><code class="language-plaintext highlighter-rouge">arrow</code></li>
+            <li><code>none</code></li>
+            <li><code>arrow</code></li>
+          </ul>
+        </li>
+        <li><code>toNode</code> (required, string) is the node <code>id</code> where the connection ends.</li>
+        <li
+          ><code>toSide</code> (optional, string) is the side where this edge ends. Valid values:
+          <ul>
+            <li><code>top</code></li>
+            <li><code>right</code></li>
+            <li><code>bottom</code></li>
+            <li><code>left</code></li>
           </ul>
         </li>
         <li
-          ><code class="language-plaintext highlighter-rouge">toNode</code> (required, string) is the node
-          <code class="language-plaintext highlighter-rouge">id</code> where the connection ends.</li
-        >
-        <li
-          ><code class="language-plaintext highlighter-rouge">toSide</code> (optional, string) is the side where this
-          edge ends. Valid values:
+          ><code>toEnd</code> (optional, string) is the shape of the endpoint at the edge end. Valid values:
           <ul>
-            <li><code class="language-plaintext highlighter-rouge">top</code></li>
-            <li><code class="language-plaintext highlighter-rouge">right</code></li>
-            <li><code class="language-plaintext highlighter-rouge">bottom</code></li>
-            <li><code class="language-plaintext highlighter-rouge">left</code></li>
+            <li><code>none</code></li>
+            <li><code>arrow</code></li>
           </ul>
         </li>
         <li
-          ><code class="language-plaintext highlighter-rouge">toEnd</code> (optional, string) is the shape of the
-          endpoint at the edge end. Valid values:
-          <ul>
-            <li><code class="language-plaintext highlighter-rouge">none</code></li>
-            <li><code class="language-plaintext highlighter-rouge">arrow</code></li>
-          </ul>
-        </li>
-        <li
-          ><code class="language-plaintext highlighter-rouge">color</code> (optional,
-          <code class="language-plaintext highlighter-rouge">canvasColor</code>) is the color of the line, see the Color
-          section.</li
+          ><code>color</code> (optional, <code>canvasColor</code>) is the color of the line, see the Color section.</li
         >
-        <li
-          ><code class="language-plaintext highlighter-rouge">label</code> (optional, string) is a text label for the
-          edge.</li
-        >
+        <li><code>label</code> (optional, string) is a text label for the edge.</li>
       </ul>
 
       <h2 id="color">Color</h2>
 
       <p
-        >The <code class="language-plaintext highlighter-rouge">color</code> type is used to encode color data for nodes
-        and edges. Colors attributes expect a string. Colors can be specified in hex format, e.g.
-        <code class="language-plaintext highlighter-rouge">"#FFFFFF"</code>. Six preset colors exist, mapped to the
-        following numbers:</p
+        >The <code>color</code> type is used to encode color data for nodes and edges. Colors attributes expect a
+        string. Colors can be specified in hex format, e.g. <code>"#FFFFFF"</code>. Six preset colors exist, mapped to
+        the following numbers:</p
       >
 
       <ul>
-        <li><code class="language-plaintext highlighter-rouge">1</code> red</li>
-        <li><code class="language-plaintext highlighter-rouge">2</code> orange</li>
-        <li><code class="language-plaintext highlighter-rouge">3</code> yellow</li>
-        <li><code class="language-plaintext highlighter-rouge">4</code> green</li>
-        <li><code class="language-plaintext highlighter-rouge">5</code> cyan</li>
-        <li><code class="language-plaintext highlighter-rouge">6</code> purple</li>
+        <li><code>1</code> red</li>
+        <li><code>2</code> orange</li>
+        <li><code>3</code> yellow</li>
+        <li><code>4</code> green</li>
+        <li><code>5</code> cyan</li>
+        <li><code>6</code> purple</li>
       </ul>
     </div>
   </body>

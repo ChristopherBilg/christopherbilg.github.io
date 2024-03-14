@@ -89,6 +89,8 @@ document.getElementById("zoom-reset").addEventListener("click", function () {
   adjustCanvasToViewport();
 });
 
+window.addEventListener("resize", adjustCanvasToViewport);
+
 document.getElementById("toggleOutput").addEventListener("click", function () {
   const output = document.getElementById("output");
   output.classList.toggle("hidden");
