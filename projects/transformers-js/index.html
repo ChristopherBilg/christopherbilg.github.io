@@ -11,14 +11,10 @@
     <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../../css/styles.css" />
-
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0" defer></script>
   </head>
 
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
-
-    <div id="work-in-progress"></div>
 
     <main hidden>
       <a href="/projects">Back to Projects List</a>
@@ -26,14 +22,15 @@
       <h1>Transformers.js - AI/ML Directly in the Browser</h1>
 
       <p>
-        Description...
-        <a href="https://www.google.com/search?q=transformers.js&sourceid=chrome&ie=UTF-8" target="_blank">
-          Transformers.js
-        </a>
+        This project is a proof of concept for using Hugging Face's
+        <a href="https://huggingface.co/transformers/" target="_blank">transformers</a>
+        library directly in the browser. The library is a state-of-the-art natural language processing library that can
+        be used for a variety of tasks such as text classification, translation, summarization, and more.
       </p>
     </main>
 
     <script type="module">
+      import { pipeline } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.16.0";
       import * as Arlo from "../../js/arlo/index.js";
 
       for (const exportedName in Arlo) {
@@ -44,10 +41,46 @@
         document.getElementsByTagName("main")[0].hidden = false;
 
         class App extends Component {
-          init() {}
+          async init() {
+            this.inputs = ["I love transformers!", "I hate transformers!"];
+
+            this.classifier = await pipeline(
+              "sentiment-analysis",
+              "Xenova/distilbert-base-uncased-finetuned-sst-2-english"
+            );
+            this.result = await this.classifier(this.inputs);
+
+            setInterval(async () => {
+              this.render();
+            }, 100);
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <h2>Classifier Inputs:</h2>
+
+                <ol>
+                  ${this.inputs.map((i) => vdom`<li>${i}</li>`)}
+                </ol>
+
+                <h2>Classifier Outputs:</h2>
+
+                <ol>
+                  ${
+                    this.result?.map(
+                      (r) => vdom`
+                        <li>
+                          <code>${r.label}</code>
+                          |
+                          <code>${r.score}</code>
+                        </li>
+                      `
+                    ) || vdom`<li>Loading...</li>`
+                  }
+                </ol>
+              </div>
+            `;
           }
         }
 
