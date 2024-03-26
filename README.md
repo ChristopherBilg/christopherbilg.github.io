@@ -4,7 +4,6 @@ Christopher Bilger's Portfolio
 
 ## To-Do
 
-- [ ] projects/js-canvas
 - [ ] Paternity Leave #2
   - [ ] Buy a domain matching our second child's full name (5)
   - [ ] Point the domain to a new webpage for our second child's `Love Letters` webpage (15)

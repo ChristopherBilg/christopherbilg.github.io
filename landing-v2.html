@@ -10,17 +10,56 @@
     <title>Chris Bilger</title>
     <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
 
-    <script type="module" src="./js/nova/index.js" defer></script>
-    <script type="module" src="./js/theo/index.js" defer></script>
+    <style>
+      #zoom-controls {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        padding: 1rem;
+        margin: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background-color: #fff;
+        border-radius: 0 0 0 1rem;
+        box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
 
-    <style></style>
+        button {
+          padding: 0.5rem 1rem;
+          border: none;
+          background-color: #fff;
+          color: var(--text-color);
+          font-size: 1rem;
+          cursor: pointer;
+          border-radius: 0.5rem;
+          box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.1);
+
+          &:hover {
+            background-color: #f0f0f0;
+          }
+        }
+      }
+    </style>
   </head>
 
   <body>
     <main>
       <!-- TODO: Canvas -->
+
+      <div id="zoom-controls">
+        <button id="zoom-in">Zoom in</button>
+        <button id="zoom-out">Zoom out</button>
+        <button id="zoom-reset">Reset Zoom</button>
+      </div>
     </main>
 
     <nova-command-palette />
+
+    <script>
+      let edges = [];
+    </script>
+
+    <script type="module" src="./js/nova/index.js"></script>
+    <script type="module" src="./js/theo/index.js"></script>
   </body>
 </html>

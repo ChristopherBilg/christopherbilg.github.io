@@ -1,7 +1,6 @@
 /**
  * Nova is a JavaScript UI component for creating a command palette.
- *
- * Nova was built almost entirely using GitHub's Copilot tool for AI generated code.
+ * It was built almost entirely using GitHub's Copilot tool for AI generated code.
  *
  * Nova was named after our first family dog, Ava.
  */
