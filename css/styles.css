@@ -54,17 +54,6 @@ abbr[title]:after {
   content: " (" attr(title) ") ";
 }
 
-@media screen and (min-width: 750px) {
-  abbr[title] {
-    text-decoration: underline dotted;
-    cursor: help;
-  }
-
-  abbr[title]:after {
-    content: "";
-  }
-}
-
 ol {
   padding-inline-start: 1rem;
 }
@@ -150,6 +139,7 @@ figure {
   color: var(--color-text-secondary);
 }
 
+/* Media Queries */
 @media screen and (min-width: 600px) {
   .typewriter {
     width: fit-content;
@@ -182,5 +172,16 @@ figure {
     50% {
       border-color: var(--color-text);
     }
+  }
+}
+
+@media screen and (min-width: 750px) {
+  abbr[title] {
+    text-decoration: underline dotted;
+    cursor: help;
+  }
+
+  abbr[title]:after {
+    content: "";
   }
 }
