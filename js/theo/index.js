@@ -24,6 +24,9 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let touchStartPanX = 0;
 let touchStartPanY = 0;
+let panStartX = 0;
+let panStartY = 0;
+let selectedElement = null;
 
 function adjustCanvasToViewport() {
   const nodes = document.querySelectorAll(".node");
@@ -76,7 +79,7 @@ window.addEventListener(
         scale = Math.min(scale + ZOOM_SPEED, maxScale);
       }
 
-      document.body.style.setProperty("--scale", scale);
+      document.getElementById("container").style.setProperty("--scale", scale);
       e.preventDefault();
     }
   },
@@ -86,12 +89,12 @@ window.addEventListener(
 // Buttons
 document.getElementById("zoom-in").addEventListener("click", function () {
   scale = Math.min(scale + ZOOM_SPEED, maxScale);
-  document.body.style.setProperty("--scale", scale);
+  document.getElementById("container").style.setProperty("--scale", scale);
 });
 
 document.getElementById("zoom-out").addEventListener("click", function () {
   scale = Math.max(scale - ZOOM_SPEED, minScale);
-  document.body.style.setProperty("--scale", scale);
+  document.getElementById("container").style.setProperty("--scale", scale);
 });
 
 document.getElementById("zoom-reset").addEventListener("click", function () {
@@ -99,36 +102,6 @@ document.getElementById("zoom-reset").addEventListener("click", function () {
 });
 
 window.addEventListener("resize", adjustCanvasToViewport);
-
-document.getElementById("toggle-output").addEventListener("click", function () {
-  const output = document.getElementById("output");
-  output.classList.toggle("hidden");
-});
-
-document.querySelector(".close-output").addEventListener("click", function () {
-  const output = document.getElementById("output");
-  output.classList.toggle("hidden");
-});
-
-document.querySelector(".button-copy").addEventListener("click", function () {
-  const positionsOutput = document.getElementById("positionsOutput").textContent;
-  navigator.clipboard.writeText(positionsOutput).catch((err) => {
-    console.error("Error copying canvas data: ", err);
-  });
-});
-
-document.querySelector(".button-download").addEventListener("click", function () {
-  const positionsOutput = document.getElementById("positionsOutput").textContent;
-  const blob = new Blob([positionsOutput], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "sample.canvas";
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-});
 
 // Very simplified Markdown conversion
 function htmlToMarkdown(html) {
@@ -190,16 +163,6 @@ function updateCanvasData() {
 
     return nodeObject;
   });
-
-  const canvasData = {
-    nodes: nodes,
-    edges: edges,
-  };
-
-  const positionsOutput = document.getElementById("positionsOutput");
-  positionsOutput.textContent = JSON.stringify(canvasData, null, 2);
-
-  Prism.highlightElement(positionsOutput);
 }
 
 function getAnchorPoint(node, side) {
@@ -298,21 +261,21 @@ window.addEventListener("keydown", function (e) {
   if (e.code === "Space") {
     e.preventDefault();
     isSpacePressed = true;
-    document.body.classList.add("will-pan");
+    document.getElementById("container").classList.add("will-pan");
   }
 });
 
 window.addEventListener("keyup", function (e) {
   if (e.code === "Space") {
     isSpacePressed = false;
-    document.body.classList.remove("will-pan");
+    document.getElementById("container").classList.remove("will-pan");
   }
 });
 
 window.addEventListener("mousedown", function (e) {
   if (isSpacePressed && !isDragging) {
     isPanning = true;
-    document.body.style.cursor = "grabbing";
+    document.getElementById("container").style.cursor = "grabbing";
     panStartX = e.clientX - panOffsetX;
     panStartY = e.clientY - panOffsetY;
   }
@@ -323,15 +286,15 @@ window.addEventListener("mousemove", function (e) {
     panOffsetX = e.clientX - panStartX;
     panOffsetY = e.clientY - panStartY;
 
-    document.body.style.setProperty("--pan-x", `${panOffsetX}px`);
-    document.body.style.setProperty("--pan-y", `${panOffsetY}px`);
+    document.getElementById("container").style.setProperty("--pan-x", `${panOffsetX}px`);
+    document.getElementById("container").style.setProperty("--pan-y", `${panOffsetY}px`);
   }
 });
 
 window.addEventListener("mouseup", function () {
   if (isPanning) {
     isPanning = false;
-    document.body.style.cursor = "";
+    document.getElementById("container").style.cursor = "";
   }
 });
 
@@ -386,7 +349,7 @@ document.getElementById("canvas-container").addEventListener(
       const distance = Math.sqrt((touch2.pageX - touch1.pageX) ** 2 + (touch2.pageY - touch1.pageY) ** 2);
       const scaleChange = distance / initialDistance;
       scale = Math.min(Math.max(minScale, scale * scaleChange), maxScale); // Apply and limit scale
-      document.body.style.setProperty("--scale", scale);
+      document.getElementById("container").style.setProperty("--scale", scale);
       initialDistance = distance;
       applyPanAndZoom();
     }
@@ -485,9 +448,9 @@ document.addEventListener("touchend", function () {
 });
 
 function applyPanAndZoom() {
-  document.body.style.setProperty("--scale", scale);
-  document.body.style.setProperty("--pan-x", `${panOffsetX}px`);
-  document.body.style.setProperty("--pan-y", `${panOffsetY}px`);
+  document.getElementById("container").style.setProperty("--scale", scale);
+  document.getElementById("container").style.setProperty("--pan-x", `${panOffsetX}px`);
+  document.getElementById("container").style.setProperty("--pan-y", `${panOffsetY}px`);
 }
 
 // Prevent the whole page from zooming on pinch
