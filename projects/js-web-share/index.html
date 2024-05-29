@@ -16,14 +16,15 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Web Share</h1>
 
-      <p>Description...</p>
+      <p>
+        This project is a simple demonstration of the <b>JavaScript Web Share API</b>. The Web Share API allows web
+        developers to share content from their web applications to other applications on the user's device.
+      </p>
     </main>
 
     <script type="module">
@@ -36,11 +37,55 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
+        class App extends StyledComponent {
           init() {}
 
+          share() {
+            if (navigator.share) {
+              navigator
+                .share({
+                  title: "Christopher Bilger's Portfolio",
+                  text: "Check out Christopher Bilger's portfolio!",
+                  url: "https://chrisbilger.com/portfolio/",
+                })
+                .finally(() => {
+                  this.render();
+                });
+            }
+
+            this.render();
+          }
+
+          styles() {
+            return css`
+              button {
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 1rem;
+                margin: 0.5rem 0rem;
+                cursor: pointer;
+              }
+
+              p {
+                font-size: 1rem;
+                margin: 0.5rem;
+              }
+            `;
+          }
+
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <button onclick=${this.share}>Share</button>
+
+                <p>Click the 'Share' button to share the portfolio page. If nothing happens, your browser does not support the Web Share API.</p>
+              </div>
+            `;
           }
         }
 
