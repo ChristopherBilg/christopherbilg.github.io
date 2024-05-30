@@ -39,21 +39,19 @@
 
         class App extends StyledComponent {
           init() {
-            this.shareable = navigator.canShare();
+            this.shareable = !!navigator.share;
           }
 
           share() {
-            if (this.shareable && navigator.share) {
-              navigator
-                .share({
-                  title: "Christopher Bilger's Portfolio",
-                  text: "Check out Christopher Bilger's portfolio!",
-                  url: "https://chrisbilger.com/portfolio/",
-                })
-                .finally(() => {
-                  this.render();
-                });
-            }
+            navigator
+              .share({
+                title: "Christopher Bilger's Portfolio",
+                text: "Check out Christopher Bilger's portfolio!",
+                url: "https://chrisbilger.com/portfolio/",
+              })
+              .finally(() => {
+                this.render();
+              });
 
             this.render();
           }
@@ -83,7 +81,7 @@
           compose() {
             return vdom`
               <div>
-                <button onclick=${this.share}>Share</button>
+                <button onclick=${this.share} disabled=${!this.shareable}>Share</button>
 
                 <p>${
                   this.shareable
