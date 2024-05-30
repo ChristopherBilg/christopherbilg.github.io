@@ -38,10 +38,12 @@
         document.getElementsByTagName("main")[0].hidden = false;
 
         class App extends StyledComponent {
-          init() {}
+          init() {
+            this.shareable = navigator.canShare();
+          }
 
           share() {
-            if (navigator.share) {
+            if (this.shareable && navigator.share) {
               navigator
                 .share({
                   title: "Christopher Bilger's Portfolio",
@@ -83,7 +85,11 @@
               <div>
                 <button onclick=${this.share}>Share</button>
 
-                <p>Click the 'Share' button to share the portfolio page. If nothing happens, your browser does not support the Web Share API.</p>
+                <p>${
+                  this.shareable
+                    ? "Click the 'Share' button to share the portfolio page. If nothing happens, your browser does not support the Web Share API."
+                    : "Your browser does not support the Web Share API."
+                }</p>
               </div>
             `;
           }
