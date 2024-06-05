@@ -16,14 +16,21 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Performance</h1>
 
-      <p>Description...</p>
+      <p>
+        The <b>Performance API</b> is a JavaScript API that provides access to performance-related information for the
+        current page. It allows web developers to measure the performance of their web applications and make
+        optimizations to improve the user experience.
+      </p>
+
+      <p>
+        Below is a timing test of the <code>render(...)</code> function that is used by my custom virtual DOM library,
+        Arlo. Arlo is, of course, largely based on the Torus project by Linus Lee.
+      </p>
     </main>
 
     <script type="module">
@@ -37,10 +44,43 @@
         document.getElementsByTagName("main")[0].hidden = false;
 
         class App extends Component {
-          init() {}
+          init() {
+            // Constants
+            this.NUMBER_OF_SAVED_TIMES = 100;
+            this.SMOOTHED_FPS_WEIGHT = 0.9;
+
+            // Variables
+            this.times = [];
+            this.smoothedFps = 0;
+
+            // Start the (main) render loop
+            this.renderLoop();
+          }
+
+          renderLoop() {
+            const startTime = performance.now();
+            this.render();
+            const endTime = performance.now();
+
+            this.times.push(endTime - startTime);
+            if (this.times.length > this.NUMBER_OF_SAVED_TIMES) {
+              this.times.shift();
+            }
+
+            const fps = Math.round(1000 / (this.times.reduce((a, b) => a + b) / this.times.length));
+            this.smoothedFps = this.smoothedFps * this.SMOOTHED_FPS_WEIGHT + fps * (1 - this.SMOOTHED_FPS_WEIGHT);
+
+            requestAnimationFrame(() => this.renderLoop());
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <div>
+                  <b>Render Function Loop FPS:</b> ${Math.round(this.smoothedFps)}
+                </div>
+              </div>
+            `;
           }
         }
 
