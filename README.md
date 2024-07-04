@@ -10,3 +10,6 @@ Christopher Bilger's Portfolio
   - [ ] Create the Love Letters page for our second child (30)
   - [ ] Create a new project for our second child (600)
     - [ ] ??? Modularize all three love letters pages and the project page ???
+- [ ] Chess Engine ?
+  - [ ] chess.js ?
+  - [ ] chessboard.js ?
