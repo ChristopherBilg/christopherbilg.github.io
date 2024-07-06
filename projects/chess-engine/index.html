@@ -11,12 +11,11 @@
     <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+    <link rel="stylesheet" href="./chessboard/css/chessboard-1.0.0.css" />
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message"
-      >Please enable JavaScript in order to view this webpage.</noscript
-    >
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
     <div id="work-in-progress"></div>
 
@@ -25,13 +24,9 @@
 
       <h1>Chess Engine</h1>
 
-      <p>Description...</p>
-
       <ol>
         <li>
-          <a href="https://chessengines.super.site/"
-            >Guide: https://chessengines.super.site/</a
-          >
+          <a href="https://chessengines.super.site/">Guide: https://chessengines.super.site/</a>
         </li>
         <li>
           <a href="https://chessboardjs.com/">UI: https://chessboardjs.com/</a>
@@ -42,11 +37,40 @@
           >
         </li>
       </ol>
+
+      <div id="board" style="width: 400px"></div>
+      <button id="startButton">Start Position</button>
+      <button id="clearButton">Clear Board</button>
+      <button id="flipButton">Flip Board</button>
     </main>
 
+    <script type="module" src="./jquery/1.8.3.js"></script>
+    <script type="module" src="./chessboard/js/chessboard-1.0.0.js"></script>
     <script type="module">
+      import { Chess } from "./chess/4d4928d47cacf01a194f5a48bb4b9ddcc9fd5f19.js";
+
       (() => {
-        setInterval(() => console.log("Chess Engine"), 1000);
+        const chess = new Chess();
+
+        while (!chess.isGameOver()) {
+          const moves = chess.moves();
+          const move = moves[Math.floor(Math.random() * moves.length)];
+          chess.move(move);
+        }
+
+        console.log(chess.pgn());
+        console.log(chess.ascii());
+
+        var board = Chessboard("board", {
+          draggable: true,
+          dropOffBoard: "trash",
+          sparePieces: true,
+          position: "start",
+        });
+
+        $("#startButton").on("click", board.start);
+        $("#clearButton").on("click", board.clear);
+        $("#flipButton").on("click", board.flip);
       })();
     </script>
   </body>
