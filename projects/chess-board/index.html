@@ -7,7 +7,7 @@
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Chess Engine</title>
+    <title>Chess Board</title>
     <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../../css/styles.css" />
@@ -15,30 +15,27 @@
   </head>
 
   <body>
-    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
-
-    <div id="work-in-progress"></div>
+    <noscript id="full-screen-noscript-message"
+      >Please enable JavaScript in order to view this webpage.</noscript
+    >
 
     <main>
       <a href="/projects">Back to Projects List</a>
 
-      <h1>Chess Engine</h1>
+      <h1>Chess Board</h1>
 
-      <ol>
-        <li>
-          <a href="https://chessengines.super.site/">Guide: https://chessengines.super.site/</a>
-        </li>
-        <li>
-          <a href="https://chessboardjs.com/">UI: https://chessboardjs.com/</a>
-        </li>
-        <li>
-          <a href="https://github.com/jhlywa/chess.js/tree/master"
-            >Game state: https://github.com/jhlywa/chess.js/tree/master</a
-          >
-        </li>
-      </ol>
+      <p>
+        The <b>Chess Board</b> project is built with <code>chess.js</code> and
+        <code>chessboard.js</code> and is a simple demonstration of a chess
+        board that you can play, flip, modify, and clear.
+      </p>
+
+      <hr style="margin-top: 2rem; margin-bottom: 2rem" />
 
       <div id="board" style="width: 400px"></div>
+
+      <hr style="margin-top: 2rem; margin-bottom: 2rem" />
+
       <button id="startButton">Start Position</button>
       <button id="clearButton">Clear Board</button>
       <button id="flipButton">Flip Board</button>
@@ -50,6 +47,7 @@
       import { Chess } from "./chess/4d4928d47cacf01a194f5a48bb4b9ddcc9fd5f19.js";
 
       (() => {
+        // chess.js
         const chess = new Chess();
 
         while (!chess.isGameOver()) {
@@ -61,6 +59,7 @@
         console.log(chess.pgn());
         console.log(chess.ascii());
 
+        // chessboard.js
         var board = Chessboard("board", {
           draggable: true,
           dropOffBoard: "trash",
