@@ -4,6 +4,10 @@ Christopher Bilger's Portfolio
 
 ## To-Do
 
+- [ ] Project Idea - JS Web Authentication API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Authentication_API
+- [ ] Project Idea - JS Idle Detection API: https://developer.mozilla.org/en-US/docs/Web/API/Idle_Detection_API
+- [ ] Project Idea - JS Payment Request API: https://developer.mozilla.org/en-US/docs/Web/API/Payment_Request_API
+- [ ] Project Idea - JS Screen Capture API: https://developer.mozilla.org/en-US/docs/Web/API/Screen_Capture_API
 - [ ] Paternity Leave #2
   - [ ] Buy a domain matching our second child's full name (5)
   - [ ] Point the domain to a new webpage for our second child's `Love Letters` webpage (15)
