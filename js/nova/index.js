@@ -137,7 +137,11 @@ export class NovaCommandPalette extends HTMLElement {
       document.body.style.paddingRight = `${Math.max(paddingRight, 0)}px`;
 
       // Blur all elements that aren't the command palette.
-      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(nova-command-palette):not(script)"));
+      const elementsToBlur = Array.from(
+        document.querySelectorAll(
+          "body > *:not(nova-command-palette):not(script)"
+        )
+      );
       elementsToBlur.forEach((element) => {
         element.style.filter = this.hidden ? "" : "blur(4px)";
       });
@@ -222,7 +226,8 @@ export class NovaCommandPalette extends HTMLElement {
       ctrlKey: true,
       desc: "Notify 'alt+5' || 'alt+5' was pressed.",
       callback: () => {
-        window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
+        window.location.href =
+          "https://www.linkedin.com/in/christopher-bilger/";
       },
       commandDesc: "Go to LinkedIn Profile",
       commandHref: "https://www.linkedin.com/in/christopher-bilger/",
