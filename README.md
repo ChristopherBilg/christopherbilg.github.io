@@ -4,6 +4,7 @@ Christopher Bilger's Portfolio
 
 ## To-Do
 
+- [ ] Staff Software Engineer
 - [ ] Paternity Leave #2
   - [ ] Create the Love Letters page for our second child (30)
   - [ ] Rename the Nova JS framework for them (10)
