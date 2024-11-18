@@ -9,3 +9,4 @@ Christopher Bilger's Portfolio
   - [ ] Rename the Nova JS framework for them (10)
   - [ ] Buy a domain matching our second child's full name (5)
   - [ ] Point the domain to a new webpage for our second child's `Love Letters` webpage (15)
+  - [ ] Add them to insurance enrollment on ADP as a qualifying life event (dependent) (30)
