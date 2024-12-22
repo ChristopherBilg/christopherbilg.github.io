@@ -42,7 +42,10 @@
 
         class App extends StyledComponent {
           init() {
-            this.isFetchingOrDecrypting = false;
+            this.isFetching = false;
+            this.isDecrypting = false;
+            this.ciphertextString = null;
+
             this.encoder = new TextEncoder();
             this.decoder = new TextDecoder();
 
@@ -62,21 +65,12 @@
               //   ],
               // },
             ];
+
+            this.fetchEncryptedData();
           }
 
-          handlePasswordInput(event) {
-            if (event.which !== 13) return;
-
-            event.preventDefault();
-
-            this.password = document.getElementById("passwordInput").value;
-
-            this.isFetchingOrDecrypting = true;
-            this.render();
-
-            fetch("./encrypted-data.txt")
-              .then((response) => response.text())
-              .then((ciphertextString) => this.decryptData(ciphertextString, this.password))
+          handleDecryption() {
+            this.decryptData(this.ciphertextString, this.password)
               .then((plaintextString) => {
                 try {
                   this.decrypted = JSON.parse(plaintextString);
@@ -93,9 +87,41 @@
               })
               .catch((error) => console.error(error))
               .finally(() => {
-                this.isFetchingOrDecrypting = false;
+                this.isDecrypting = false;
                 this.render();
               });
+          }
+
+          fetchEncryptedData() {
+            this.isFetching = true;
+            this.render();
+
+            fetch("./encrypted-data.txt")
+              .then((response) => response.text())
+              .then((ciphertextString) => (this.ciphertextString = ciphertextString))
+              .finally(() => {
+                this.isFetching = false;
+                this.render();
+
+                if (this.isDecrypting) this.handleDecryption();
+              });
+          }
+
+          handlePasswordInput(event) {
+            if (event.which !== 13) return;
+
+            event.preventDefault();
+
+            this.password = event.srcElement.value;
+
+            if (this.isDecrypting) return; // Already decrypting
+
+            this.isDecrypting = true;
+            this.render();
+
+            if (!this.ciphertextString) return;
+
+            this.handleDecryption();
           }
 
           bufferToBase64(buffer) {
@@ -224,10 +250,20 @@
                         </div>
 
                         ${
-                          this.isFetchingOrDecrypting
+                          this.isFetching
                             ? vdom`
                                 <div class="centered">
-                                  <div>Fetching and decrypting love letters...</div>
+                                  <div>Fetching love letters...</div>
+                                </div>
+                              `
+                            : ""
+                        }
+
+                        ${
+                          this.isDecrypting
+                            ? vdom`
+                                <div class="centered">
+                                  <div>Decrypting love letters...</div>
                                 </div>
                               `
                             : ""
