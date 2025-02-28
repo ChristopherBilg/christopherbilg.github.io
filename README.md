@@ -5,6 +5,7 @@ Christopher Bilger's Portfolio
 ## To-Do
 
 - [ ] Google UX Design Professional Certificate
+- [ ] PostgreSQL and Us
 - [ ] Paternity Leave #2
   - [ ] Update the portfolio to include the paternity leave timeframe (10)
   - [ ] Create the Love Letters page for our second child (30)
