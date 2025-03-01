@@ -4,8 +4,6 @@ Christopher Bilger's Portfolio
 
 ## To-Do
 
-- [ ] Google UX Design Professional Certificate
-- [ ] PostgreSQL and Us
 - [ ] Paternity Leave #2
   - [ ] Update the portfolio to include the paternity leave timeframe (10)
   - [ ] Create the Love Letters page for our second child (30)
@@ -14,5 +12,9 @@ Christopher Bilger's Portfolio
   - [ ] Point the domain to a new webpage for our second child's `Love Letters` webpage (15)
   - [ ] Add them to insurance enrollment on ADP as a qualifying life event (dependent) (30)
     - [ ] Send any additional documentation to HR (15)
+
+# Career
+
+- [ ] PostgreSQL and Us
 - [ ] Courses from [DeepLearning.AI](https://www.deeplearning.ai/)
 - [ ] Staff Software Engineer
