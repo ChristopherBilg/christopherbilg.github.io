@@ -18,7 +18,7 @@
 
     <link rel="stylesheet" href="./reveal.js-5.1.0/reset.css" />
     <link rel="stylesheet" href="./reveal.js-5.1.0/reveal.css" />
-    <link rel="stylesheet" href="./reveal.js-5.1.0/theme/white.css" />
+    <link rel="stylesheet" href="./reveal.js-5.1.0/theme/solarized.css" />
 
     <link rel="stylesheet" href="./highlight.js-11.9.0/default.min.css" />
     <script src="./highlight.js-11.9.0/highlight.min.js"></script>
@@ -31,9 +31,17 @@
       .reveal {
         & .slides {
           & section {
-            & h2 {
+            & h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
               text-transform: none;
-              margin-bottom: 4rem;
+            }
+
+            & ul {
+              font-size: 75%;
             }
           }
         }
@@ -46,11 +54,119 @@
       <div class="slides">
         <section>
           <h2>PostgreSQL and Us</h2>
+          <h4>How We Use PostgreSQL, What Works, and What's Next</h4>
+
+          <br />
+          <br />
+
           <p>Christopher R. Bilger</p>
           <p>March 11th, 2025</p>
         </section>
 
         <section>
+          <h2>Agenda</h2>
+
+          <br />
+          <br />
+
+          <ul>
+            <li>TODO 1</li>
+            <li>TODO 2</li>
+            <li>TODO 3</li>
+            <li>Conclusion + Q&A</li>
+          </ul>
+
+          <!--
+            TODO:
+            - PHOTO: PostgreSQL logo
+          -->
+        </section>
+
+        <section>
+          <h2>How We Use PostgreSQL</h2>
+
+          <!--
+            TODO:
+            - Overview of out PostgreSQL deployment infrastructure
+            - Key applications and workloads replying on it
+            - Scale and performance considerations
+            - PHOTO: A flowchart or system diagram showing how PostgreSQL fits into our architecture and/or infrastructure
+          -->
+        </section>
+
+        <section>
+          <h2>Pros of Our Current Approach</h2>
+
+          <!--
+            TODO:
+            - Strengths in our setup
+            - Features that work well for us
+            - Performance, scalability, reliability wins
+            - PHOTO: A simple chart or graph showing performance metrics or other key indicators such as uptime, query speed, etc.
+          -->
+        </section>
+
+        <section>
+          <h2>Cons & Challenges</h2>
+
+          <!--
+            TODO:
+            - Performance bottlenecks
+            - Operational pain points
+            - Lessons learned from past experiences
+            - PHOTO: A meme or lighthearted image to illustrate a common challenge or pain point, e.g. a slow query loading spinner or a server room on fire
+          -->
+        </section>
+
+        <section>
+          <h2>Best Practices We Follow</h2>
+
+          <!--
+            TODO:
+            - Backup and Recovery strategies
+            - Monitoring and alerting practices
+            - Indexing and query optimizations
+            - Connection pooling and resource management
+            - CODE SNIPPET: Example of a well-optimized query user proper indexing
+            - PHOTO: A simple diagram illustrating connection pooling or backup strategies
+          -->
+        </section>
+
+        <section>
+          <h2>Best Practices We Should Adopt</h2>
+
+          <!--
+            TODO:
+            - Areas for improvement
+            - Industry-standard recommendations
+            - New features, tools, and/or techniques to consider
+            - CODE SNIPPET: Example of a poorly-optimized query that could be improved or using PG's EXPLAIN ANALYZE feature
+            - PHOTO: A screenshot of a new tool or feature we should consider using
+          -->
+        </section>
+
+        <section>
+          <h2>Recommended Next Steps</h2>
+
+          <!--
+            TODO:
+            - Actionable items for improvement
+            - Proposed updates or migrations
+            - Training, monitoring, or tooling recommendations for enhancing our practices
+            - PHOTO: A roadmap or timeline showing key milestones for future improvements
+          -->
+        </section>
+
+        <!--
+          Ideas:
+          - How We Use PostgreSQL, What Works, and What's Next
+          - Our practices and how to enhance them
+          - Database indices / optimizations for easy wins
+          - Performance metric monitoring and tooling
+          - RDS Proxy
+        -->
+
+        <!-- <section>
           <section>
             <img data-src="https://picsum.photos/seed/1/500/400" />
           </section>
@@ -70,6 +186,25 @@
 SELECT * FROM "user" WHERE "id" IN (?, ?, ?);
             </code>
           </pre>
+        </section> -->
+
+        <section>
+          <h2>Conclusion + Q&A</h2>
+
+          <br />
+          <br />
+
+          <ul>
+            <li>TODO 1</li>
+            <li>TODO 2</li>
+            <li>TODO 3</li>
+            <li>Questions, Comments, Concerns?</li>
+          </ul>
+
+          <!--
+            TODO:
+            - PHOTO: A fun PostgreSQL-related image or meme.
+          -->
         </section>
       </div>
     </div>
