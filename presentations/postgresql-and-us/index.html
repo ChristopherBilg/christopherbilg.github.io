@@ -43,8 +43,20 @@
             & ul {
               font-size: 75%;
             }
+
+            & p {
+              font-size: 75%;
+            }
+
+            & table {
+              font-size: 65%;
+            }
           }
         }
+      }
+
+      .blue {
+        color: #268bd2;
       }
     </style>
   </head>
@@ -87,19 +99,114 @@
         </section>
 
         <section>
-          <h2>How We Use PostgreSQL</h2>
-          <h4>
-            Note: This presentation revolves around our main product database; however 90%+ is true for all of our
-            PostgreSQL databases.
-          </h4>
+          <section>
+            <h2>How We Use PostgreSQL</h2>
+            <h4>
+              Note: This presentation revolves around our <span class="blue">main product database</span>; however 90%+
+              is true for all of our PostgreSQL databases.
+            </h4>
+          </section>
 
-          <!--
-            TODO:
-            - Overview of out PostgreSQL deployment infrastructure
-            - Key applications and workloads replying on it
-            - Scale and performance considerations
-            - PHOTO: A flowchart or system diagram showing how PostgreSQL fits into our architecture and/or infrastructure
-          -->
+          <section>
+            <h2>Overview of Our Database Infrastructure</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Managed PostgreSQL service via AWS RDS (Relational Database Service)</li>
+              <li>
+                Single instance primary with a failover read replica
+                <ul>
+                  <li>Subject to change once we have an RDS Proxy in place</li>
+                </ul>
+              </li>
+              <li>
+                Database migrations handled via the talkiatry-app Git repository
+                <ul>
+                  <li>Applied using the <span class="blue">knex</span> NPM package</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Key Applications and Workloads</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Source of truth for all pre-patient (a.k.a. intake) data</li>
+              <li>Supports all <span class="blue">CRUD operations</span> from the intake assessment and Synapse</li>
+              <li>Interfaces directly with all running <span class="blue">cronjobs</span> (Argo Workflows)</li>
+              <li>Used for reporting and analytics via regular sync's to Snowflake</li>
+              <li>
+                Also regularly sync's new data from external sources
+                <ul>
+                  <li>Snowflake</li>
+                  <li>eCW</li>
+                  <li>Sohar</li>
+                  <li>etc.</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Scale and Performance Considerations</h2>
+
+            <p>
+              Using PostgreSQL's native functions, we can easily find our database's size when stored on disk. This
+              includes indices and other relations which increase disk space beyond that of the data itself.
+            </p>
+
+            <br />
+
+            <pre>
+              <code class="language-sql">
+SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h2>Scale and Performance Considerations</h2>
+
+            <p>
+              As of today, our current size on disk is <span class="blue">~62 GB</span>. This includes all data,
+              indices, and other relations.
+            </p>
+
+            <br />
+
+            <table>
+              <tr>
+                <th>Size Category</th>
+                <th>Range</th>
+              </tr>
+              <tr>
+                <td>Very Small</td>
+                <td>&lt;1 GB</td>
+              </tr>
+              <tr>
+                <td>Small</td>
+                <td>1 GB - 100 GB</td>
+              </tr>
+              <tr>
+                <td>Medium</td>
+                <td>100 GB - 1 TB</td>
+              </tr>
+              <tr>
+                <td>Large</td>
+                <td>1 TB - 10 TB</td>
+              </tr>
+              <tr>
+                <td>Very Large</td>
+                <td>&gt;10 TB</td>
+              </tr>
+            </table>
+          </section>
         </section>
 
         <section>
@@ -194,35 +301,42 @@
           - RDS Proxy
         -->
 
-        <!-- <section>
-          <pre>
-            <code class="language-sql">
-SELECT * FROM "user" WHERE "id" IN (?, ?, ?);
-            </code>
-          </pre>
-        </section> -->
-
         <section>
-          <h2>Conclusion + Q&A</h2>
+          <section>
+            <h2>Conclusion + Q&A</h2>
 
-          <br />
-          <br />
+            <br />
+            <br />
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr">
-            <div style="align-self: center">
-              <ul>
-                <li>How We Use PostgreSQL</li>
-                <li>Pros and Cons of Our Current Approach</li>
-                <li>Best Practices</li>
-                <li>Recommended Next Steps</li>
-                <li>Conclusion + Q&A</li>
-              </ul>
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li>How We Use PostgreSQL</li>
+                  <li>Pros and Cons of Our Current Approach</li>
+                  <li>Best Practices</li>
+                  <li>Recommended Next Steps</li>
+                  <li>Q&A</li>
+                </ul>
+              </div>
+
+              <div>
+                <img data-src="./images/keep-calm-and-use-postgres.webp" width="400" />
+              </div>
             </div>
+          </section>
 
-            <div>
-              <img data-src="./images/keep-calm-and-use-postgres.webp" width="400" />
-            </div>
-          </div>
+          <section>
+            <h2>Poweblue By</h2>
+
+            <br />
+            <br />
+
+            <ol>
+              <li>A single, static webpage.</li>
+              <li><a href="https://revealjs.com/" target="_blank">reveal.js</a></li>
+              <li><a href="https://highlightjs.org/" target="_blank">highlight.js</a></li>
+            </ol>
+          </section>
 
           <!--
             TODO:
