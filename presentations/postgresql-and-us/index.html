@@ -69,21 +69,29 @@
           <br />
           <br />
 
-          <ul>
-            <li>TODO 1</li>
-            <li>TODO 2</li>
-            <li>TODO 3</li>
-            <li>Conclusion + Q&A</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr">
+            <div style="align-self: center">
+              <ul>
+                <li>How We Use PostgreSQL</li>
+                <li>Pros and Cons of Our Current Approach</li>
+                <li>Best Practices</li>
+                <li>Recommended Next Steps</li>
+                <li>Conclusion + Q&A</li>
+              </ul>
+            </div>
 
-          <!--
-            TODO:
-            - PHOTO: PostgreSQL logo
-          -->
+            <div>
+              <img data-src="./images/Postgresql_elephant.png" width="200" />
+            </div>
+          </div>
         </section>
 
         <section>
           <h2>How We Use PostgreSQL</h2>
+          <h4>
+            Note: This presentation revolves around our main product database; however 90%+ is true for all of our
+            PostgreSQL databases.
+          </h4>
 
           <!--
             TODO:
@@ -95,31 +103,48 @@
         </section>
 
         <section>
-          <h2>Pros of Our Current Approach</h2>
+          <section>
+            <h2>Pros of Our Current Approach</h2>
+          </section>
+
+          <section>
+            <img data-src="./images/kiss.png" />
+          </section>
 
           <!--
             TODO:
             - Strengths in our setup
             - Features that work well for us
             - Performance, scalability, reliability wins
-            - PHOTO: A simple chart or graph showing performance metrics or other key indicators such as uptime, query speed, etc.
+            - Security and compliance benefits
           -->
         </section>
 
         <section>
-          <h2>Cons & Challenges</h2>
+          <section>
+            <h2>Cons & Challenges</h2>
+          </section>
+
+          <section>
+            <img data-src="./images/this-is-fine-fire.jpg" />
+          </section>
 
           <!--
             TODO:
             - Performance bottlenecks
             - Operational pain points
             - Lessons learned from past experiences
-            - PHOTO: A meme or lighthearted image to illustrate a common challenge or pain point, e.g. a slow query loading spinner or a server room on fire
           -->
         </section>
 
         <section>
-          <h2>Best Practices We Follow</h2>
+          <section>
+            <h2>Best Practices We Follow</h2>
+          </section>
+
+          <section>
+            <img data-src="./images/with_connection_pool.png" />
+          </section>
 
           <!--
             TODO:
@@ -128,12 +153,17 @@
             - Indexing and query optimizations
             - Connection pooling and resource management
             - CODE SNIPPET: Example of a well-optimized query user proper indexing
-            - PHOTO: A simple diagram illustrating connection pooling or backup strategies
           -->
         </section>
 
         <section>
-          <h2>Best Practices We Should Adopt</h2>
+          <section>
+            <h2>Best Practices We Should Adopt</h2>
+          </section>
+
+          <section>
+            <img data-src="./images/pganalyze_query_performance_date_picker.png" />
+          </section>
 
           <!--
             TODO:
@@ -141,7 +171,6 @@
             - Industry-standard recommendations
             - New features, tools, and/or techniques to consider
             - CODE SNIPPET: Example of a poorly-optimized query that could be improved or using PG's EXPLAIN ANALYZE feature
-            - PHOTO: A screenshot of a new tool or feature we should consider using
           -->
         </section>
 
@@ -152,8 +181,7 @@
             TODO:
             - Actionable items for improvement
             - Proposed updates or migrations
-            - Training, monitoring, or tooling recommendations for enhancing our practices
-            - PHOTO: A roadmap or timeline showing key milestones for future improvements
+            - Training, monitoring, or tooling recommendations for enhancing our practice
           -->
         </section>
 
@@ -167,20 +195,6 @@
         -->
 
         <!-- <section>
-          <section>
-            <img data-src="https://picsum.photos/seed/1/500/400" />
-          </section>
-
-          <section>
-            <img data-src="https://picsum.photos/seed/2/500/400" />
-          </section>
-
-          <section>
-            <img data-src="https://picsum.photos/seed/3/500/400" />
-          </section>
-        </section>
-
-        <section>
           <pre>
             <code class="language-sql">
 SELECT * FROM "user" WHERE "id" IN (?, ?, ?);
@@ -194,16 +208,25 @@ SELECT * FROM "user" WHERE "id" IN (?, ?, ?);
           <br />
           <br />
 
-          <ul>
-            <li>TODO 1</li>
-            <li>TODO 2</li>
-            <li>TODO 3</li>
-            <li>Questions, Comments, Concerns?</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr">
+            <div style="align-self: center">
+              <ul>
+                <li>How We Use PostgreSQL</li>
+                <li>Pros and Cons of Our Current Approach</li>
+                <li>Best Practices</li>
+                <li>Recommended Next Steps</li>
+                <li>Conclusion + Q&A</li>
+              </ul>
+            </div>
+
+            <div>
+              <img data-src="./images/keep-calm-and-use-postgres.webp" width="400" />
+            </div>
+          </div>
 
           <!--
             TODO:
-            - PHOTO: A fun PostgreSQL-related image or meme.
+            - Replace list with a summary of key takeaways + relativistic score for us
           -->
         </section>
       </div>
