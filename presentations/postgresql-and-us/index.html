@@ -101,6 +101,10 @@
         <section>
           <section>
             <h2>How We Use PostgreSQL</h2>
+
+            <br />
+            <br />
+
             <h4>
               Note: This presentation revolves around our <span class="blue">main product database</span>; however 90%+
               is true for all of our PostgreSQL databases.
@@ -212,24 +216,75 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
         <section>
           <section>
             <h2>Pros of Our Current Approach</h2>
-          </section>
 
-          <section>
-            <img data-src="./images/kiss.png" />
+            <br />
+            <br />
+
+            <ul>
+              <li>Managed service with minimal maintenance</li>
+              <li>Easy to <span class="blue">scale up and out</span></li>
+              <li>
+                Highly reliable and secure
+                <ul>
+                  <li>Regularly patched and updated by AWS</li>
+                  <li>Automated backups and point-in-time recovery</li>
+                </ul>
+              </li>
+              <li>Compatible with a wide range of tools and libraries</li>
+              <li>
+                Excellent support for complex queries and data types
+                <ul>
+                  <li>JSONB, arrays, and custom types</li>
+                  <li>We recently added PostGIS support for geospatial data</li>
+                </ul>
+              </li>
+            </ul>
           </section>
 
           <!--
-            TODO:
+            TODO ???:
             - Strengths in our setup
             - Features that work well for us
             - Performance, scalability, reliability wins
             - Security and compliance benefits
           -->
+
+          <section>
+            <img data-src="./images/kiss.png" />
+          </section>
         </section>
 
         <section>
           <section>
             <h2>Cons & Challenges</h2>
+
+            <br />
+
+            <ul>
+              <li>
+                Performance bottlenecks
+                <ul>
+                  <li>Slow queries and high CPU usage</li>
+                  <li>Indexing and query optimization challenges</li>
+                  <li>Resource contention and connection limits</li>
+                </ul>
+              </li>
+              <li>
+                Operational pain points
+                <ul>
+                  <li>Database migrations and schema changes</li>
+                  <li>Monitoring and alerting practices</li>
+                </ul>
+              </li>
+              <li>
+                Lessons learned from past experiences
+                <ul>
+                  <li>Reduce long-running transactions</li>
+                  <li>Optimize queries and indices</li>
+                  <li>Regularly review and update our database schema</li>
+                </ul>
+              </li>
+            </ul>
           </section>
 
           <section>
