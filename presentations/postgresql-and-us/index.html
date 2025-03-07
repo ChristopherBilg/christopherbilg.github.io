@@ -245,14 +245,6 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
             </ul>
           </section>
 
-          <!--
-            TODO ???:
-            - Strengths in our setup
-            - Features that work well for us
-            - Performance, scalability, reliability wins
-            - Security and compliance benefits
-          -->
-
           <section>
             <img data-src="./images/kiss.png" />
           </section>
@@ -374,6 +366,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
             <h2>Best Practices We Follow</h2>
 
             <br />
+            <br />
 
             <ul>
               <li>Database schema design and normalization</li>
@@ -429,19 +422,106 @@ WHERE
         <section>
           <section>
             <h2>Best Practices We Should Adopt</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Use <span class="blue">EXPLAIN ANALYZE</span> to identify bottlenecks</li>
+              <li>
+                Use tools such as <span class="blue">pganalyze</span>
+                <ul>
+                  <li>Identify slow queries and missing indices</li>
+                  <li>Optimize query patterns and database schema</li>
+                </ul>
+              </li>
+              <li>
+                Perform as much as possible, if not all, query filtering, joins, and ordering in the database
+                <ul>
+                  <li>Minimize data transfer between the database and application</li>
+                  <li>Minimize computational load on the application servers</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>What is EXPLAIN ANALYZE?</h2>
+
+            <br />
+            <br />
+
+            <p>
+              <span class="blue">EXPLAIN ANALYZE</span> are a set of two PostgreSQL options that can be used to obtain a
+              query execution plan and the actual execution time of each node in the plan.
+            </p>
+
+            <p>
+              <span class="blue">EXPLAIN</span> will show the query plan, while <span class="blue">ANALYZE</span> will
+              actually execute the query and show the actual execution time.
+            </p>
+          </section>
+
+          <section>
+            <h2>Example: EXPLAIN ANALYZE</h2>
+
+            <br />
+
+            <pre>
+              <code class="language-sql">
+CREATE TABLE employees (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  department VARCHAR(50),
+  salary INT
+);
+
+SELECT * FROM employees WHERE department = 'Engineering';
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h2>Example: EXPLAIN ANALYZE</h2>
+
+            <br />
+
+            <pre>
+              <code class="language-sql">
+EXPLAIN ANALYZE SELECT * FROM employees WHERE department = 'Engineering';
+
+Seq Scan on employees  (cost=0.00..15.35 rows=5 width=100) (actual time=0.015..0.018 rows=3 loops=1)
+  Filter: (department = 'Engineering'::text)
+  Rows Removed by Filter: 97
+Planning Time: 0.125 ms
+Execution Time: 0.057 ms
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h2>Example: EXPLAIN ANALYZE</h2>
+
+            <br />
+
+            <p>
+              Using the information returned from <span class="blue">EXPLAIN ANALYZE</span>, we can see that the query
+              is performing a <span class="blue">sequential scan</span> on the employees table. This is not ideal for
+              performance as it is scanning the entire table.
+            </p>
+
+            <br />
+
+            <pre>
+              <code class="language-sql">
+CREATE INDEX idx_department ON employees(department);
+              </code>
+            </pre>
           </section>
 
           <section>
             <img data-src="./images/pganalyze_query_performance_date_picker.png" />
           </section>
-
-          <!--
-            TODO:
-            - Areas for improvement
-            - Industry-standard recommendations
-            - New features, tools, and/or techniques to consider
-            - CODE SNIPPET: Example of a poorly-optimized query that could be improved or using PG's EXPLAIN ANALYZE feature
-          -->
         </section>
 
         <section>
@@ -452,17 +532,15 @@ WHERE
             - Actionable items for improvement
             - Proposed updates or migrations
             - Training, monitoring, or tooling recommendations for enhancing our practice
+
+            Ideas:
+            - How We Use PostgreSQL, What Works, and What's Next
+            - Our practices and how to enhance them
+            - Database indices / optimizations for easy wins
+            - Performance metric monitoring and tooling
+            - RDS Proxy
           -->
         </section>
-
-        <!--
-          Ideas:
-          - How We Use PostgreSQL, What Works, and What's Next
-          - Our practices and how to enhance them
-          - Database indices / optimizations for easy wins
-          - Performance metric monitoring and tooling
-          - RDS Proxy
-        -->
 
         <section>
           <section>
@@ -500,11 +578,6 @@ WHERE
               <li><a href="https://highlightjs.org/" target="_blank">highlight.js</a></li>
             </ol>
           </section>
-
-          <!--
-            TODO:
-            - Replace list with a summary of key takeaways + relativistic score for us
-          -->
         </section>
       </div>
     </div>
