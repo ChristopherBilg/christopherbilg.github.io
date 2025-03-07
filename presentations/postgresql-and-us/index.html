@@ -58,6 +58,10 @@
       .blue {
         color: #268bd2;
       }
+
+      a[target="_blank"]::after {
+        content: " \2197";
+      }
     </style>
   </head>
 
@@ -232,7 +236,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
               </li>
               <li>Compatible with a wide range of tools and libraries</li>
               <li>
-                Excellent support for complex queries and data types
+                Excellent support for <span class="blue">complex queries</span> and data types
                 <ul>
                   <li>JSONB, arrays, and custom types</li>
                   <li>We recently added PostGIS support for geospatial data</li>
@@ -275,9 +279,27 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
             <br />
 
             <ul>
-              <li>Slow queries and high CPU usage</li>
-              <li>Indexing and query optimization challenges</li>
-              <li>Resource contention and connection limits</li>
+              <li>
+                Slow queries
+                <ul>
+                  <li>Missing or poorly optimized indices</li>
+                  <li>Suboptimal query patterns</li>
+                </ul>
+              </li>
+              <li>
+                Long-running transactions
+                <ul>
+                  <li>Lock contention and deadlocks</li>
+                  <li>Resource constraints and timeouts</li>
+                </ul>
+              </li>
+              <li>
+                Materialized view and synchronization issues
+                <ul>
+                  <li>Performance overhead and maintenance costs</li>
+                  <li>Consistency and staleness concerns</li>
+                </ul>
+              </li>
             </ul>
           </section>
 
@@ -288,8 +310,20 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
             <br />
 
             <ul>
-              <li>Database migrations and schema changes</li>
-              <li>Monitoring and alerting practices</li>
+              <li>
+                Database migrations and schema changes
+                <ul>
+                  <li>Rolling updates and backward compatibility</li>
+                  <li>Automated testing and validation</li>
+                </ul>
+              </li>
+              <li>
+                Monitoring and alerting practices
+                <ul>
+                  <li>Performance metrics and resource utilization</li>
+                  <li>Query profiling and optimization</li>
+                </ul>
+              </li>
             </ul>
           </section>
 
@@ -300,9 +334,33 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
             <br />
 
             <ul>
-              <li>Reduce long-running transactions</li>
-              <li>Optimize queries and indices</li>
-              <li>Regularly review and update our database schema</li>
+              <li>
+                Reduce long-running transactions
+                <ul>
+                  <li>Generally occurs in cronjobs; minimize both temporal and computation per transaction loop</li>
+                </ul>
+              </li>
+              <li>
+                Optimize queries and indices
+                <ul>
+                  <li>Use <span class="blue">EXPLAIN ANALYZE</span> to identify bottlenecks</li>
+                  <li>Regularly review and update our database schema</li>
+                  <li>
+                    Add indices on high-usage queries and/or queries that are part of a critical path
+                    <ul>
+                      <li>e.g. WHERE, JOIN, ORDER BY, GROUP BY, etc.</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Synchronizing to external data sources (<span class="blue">e.g. OpenSearch</span>) causes performance
+                issues
+                <ul>
+                  <li>Consider using a change data capture (CDC) tool</li>
+                  <li>Or, use a more efficient synchronization mechanism if needed at all</li>
+                </ul>
+              </li>
             </ul>
           </section>
 
@@ -314,20 +372,58 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
         <section>
           <section>
             <h2>Best Practices We Follow</h2>
+
+            <br />
+
+            <ul>
+              <li>Database schema design and normalization</li>
+              <li>Connection pooling and resource management</li>
+              <li>Fairly standardized schema and query patterns</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Example: Non-Optimized Query</h2>
+
+            <br />
+
+            <pre>
+              <code class="language-sql">
+SELECT
+  *
+FROM
+  users
+WHERE
+  created_at &gt;= '2025-01-01'
+  AND created_at &lt; '2025-02-01'
+  AND status = 'active';
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h2>Example: Well-Optimized Query</h2>
+
+            <pre>
+              <code class="language-sql">
+CREATE INDEX idx_users_created_at_status
+ON users (created_at, status);
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  created_at &gt;= '2025-01-01'
+  AND created_at &lt; '2025-02-01'
+  AND status = 'active';
+              </code>
+            </pre>
           </section>
 
           <section>
             <img data-src="./images/with_connection_pool.png" />
           </section>
-
-          <!--
-            TODO:
-            - Backup and Recovery strategies
-            - Monitoring and alerting practices
-            - Indexing and query optimizations
-            - Connection pooling and resource management
-            - CODE SNIPPET: Example of a well-optimized query user proper indexing
-          -->
         </section>
 
         <section>
@@ -393,7 +489,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
           </section>
 
           <section>
-            <h2>Poweblue By</h2>
+            <h2>Powered By</h2>
 
             <br />
             <br />
