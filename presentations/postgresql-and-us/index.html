@@ -122,7 +122,7 @@
             <br />
 
             <ul>
-              <li>Managed PostgreSQL service via AWS RDS (Relational Database Service)</li>
+              <li>Managed PostgreSQL service via <span class="blue">AWS RDS</span> (Relational Database Service)</li>
               <li>
                 Single instance primary with a failover read replica
                 <ul>
@@ -230,7 +230,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
               <li>
                 Highly reliable and secure
                 <ul>
-                  <li>Regularly patched and updated by AWS</li>
+                  <li>Regular patches and updates made available by AWS</li>
                   <li>Automated backups and point-in-time recovery</li>
                 </ul>
               </li>
@@ -275,13 +275,13 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
                 Slow queries
                 <ul>
                   <li>Missing or poorly optimized indices</li>
-                  <li>Suboptimal query patterns</li>
+                  <li><span class="blue">Suboptimal query patterns</span></li>
                 </ul>
               </li>
               <li>
                 Long-running transactions
                 <ul>
-                  <li>Lock contention and deadlocks</li>
+                  <li><span class="blue">Lock contention and deadlocks</span></li>
                   <li>Resource constraints and timeouts</li>
                 </ul>
               </li>
@@ -289,7 +289,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
                 Materialized view and synchronization issues
                 <ul>
                   <li>Performance overhead and maintenance costs</li>
-                  <li>Consistency and staleness concerns</li>
+                  <li><span class="blue">Consistency and staleness concerns</span></li>
                 </ul>
               </li>
             </ul>
@@ -306,7 +306,7 @@ SELECT pg_size_pretty(pg_database_size('&lt;dbname&gt;'));
                 Database migrations and schema changes
                 <ul>
                   <li>Rolling updates and backward compatibility</li>
-                  <li>Automated testing and validation</li>
+                  <li><span class="blue">Automated testing and validation</span></li>
                 </ul>
               </li>
               <li>
@@ -525,21 +525,52 @@ CREATE INDEX idx_department ON employees(department);
         </section>
 
         <section>
-          <h2>Recommended Next Steps</h2>
+          <section>
+            <h2>Recommended Next Steps</h2>
 
-          <!--
-            TODO:
-            - Actionable items for improvement
-            - Proposed updates or migrations
-            - Training, monitoring, or tooling recommendations for enhancing our practice
+            <br />
+            <br />
 
-            Ideas:
-            - How We Use PostgreSQL, What Works, and What's Next
-            - Our practices and how to enhance them
-            - Database indices / optimizations for easy wins
-            - Performance metric monitoring and tooling
-            - RDS Proxy
-          -->
+            <ul>
+              <li>Performance metric monitoring and tooling</li>
+              <li>Database indices / optimizations for easy wins</li>
+              <li>Training, monitoring, or tooling recommendations for enhancing our practice</li>
+              <li>Making use of an AWS RDS Proxy</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>PostgreSQL Extensions to Consider</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>
+                <span class="blue">pg_stat_statements</span> for query statistics
+                <ul>
+                  <li>Already in use</li>
+                </ul>
+              </li>
+              <li>
+                <span class="blue">pg_cron</span> for cronjobs
+                <ul>
+                  <li>Currently using Argo Workflows</li>
+                  <li>
+                    May be useful for simpler tasks; although the added complexity would more or less render the use of
+                    this extension moot
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <span class="blue">pg_repack</span> for table maintenance
+                <ul>
+                  <li>Reduces bloat and improves performance</li>
+                  <li>May be useful for large tables</li>
+                </ul>
+              </li>
+            </ul>
+          </section>
         </section>
 
         <section>
