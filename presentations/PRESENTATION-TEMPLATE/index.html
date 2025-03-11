@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta property="og:url" content="https://chrisbilger.com" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Chris Bilger's Portfolio" />
+    <meta property="og:description" content="Christopher Bilger's Portfolio" />
+    <meta property="og:image" content="https://chrisbilger.com/images/portfolio.avif" />
+
+    <title>Presentation Name/Title</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+
+    <link rel="stylesheet" href="../lib/reveal.js-5.1.0/reset.css" />
+    <link rel="stylesheet" href="../lib/reveal.js-5.1.0/reveal.css" />
+    <link rel="stylesheet" href="../lib/reveal.js-5.1.0/theme/solarized.css" />
+
+    <link rel="stylesheet" href="../lib/highlight.js-11.9.0/default.min.css" />
+    <script src="../lib/highlight.js-11.9.0/highlight.min.js"></script>
+
+    <link rel="stylesheet" href="../css/styles.css" />
+
+    <script>
+      hljs.highlightAll();
+    </script>
+  </head>
+
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Presentation Name/Title</h2>
+          <h4>Presentation Subtitle</h4>
+
+          <br />
+          <br />
+
+          <p>Author's Name</p>
+          <p>Presentation Date</p>
+        </section>
+
+        <section>
+          <img data-src="./images/blank-white-card.jpg" />
+        </section>
+      </div>
+    </div>
+
+    <script>
+      hljs.highlightAll();
+    </script>
+
+    <script type="module">
+      import Reveal from "../lib/reveal.js-5.1.0/reveal.esm.js";
+
+      let deck = new Reveal({
+        slideNumber: "c/t",
+        help: true,
+      });
+      deck.initialize();
+    </script>
+  </body>
+</html>
