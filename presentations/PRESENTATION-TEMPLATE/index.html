@@ -24,10 +24,6 @@
     <script src="../lib/highlight.js-11.9.0/highlight.min.js"></script>
 
     <link rel="stylesheet" href="../css/styles.css" />
-
-    <script>
-      hljs.highlightAll();
-    </script>
   </head>
 
   <body>
@@ -50,18 +46,6 @@
       </div>
     </div>
 
-    <script>
-      hljs.highlightAll();
-    </script>
-
-    <script type="module">
-      import Reveal from "../lib/reveal.js-5.1.0/reveal.esm.js";
-
-      let deck = new Reveal({
-        slideNumber: "c/t",
-        help: true,
-      });
-      deck.initialize();
-    </script>
+    <script type="module" src="../js/initialize-reveal-js-and-highlight-js.js"></script>
   </body>
 </html>
