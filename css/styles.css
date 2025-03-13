@@ -30,6 +30,7 @@ nav {
   margin-bottom: 0rem;
   display: flex;
   flex-flow: wrap;
+  text-align-last: center;
 }
 
 table {
@@ -127,7 +128,7 @@ figure {
   color: #800080;
 }
 
-.EMPLOYER-ETC {
+.unused-employer {
   color: #4834b3;
 }
 
