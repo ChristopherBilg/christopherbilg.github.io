@@ -1,13 +1,13 @@
 /**
- * Nova is a JavaScript UI component for creating a command palette.
+ * Cass is a JavaScript UI component for creating a command palette.
  * It was built almost entirely using GitHub's Copilot tool for AI generated code.
  *
- * Nova was named after our first family dog, Ava.
+ * Cass was named after my daughter, Cassandra.
  */
 
 import { Keyboard } from "./keyboard.js";
 
-export class NovaCommandPalette extends HTMLElement {
+export class CassCommandPalette extends HTMLElement {
   constructor() {
     super();
     this.hidden = true;
@@ -137,7 +137,7 @@ export class NovaCommandPalette extends HTMLElement {
       document.body.style.paddingRight = `${Math.max(paddingRight, 0)}px`;
 
       // Blur all elements that aren't the command palette.
-      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(nova-command-palette):not(script)"));
+      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(cass-command-palette):not(script)"));
       elementsToBlur.forEach((element) => {
         element.style.filter = this.hidden ? "" : "blur(4px)";
       });
@@ -252,4 +252,4 @@ export class NovaCommandPalette extends HTMLElement {
   }
 }
 
-customElements.define("nova-command-palette", NovaCommandPalette);
+customElements.define("cass-command-palette", CassCommandPalette);
