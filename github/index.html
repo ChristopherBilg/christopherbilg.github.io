@@ -84,7 +84,10 @@
                 );
                 const json = await response.json();
                 githubData.push(...json);
-              } catch (error) {}
+              } catch (error) {
+                console.error(`Error fetching GitHub data: ${error}`);
+                break;
+              }
             }
 
             return githubData;

@@ -74,7 +74,10 @@
               .then((plaintextString) => {
                 try {
                   this.decrypted = JSON.parse(plaintextString);
-                } catch {}
+                } catch (error) {
+                  console.error("Error parsing decrypted data:", error);
+                  this.decrypted = [];
+                }
 
                 return this.encryptData(
                   JSON.stringify(this.decrypted.concat(this.additionalLoveLetters)),
@@ -173,7 +176,7 @@
               buffer.set(encryptedDataArray, salt.byteLength + iv.byteLength);
               return this.bufferToBase64(buffer);
             } catch (error) {
-              console.log(`Error - ${error}`);
+              console.error("Error encrypting data:", error);
               return "";
             }
           }
@@ -196,7 +199,7 @@
               );
               return this.decoder.decode(decryptedData);
             } catch (error) {
-              console.log(`Error - ${error}`);
+              console.error("Error decrypting data:", error);
               return "";
             }
           }
