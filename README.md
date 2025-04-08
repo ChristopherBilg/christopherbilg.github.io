@@ -7,3 +7,7 @@ Christopher Bilger's Portfolio
 ```bash
 npx live-server
 ```
+
+## To-Do
+
+- [ ] Staff Software Engineer
