@@ -16,8 +16,6 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
@@ -41,10 +39,30 @@
         document.getElementsByTagName("main")[0].hidden = false;
 
         class App extends Component {
-          init() {}
+          init() {
+            this.screenOrientation = screen.orientation;
+            this.screenOrientationType = this.screenOrientation?.type ?? null;
+            this.screenOrientationAngle = this.screenOrientation?.angle ?? null;
+
+            setInterval(() => {
+              this.screenOrientation = screen.orientation;
+              this.screenOrientationType = this.screenOrientation?.type ?? null;
+              this.screenOrientationAngle = this.screenOrientation?.angle ?? null;
+
+              this.render();
+            }, 250);
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <h2>Screen Orientation</h2>
+                <p><b>Type:</b> ${this.screenOrientationType ?? "Unsupported"}</p>
+                <p><b>Angle:</b> ${
+                  this.screenOrientationAngle !== null ? `${this.screenOrientationAngle}°` : "Unsupported"
+                }</p>
+              </div>
+            `;
           }
         }
 
