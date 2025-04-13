@@ -1,13 +1,13 @@
 /**
- * Cass is a JavaScript UI component for creating a command palette.
+ * Casper is a JavaScript UI component for creating a command palette.
  * It was built almost entirely using GitHub's Copilot tool for AI generated code.
  *
- * Cass was named after my daughter, Cassandra.
+ * Casper was named after my daughter, Cassandra.
  */
 
 import { Keyboard } from "./keyboard.js";
 
-export class CassCommandPalette extends HTMLElement {
+export class CasperCommandPalette extends HTMLElement {
   constructor() {
     super();
     this.hidden = true;
@@ -137,7 +137,7 @@ export class CassCommandPalette extends HTMLElement {
       document.body.style.paddingRight = `${Math.max(paddingRight, 0)}px`;
 
       // Blur all elements that aren't the command palette.
-      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(cass-command-palette):not(script)"));
+      const elementsToBlur = Array.from(document.querySelectorAll("body > *:not(casper-command-palette):not(script)"));
       elementsToBlur.forEach((element) => {
         element.style.filter = this.hidden ? "" : "blur(4px)";
       });
@@ -252,4 +252,4 @@ export class CassCommandPalette extends HTMLElement {
   }
 }
 
-customElements.define("cass-command-palette", CassCommandPalette);
+customElements.define("casper-command-palette", CasperCommandPalette);
