@@ -288,6 +288,7 @@
 
                               ${letter.body.map((bodyString) => {
                                 if (bodyString.startsWith("data:image")) {
+                                  // Example: data:image/jpeg;base64,
                                   return vdom`<img class="rounded-image" style="width: 100%; max-width: max(65%, 400px)" src="${bodyString}" alt="Base 64 encoded image" loading="lazy" />`;
                                 } else {
                                   return vdom`<p>${bodyString}</p>`;
