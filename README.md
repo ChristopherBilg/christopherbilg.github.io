@@ -10,7 +10,7 @@ npx live-server
 
 ## To-Do
 
-- Tech Talks:
+- Tech Talk Ideas
   - Beyond the Linter: Code Quality Strategies That Stick
   - Release Engineering: What We Got Right and Wrong
 - Staff Software Engineer
@@ -24,3 +24,4 @@ npx live-server
   - Remove unused / dead code
   - Remove old TODO comments
   - Remove old console.log, console.error, etc.
+- Courses from [DeepLearning.AI](https://www.deeplearning.ai/)
