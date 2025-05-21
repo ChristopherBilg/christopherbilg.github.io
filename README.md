@@ -10,6 +10,7 @@ npx live-server
 
 ## To-Do
 
+- Add Jittter to `/portfolio` once Phase 2 is finished and after I begin working on Phase 3
 - Tech Talk Ideas
   - Beyond the Linter: Code Quality Strategies That Stick
   - Release Engineering: What We Got Right and Wrong
