@@ -10,11 +10,11 @@ npx live-server
 
 ## To-Do
 
-- Add Jittter to `/portfolio` once Phase 2 is finished and after I begin working on Phase 3
 - Tech Talk Ideas
   - Beyond the Linter: Code Quality Strategies That Stick
   - Release Engineering: What We Got Right and Wrong
 - Staff Software Engineer
+  - **Tech Talks**
   - Documentation in talkiatry-app
   - Directory / file structure
   - Try / catch blocks and error handling
@@ -25,4 +25,4 @@ npx live-server
   - Remove unused / dead code
   - Remove old TODO comments
   - Remove old console.log, console.error, etc.
-- Courses from [DeepLearning.AI](https://www.deeplearning.ai/)
+- Course(s) from [DeepLearning.AI](https://www.deeplearning.ai/)
