@@ -25,4 +25,5 @@ npx live-server
   - Remove unused / dead code
   - Remove old TODO comments
   - Remove old console.log, console.error, etc.
+- Senior Staff Software Engineer
 - Course(s) from [DeepLearning.AI](https://www.deeplearning.ai/)
