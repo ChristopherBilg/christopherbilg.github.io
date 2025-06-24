@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chris Bilger, M.C.S. | Presentations</title>
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../css/styles.css" />
+
+    <script type="module" src="../js/casper/index.js" defer></script>
+  </head>
+
+  <body>
+    <header>
+      <div class="typewriter">
+        <h1>Chris Bilger, M.C.S. | Presentations</h1>
+      </div>
+
+      <figure>
+        <img
+          class="rounded-image"
+          alt="Image of a programmer with CSS code on the wall behind him"
+          src="../images/presentations.avif"
+          width="320"
+          height="222.33"
+          loading="lazy"
+        />
+        <figcaption> An image of a lightbulb drawn on a sticky note, pinned on a cork board </figcaption>
+      </figure>
+
+      <section>
+        <nav>
+          <ul>
+            <li><a href="/portfolio">Back to Portfolio</a></li>
+          </ul>
+        </nav>
+      </section>
+    </header>
+
+    <main>
+      <section>
+        <hr id="presentations" />
+        <h2><a href="#presentations">Presentations</a></h2>
+        <hr />
+
+        <input type="text" id="link-table-filter" placeholder="Filter Presentations..." hidden />
+
+        <table id="link-table">
+          <tbody>
+            <!-- <tr>
+              <td>
+                <a href="/presentations/beyond-the-linter">Beyond the Linter: Code Quality Strategies That Stick</a>
+              </td>
+            </tr> -->
+
+            <tr>
+              <td>
+                <a href="/presentations/release-engineering">Release Engineering: What We Got Right and Wrong</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <a href="/presentations/postgresql-and-us">
+                  PostgreSQL and Us: How We Use PostgreSQL, What Works, and What's Next
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+
+    <script>
+      (() => {
+        document.getElementById("link-table-filter").hidden = false;
+
+        (() => {
+          const table = document.getElementById("link-table");
+          const tbody = table.getElementsByTagName("tbody")[0];
+          const rows = tbody.getElementsByTagName("tr");
+
+          Array.from(rows).forEach((element) => {
+            const content = element.getElementsByTagName("td")[0].getElementsByTagName("a")[0];
+
+            if (element.hidden) {
+              content.innerHTML = "Hidden: " + content.innerHTML;
+            }
+          });
+        })();
+
+        const handleInput = (event) => {
+          const filter = event?.target?.value?.toUpperCase() || "";
+
+          const table = document.getElementById("link-table");
+          const tbody = table.getElementsByTagName("tbody")[0];
+          const rows = tbody.getElementsByTagName("tr");
+          let disabledCounter = 0;
+
+          Array.from(rows).forEach((element) => {
+            const title = element.getElementsByTagName("td")[0].getElementsByTagName("a")[0].innerHTML.toUpperCase();
+
+            if (title.includes(filter)) {
+              element.hidden = false;
+            } else {
+              element.hidden = true;
+            }
+
+            if (filter.startsWith("HIDDEN") && title.startsWith("HIDDEN:")) {
+              element.hidden = false;
+            } else if (filter.startsWith("ALL!")) {
+              element.hidden = false;
+            } else if (title.startsWith("HIDDEN:")) {
+              element.hidden = true;
+            }
+
+            if (element.hidden) {
+              disabledCounter++;
+            }
+          });
+
+          if (disabledCounter === rows.length) {
+            table.hidden = true;
+          } else {
+            table.hidden = false;
+          }
+        };
+
+        // Run once on load
+        handleInput();
+
+        // Run on every input event
+        document.getElementById("link-table-filter").addEventListener("input", handleInput);
+      })();
+    </script>
+
+    <casper-command-palette />
+  </body>
+</html>
