@@ -176,7 +176,7 @@ export class CasperCommandPalette extends HTMLElement {
     Keyboard.add_binding({
       key: "1",
       ctrlKey: true,
-      desc: "Notify 'alt+1' || 'alt+1' was pressed.",
+      desc: "Notify 'ctrl+1' || 'ctrl+1' was pressed.",
       callback: () => {
         window.location.href = "/";
       },
@@ -187,7 +187,7 @@ export class CasperCommandPalette extends HTMLElement {
     Keyboard.add_binding({
       key: "2",
       ctrlKey: true,
-      desc: "Notify 'alt+2' || 'alt+2' was pressed.",
+      desc: "Notify 'ctrl+2' || 'ctrl+2' was pressed.",
       callback: () => {
         window.location.href = "/portfolio";
       },
@@ -198,7 +198,7 @@ export class CasperCommandPalette extends HTMLElement {
     Keyboard.add_binding({
       key: "3",
       ctrlKey: true,
-      desc: "Notify 'alt+3' || 'alt+3' was pressed.",
+      desc: "Notify 'ctrl+3' || 'ctrl+3' was pressed.",
       callback: () => {
         window.location.href = "/projects";
       },
@@ -209,7 +209,18 @@ export class CasperCommandPalette extends HTMLElement {
     Keyboard.add_binding({
       key: "4",
       ctrlKey: true,
-      desc: "Notify 'alt+4' || 'alt+4' was pressed.",
+      desc: "Notify 'ctrl+4' || 'ctrl+4' was pressed.",
+      callback: () => {
+        window.location.href = "/presentations";
+      },
+      commandDesc: "Go to Presentations Page",
+      commandHref: "/presentations",
+    });
+
+    Keyboard.add_binding({
+      key: "5",
+      ctrlKey: true,
+      desc: "Notify 'ctrl+5' || 'ctrl+5' was pressed.",
       callback: () => {
         window.location.href = "/github";
       },
@@ -218,9 +229,9 @@ export class CasperCommandPalette extends HTMLElement {
     });
 
     Keyboard.add_binding({
-      key: "5",
+      key: "6",
       ctrlKey: true,
-      desc: "Notify 'alt+5' || 'alt+5' was pressed.",
+      desc: "Notify 'ctrl+6' || 'ctrl+6' was pressed.",
       callback: () => {
         window.location.href = "https://www.linkedin.com/in/christopher-bilger/";
       },
@@ -229,9 +240,9 @@ export class CasperCommandPalette extends HTMLElement {
     });
 
     Keyboard.add_binding({
-      key: "6",
+      key: "7",
       ctrlKey: true,
-      desc: "Notify 'alt+6' || 'alt+6' was pressed.",
+      desc: "Notify 'ctrl+7' || 'ctrl+7' was pressed.",
       callback: () => {
         window.location.href = "/Christopher-Bilger-Resume.pdf";
       },
@@ -240,9 +251,9 @@ export class CasperCommandPalette extends HTMLElement {
     });
 
     Keyboard.add_binding({
-      key: "7",
+      key: "8",
       ctrlKey: true,
-      desc: "Notify 'alt+7' || 'alt+7' was pressed.",
+      desc: "Notify 'ctrl+8' || 'ctrl+8' was pressed.",
       callback: () => {
         window.location.href = "mailto:christopherbilg@gmail.com";
       },
