@@ -24,10 +24,9 @@
       <h1>JS Page Visibility</h1>
 
       <p>
-        A simple demo of the <b>Page Visibility API</b> being used as a Pomodoro Timer. This API can be used to
-        determine whether a webpage is currently visible to the user or not. This can be useful for pausing animations
-        or videos when the user is not actively viewing the page. In this demo, the timer will pause when the user
-        navigates away from the page and will resume when they return.
+        A simple demo of the <b>Page Visibility API</b> being used to play chimes. This API can be used to determine
+        whether a webpage is currently visible to the user or not. This can be useful for pausing animations or videos
+        when the user is not actively viewing the page.
       </p>
     </main>
 
@@ -44,10 +43,74 @@
         document.getElementsByTagName("main")[0].hidden = false;
 
         class App extends Component {
-          init() {}
+          init() {
+            this.audioContext = null;
+            this.visibilityStatus = !document.hidden ? 'Page is visible' : 'Page is hidden';
+            this.visibilityColor = !document.hidden ? '#068806' : '#880606';
+            
+            this.initAudioContext();
+            this.setupVisibilityListener();
+          }
+
+          initAudioContext() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.audioContext = new AudioContext();
+          }
+
+          playChime(frequency, duration = 500) {
+            if (!this.audioContext) return;
+            
+            if (this.audioContext.state === 'suspended') {
+              this.audioContext.resume();
+            }
+            
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+            
+            gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(this.audioContext.currentTime);
+            oscillator.stop(this.audioContext.currentTime + duration / 1000);
+          }
+
+          setupVisibilityListener() {
+            document.addEventListener('visibilitychange', () => {
+              if (document.hidden) {
+                this.playChime(440, 300);
+                this.visibilityStatus = 'Page is hidden';
+                this.visibilityColor = '#880606';
+              } else {
+                this.playChime(880, 300);
+                this.visibilityStatus = 'Page is visible';
+                this.visibilityColor = '#068806';
+              }
+              this.render();
+            });
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <h2>Page Visibility Status</h2>
+                <p style="font-size: 1.5em; color: ${this.visibilityColor}; font-weight: bold;">
+                  ${this.visibilityStatus}
+                </p>
+                <p>
+                  Switch to another tab or minimize this window to hear a low chime (440Hz).
+                  Come back to hear a high chime (880Hz).
+                </p>
+                <button onclick=${() => {
+                  this.playChime(660, 200);
+                }}>Test Chime Sound</button>
+              </div>
+            `;
           }
         }
 
