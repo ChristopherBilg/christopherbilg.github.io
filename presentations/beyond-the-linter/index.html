@@ -159,10 +159,13 @@ function processUserData(u: any) {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem">
               <div>
                 <h3>Writability ⚡</h3>
+
                 <p>How fast you can write code <strong>now</strong></p>
               </div>
+
               <div>
                 <h3>Sustainability 🏛️</h3>
+
                 <p>
                   How easy it is to <strong>read</strong>, <strong>maintain</strong>, and <strong>test</strong> later
                 </p>
@@ -333,11 +336,21 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li class="fragment"><strong class="blue">S</strong>ingle Responsibility: A class should have one reason to change</li>
-              <li class="fragment"><strong class="blue">O</strong>pen/Closed: Open for extension, closed for modification</li>
-              <li class="fragment"><strong class="blue">L</strong>iskov Substitution: Subtypes must be substitutable for their base types</li>
-              <li class="fragment"><strong class="blue">I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces</li>
-              <li class="fragment"><strong class="blue">D</strong>ependency Inversion: Depend on abstractions, not concretions</li>
+              <li class="fragment">
+                <strong class="blue">S</strong>ingle Responsibility: A class should have one reason to change
+              </li>
+              <li class="fragment">
+                <strong class="blue">O</strong>pen/Closed: Open for extension, closed for modification
+              </li>
+              <li class="fragment">
+                <strong class="blue">L</strong>iskov Substitution: Subtypes must be substitutable for their base types
+              </li>
+              <li class="fragment">
+                <strong class="blue">I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces
+              </li>
+              <li class="fragment">
+                <strong class="blue">D</strong>ependency Inversion: Depend on abstractions, not concretions
+              </li>
             </ul>
           </section>
 
@@ -347,11 +360,26 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li class="fragment"><span class="blue">Single Responsibility:</span> A UserService handles user logic, not payment processing</li>
-              <li class="fragment"><span class="blue">Open/Closed:</span> Add new payment methods via new classes, not modifying existing code</li>
-              <li class="fragment"><span class="blue">Liskov Substitution:</span> A Square class can be used wherever a Rectangle is expected</li>
-              <li class="fragment"><span class="blue">Interface Segregation:</span> Separate interfaces for reading and writing data</li>
-              <li class="fragment"><span class="blue">Dependency Inversion:</span> Inject database clients via interfaces, not concrete implementations</li>
+              <li class="fragment">
+                <span class="blue">Single Responsibility:</span> A UserService handles user logic, not payment
+                processing
+              </li>
+              <li class="fragment">
+                <span class="blue">Open/Closed:</span> Add new payment methods via new classes, not modifying existing
+                code
+              </li>
+              <li class="fragment">
+                <span class="blue">Liskov Substitution:</span> A Square class can be used wherever a Rectangle is
+                expected
+              </li>
+              <li class="fragment">
+                <span class="blue">Interface Segregation:</span> Separate interfaces for reading and writing data
+              </li>
+              <li class="fragment">
+                <span class="blue">Dependency Inversion:</span> Inject database clients via interfaces, not concrete
+                implementations
+              </li>
+            </ul>
           </section>
         </section>
 
@@ -377,7 +405,7 @@ async function createAppointment(
             <p>Replace complex logic blocks with well-named functions.</p>
           </section>
 
-           <section>
+          <section>
             <h3>Improving Readability: Extract Method (Before)</h3>
 
             <br />
@@ -498,23 +526,6 @@ class PaymentService {
             <br />
 
             <p>Depend on abstractions, not concrete implementations.</p>
-
-            <br />
-
-            <h4>Before: Hard-Coded Dependencies</h4>
-            <pre><code class="language-typescript">class AppointmentService {
-  async scheduleAppointment(data: AppointmentData) {
-    // Hard-coded dependencies - can't test without hitting real APIs
-    const smsClient = new TwilioSmsClient();
-    const calendar = new GoogleCalendarClient();
-
-    const appointment = await this.createAppointment(data);
-    await smsClient.sendSms(appointment.patientPhone, 'Confirmed!');
-    await calendar.addEvent({ title: 'Appointment', start: appointment.startTime });
-
-    return appointment;
-  }
-}</code></pre>
           </section>
 
           <section>
@@ -615,12 +626,12 @@ class AppointmentService {
             <br />
 
             <ul>
-              <li><span class="blue">Long Parameter List:</span> More than 3-4 parameters</li>
-              <li><span class="blue">Long Method:</span> Functions longer than ~20 lines</li>
-              <li><span class="blue">Deeply Nested Conditionals:</span> More than 2-3 levels</li>
-              <li><span class="blue">Duplicate Code:</span> Same logic in multiple places</li>
-              <li><span class="blue">Large Class:</span> Classes with too many responsibilities</li>
-              <li><span class="blue">Feature Envy:</span> Methods that use more of another class than their own</li>
+              <li> <span class="blue">Long Parameter List:</span> More than 3-4 parameters </li>
+              <li> <span class="blue">Long Method:</span> Functions longer than ~20 lines </li>
+              <li> <span class="blue">Deeply Nested Conditionals:</span> More than 2-3 levels </li>
+              <li> <span class="blue">Duplicate Code:</span> Same logic in multiple places </li>
+              <li> <span class="blue">Large Class:</span> Classes with too many responsibilities </li>
+              <li> <span class="blue">Feature Envy:</span> Methods that use more of another class than their own </li>
             </ul>
           </section>
         </section>
