@@ -29,6 +29,7 @@
   <body>
     <div class="reveal">
       <div class="slides">
+        <!-- Title Slide -->
         <section>
           <h2>Beyond the Linter</h2>
           <h4>Crafting Enduring Code</h4>
@@ -40,44 +41,591 @@
           <p>October 15th, 2025</p>
         </section>
 
+        <!-- Agenda -->
+        <section>
+          <h2>Agenda</h2>
+
+          <br />
+          <br />
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr">
+            <div style="align-self: center">
+              <ul>
+                <li>The Problem: Linters Can't Catch Everything</li>
+                <li>The Cost of "Just Ship It"</li>
+                <li>The Three Pillars of Enduring Code</li>
+                <li>Practical Patterns and Refactorings</li>
+                <li>Conclusion + Q&A</li>
+              </ul>
+            </div>
+
+            <div>
+              <img data-src="./images/code-quality-measurement-wtfs-per-minute.png" width="300" />
+            </div>
+          </div>
+        </section>
+
+        <!-- Section: The Problem -->
         <section>
           <section>
-            <h2>Agenda</h2>
-
-            <br />
-            <br />
-
-            <div style="display: grid; grid-template-columns: 2fr 1fr">
-              <div style="align-self: center">
-                <ul>
-                  <li>Linter's Limits & Spell-Checker Analogy</li>
-                  <li>Writability Trap & Cost of Speed</li>
-                  <li>Jenga Codebase</li>
-                  <li>Three Pillars of Enduring Code</li>
-                  <li>Conclusion + Q&A</li>
-                </ul>
-              </div>
-
-              <div>
-                <img data-src="./images/code-quality-measurement-wtfs-per-minute.png" width="300" />
-              </div>
-            </div>
-          </section>
-
-          <section>
-            <h2>Note</h2>
+            <h2>The Problem: Linters Can't Catch Everything</h2>
 
             <br />
             <br />
 
             <h4>
-              This presentation revolves around the application engineering's dominant use of
-              <span class="blue">TypeScript</span>; however, most (if not all) of the underlying information is
-              applicable to any programming language.
+              Note: This presentation focuses on <span class="blue">TypeScript</span>, but the concepts apply to any
+              programming language.
             </h4>
+          </section>
+
+          <section>
+            <h2>What Linters Do Well</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Enforce syntax rules and formatting standards</li>
+              <li>Catch common mistakes (unused variables, missing semicolons)</li>
+              <li>Ensure consistency across the codebase</li>
+              <li>Validate that code is <span class="blue">technically correct</span></li>
+            </ul>
+
+            <br />
+            <br />
+
+            <p>But they can't judge whether code is <span class="blue">understandable or maintainable</span>.</p>
+          </section>
+
+          <section>
+            <h2>Example: Linter-Approved Code</h2>
+
+            <br />
+
+            <p>This code passes all linting checks:</p>
+
+            <br />
+
+            <pre><code class="language-typescript">function processUserData(u: any) {
+  if (u.s === 'active') {
+    if (u.r === 'admin') {
+      if (u.p && u.p.length > 0) {
+        if (u.p[0].t === 'premium') {
+          if (u.l && u.l.ts && Date.now() - u.l.ts < 86400000) {
+            return { access: 'full', features: ['dashboard', 'reports'] };
+          }
+        }
+      }
+    }
+  }
+  return { access: 'limited', features: ['dashboard'] };
+}</code></pre>
+
+            <br />
+
+            <p>✅ Linter says it's fine. But is it really?</p>
+          </section>
+
+          <section>
+            <h2>The Spell-Checker Analogy</h2>
+
+            <br />
+            <br />
+
+            <p>Consider this perfectly spelled sentence:</p>
+
+            <br />
+
+            <h3 style="font-style: italic; color: #859900">
+              "The brilliant blue banana ate the moon's quiet whispers."
+            </h3>
+
+            <br />
+
+            <p>✅ Spell-checker: No errors!</p>
+            <p>❌ Reader: This makes no sense.</p>
+
+            <br />
+            <br />
+
+            <p>
+              Linters check <span class="blue">grammar</span>. They don't check for
+              <span class="blue">meaning</span>.
+            </p>
+          </section>
+
+          <section>
+            <img data-src="./images/philip-j-fry-not-sure-if-bad-code-quality.webp" width="500" />
           </section>
         </section>
 
+        <!-- Section: The Cost of "Just Ship It" -->
+        <section>
+          <section>
+            <h2>The Cost of "Just Ship It"</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>The "writability" trap</li>
+              <li>Technical debt compounds over time</li>
+              <li>Real business costs of poor code quality</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>The "Writability" Trap</h2>
+
+            <br />
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem">
+              <div>
+                <h3>Writability ⚡</h3>
+                <p>How fast you can write code <strong>now</strong></p>
+              </div>
+              <div>
+                <h3>Sustainability 🏛️</h3>
+                <p>
+                  How easy it is to <strong>read</strong>, <strong>maintain</strong>, and <strong>test</strong> later
+                </p>
+              </div>
+            </div>
+
+            <br />
+            <br />
+
+            <p>Optimizing for speed today creates maintenance debt tomorrow.</p>
+          </section>
+
+          <section>
+            <h2>Technical Debt is Design Debt</h2>
+
+            <br />
+            <br />
+
+            <p>Poorly designed code has <strong>higher interest</strong>:</p>
+
+            <br />
+
+            <ul>
+              <li>Every change takes longer</li>
+              <li>Every bug fix introduces new bugs</li>
+              <li>Every new feature requires refactoring</li>
+              <li>Engineers are afraid to touch the code</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Real Business Costs</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>🐌 Slower feature development</li>
+              <li>🧠 High cognitive load on engineers</li>
+              <li>🐛 Increased bug count and severity</li>
+              <li>💸 Higher onboarding costs</li>
+              <li>⏱️ More time debugging than building</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Example: Code Smell</h2>
+
+            <br />
+
+            <p><strong>Long Parameter List</strong></p>
+
+            <br />
+
+            <pre><code class="language-typescript">async function createAppointment(
+  patientId: string,
+  providerId: string,
+  appointmentType: string,
+  startTime: Date,
+  endTime: Date,
+  timezone: string,
+  insuranceId: string,
+  copay: number,
+  notes: string,
+  isUrgent: boolean,
+  sendReminder: boolean,
+  reminderMethod: 'email' | 'sms'
+) {
+  // Implementation...
+}</code></pre>
+
+            <br />
+
+            <p>This is hard to call, hard to test, and hard to change.</p>
+          </section>
+
+          <section>
+            <h2>The "Jenga" Codebase</h2>
+
+            <br />
+            <br />
+
+            <!-- TODO: Add image of Jenga tower or similar fragility metaphor -->
+
+            <p>Every "quick fix" makes the tower more unstable.</p>
+
+            <br />
+
+            <ul>
+              <li>Fix a bug in module A...</li>
+              <li>...and something breaks in module C</li>
+              <li>Nobody knows why 🎲</li>
+            </ul>
+
+            <br />
+            <br />
+
+            <p>This is caused by <span class="blue">high coupling</span>.</p>
+          </section>
+        </section>
+
+        <!-- Section: The Three Pillars -->
+        <section>
+          <section>
+            <h2>The Three Pillars of Enduring Code</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Readability</li>
+              <li>Maintainability</li>
+              <li>Testability</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Pillar #1: Readability</h2>
+
+            <br />
+            <br />
+
+            <p><span class="blue">Code should communicate intent clearly.</span></p>
+
+            <br />
+
+            <ul>
+              <li>Code is read 10x more than it's written</li>
+              <li>Clear naming eliminates the need for comments</li>
+              <li>Functions should do one thing and do it well</li>
+              <li>Self-documenting code reduces cognitive load</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Pillar #2: Maintainability</h2>
+
+            <br />
+            <br />
+
+            <p><span class="blue">Code should adapt to change easily.</span></p>
+
+            <br />
+
+            <ul>
+              <li>
+                <span class="blue">High cohesion:</span> Related functionality stays together
+              </li>
+              <li><span class="blue">Low coupling:</span> Components are independent</li>
+              <li>Changes in one place don't ripple unpredictably</li>
+              <li>New features don't require modifying existing code</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Pillar #3: Testability</h2>
+
+            <br />
+            <br />
+
+            <p><span class="blue">Code should be verifiable in isolation.</span></p>
+
+            <br />
+
+            <ul>
+              <li>Tests provide confidence in deployment</li>
+              <li>Dependencies can be mocked or stubbed</li>
+              <li>Fast feedback loops during development</li>
+              <li>Testable code is a byproduct of good design</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>The Foundation: SOLID Principles</h2>
+
+            <br />
+            <br />
+
+            <p>These pillars are supported by time-tested design principles:</p>
+
+            <br />
+
+            <ul>
+              <li><strong>S</strong>ingle Responsibility: A class should have one reason to change</li>
+              <li><strong>O</strong>pen/Closed: Open for extension, closed for modification</li>
+              <li><strong>L</strong>iskov Substitution: Subtypes must be substitutable for their base types</li>
+              <li><strong>I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces</li>
+              <li><strong>D</strong>ependency Inversion: Depend on abstractions, not concretions</li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- Section: Practical Patterns -->
+        <section>
+          <section>
+            <h2>Practical Patterns and Refactorings</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Improving readability with Extract Method</li>
+              <li>Improving maintainability with the Strategy Pattern</li>
+              <li>Improving testability with Dependency Injection</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Improving Readability: Extract Method</h2>
+
+            <br />
+
+            <p>Replace complex logic blocks with well-named functions.</p>
+
+            <br />
+
+            <h4>Before:</h4>
+            <pre><code class="language-typescript">function handleRefund(userId: string, orderId: string) {
+  const user = await getUser(userId);
+  const order = await getOrder(orderId);
+
+  // Check if user is eligible
+  if (
+    order.status === 'completed' &&
+    order.purchaseDate > Date.now() - 30 * 24 * 60 * 60 * 1000 &&
+    user.refundCount < 3 &&
+    !order.isDigitalProduct
+  ) {
+    await processRefund(order);
+  }
+}</code></pre>
+          </section>
+
+          <section>
+            <h2>Improving Readability: Extract Method</h2>
+
+            <br />
+
+            <h4>After:</h4>
+            <pre><code class="language-typescript">function handleRefund(userId: string, orderId: string) {
+  const user = await getUser(userId);
+  const order = await getOrder(orderId);
+
+  if (isEligibleForRefund(user, order)) {
+    await processRefund(order);
+  }
+}
+
+function isEligibleForRefund(user: User, order: Order): boolean {
+  const withinRefundWindow =
+    order.purchaseDate > Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+  return (
+    order.status === 'completed' &&
+    withinRefundWindow &&
+    user.refundCount < 3 &&
+    !order.isDigitalProduct
+  );
+}</code></pre>
+
+            <br />
+
+            <p>The function name now reveals the <span class="blue">intent</span>.</p>
+          </section>
+
+          <section>
+            <h2>Improving Maintainability: Strategy Pattern</h2>
+
+            <br />
+
+            <p>Replace conditional complexity with polymorphism.</p>
+
+            <br />
+
+            <h4>Before: Conditional Complexity</h4>
+            <pre><code class="language-typescript">function processPayment(method: string, amount: number, details: any) {
+  if (method === 'credit_card') {
+    return stripePay(details.cardToken, amount);
+  } else if (method === 'paypal') {
+    return paypalPay(details.email, amount);
+  } else if (method === 'apple_pay') {
+    return applePayProcess(details.token, amount);
+  }
+  throw new Error('Unknown payment method');
+}</code></pre>
+
+            <br />
+
+            <p>❌ Adding a new payment method requires modifying this function.</p>
+          </section>
+
+          <section>
+            <h2>Improving Maintainability: Strategy Pattern</h2>
+
+            <br />
+
+            <h4>After: Open/Closed Principle</h4>
+            <pre><code class="language-typescript">interface PaymentStrategy {
+  process(amount: number, details: PaymentDetails): Promise&lt;PaymentResult&gt;;
+}
+
+class CreditCardStrategy implements PaymentStrategy {
+  async process(amount: number, details: PaymentDetails) {
+    return stripePay(details.cardToken, amount);
+  }
+}
+
+class PaymentService {
+  constructor(private strategies: Map&lt;string, PaymentStrategy&gt;) {}
+
+  async processPayment(method: string, amount: number, details: PaymentDetails) {
+    const strategy = this.strategies.get(method);
+    if (!strategy) throw new Error('Unknown payment method');
+    return strategy.process(amount, details);
+  }
+}</code></pre>
+
+            <br />
+
+            <p>✅ Add new payment methods without modifying existing code.</p>
+          </section>
+
+          <section>
+            <h2>Improving Testability: Dependency Injection</h2>
+
+            <br />
+
+            <p>Depend on abstractions, not concrete implementations.</p>
+
+            <br />
+
+            <h4>Before: Hard-Coded Dependencies</h4>
+            <pre><code class="language-typescript">class AppointmentService {
+  async scheduleAppointment(data: AppointmentData) {
+    // Hard-coded dependencies - can't test without hitting real APIs
+    const smsClient = new TwilioSmsClient();
+    const calendar = new GoogleCalendarClient();
+
+    const appointment = await this.createAppointment(data);
+    await smsClient.sendSms(appointment.patientPhone, 'Confirmed!');
+    await calendar.addEvent({ title: 'Appointment', start: appointment.startTime });
+
+    return appointment;
+  }
+}</code></pre>
+
+            <br />
+
+            <p>❌ Tests must interact with live external APIs.</p>
+          </section>
+
+          <section>
+            <h2>Improving Testability: Dependency Injection</h2>
+
+            <br />
+
+            <h4>After: Depend on Abstractions</h4>
+            <pre><code class="language-typescript">interface INotificationClient {
+  sendSms(phone: string, message: string): Promise&lt;void&gt;;
+}
+
+interface ICalendarClient {
+  addEvent(event: CalendarEvent): Promise&lt;void&gt;;
+}
+
+class AppointmentService {
+  constructor(
+    private smsClient: INotificationClient,
+    private calendar: ICalendarClient
+  ) {}
+
+  async scheduleAppointment(data: AppointmentData) {
+    const appointment = await this.createAppointment(data);
+    await this.smsClient.sendSms(appointment.patientPhone, 'Confirmed!');
+    await this.calendar.addEvent({ title: 'Appointment', start: appointment.startTime });
+    return appointment;
+  }
+}</code></pre>
+
+            <br />
+
+            <p>✅ Inject mocks during testing for true isolation.</p>
+          </section>
+        </section>
+
+        <!-- Section: Best Practices -->
+        <section>
+          <section>
+            <h2>Best Practices We Should Follow</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li>Code reviews focused on design, not just correctness</li>
+              <li>Refactor as you go, not as a separate phase</li>
+              <li>Write tests that validate behavior, not implementation</li>
+              <li>Favor composition over inheritance</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Code Review Checklist</h2>
+
+            <br />
+            <br />
+
+            <p>Beyond "does it work?", ask:</p>
+
+            <br />
+
+            <ul>
+              <li>Can I understand what this code does without comments?</li>
+              <li>If requirements change, how many files need to be modified?</li>
+              <li>Can I test this code without external dependencies?</li>
+              <li>Does this code follow the Single Responsibility Principle?</li>
+              <li>Are there any obvious code smells (long parameter lists, deep nesting, etc.)?</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Common Code Smells to Watch For</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li><span class="blue">Long Parameter List:</span> More than 3-4 parameters</li>
+              <li><span class="blue">Long Method:</span> Functions longer than ~20 lines</li>
+              <li><span class="blue">Deeply Nested Conditionals:</span> More than 2-3 levels</li>
+              <li><span class="blue">Duplicate Code:</span> Same logic in multiple places</li>
+              <li><span class="blue">Large Class:</span> Classes with too many responsibilities</li>
+              <li><span class="blue">Feature Envy:</span> Methods that use more of another class than their own</li>
+            </ul>
+          </section>
+        </section>
+
+        <!-- Conclusion -->
         <section>
           <section>
             <h2>Conclusion + Q&A</h2>
@@ -88,18 +636,64 @@
             <div style="display: grid; grid-template-columns: 2fr 1fr">
               <div style="align-self: center">
                 <ul>
-                  <li>Linter's Limits & Spell-Checker Analogy</li>
-                  <li>Writability Trap & Cost of Speed</li>
-                  <li>Jenga Codebase</li>
-                  <li>Three Pillars of Enduring Code</li>
+                  <li>The Problem: Linters Can't Catch Everything</li>
+                  <li>The Cost of "Just Ship It"</li>
+                  <li>The Three Pillars of Enduring Code</li>
+                  <li>Practical Patterns and Refactorings</li>
                   <li>Q&A</li>
                 </ul>
               </div>
 
               <div>
-                <img data-src="./images/philip-j-fry-not-sure-if-bad-code-quality.webp" width="300" />
+                <img data-src="./images/code-quality-measurement-wtfs-per-minute.png" width="300" />
               </div>
             </div>
+          </section>
+
+          <section>
+            <h2>The Job is to Make It Last</h2>
+
+            <br />
+            <br />
+
+            <!-- TODO: Add image of solid, enduring structure (bridge, Roman aqueduct, etc.) -->
+
+            <p>Enduring code is a fundamental investment in:</p>
+
+            <br />
+
+            <ul>
+              <li>Your team's velocity</li>
+              <li>Your product's reliability</li>
+              <li>Your company's ability to adapt</li>
+            </ul>
+
+            <br />
+            <br />
+
+            <p>Small, intentional improvements compound into enduring systems.</p>
+          </section>
+
+          <section>
+            <h2>Challenge for Your Next PR</h2>
+
+            <br />
+            <br />
+
+            <p>Try applying one of these refactorings:</p>
+
+            <br />
+
+            <ol>
+              <li><span class="blue">Extract Method</span> to improve readability</li>
+              <li><span class="blue">Strategy Pattern</span> to improve maintainability</li>
+              <li><span class="blue">Dependency Injection</span> to improve testability</li>
+            </ol>
+
+            <br />
+            <br />
+
+            <p>Your legacy starts today.</p>
           </section>
 
           <section>
