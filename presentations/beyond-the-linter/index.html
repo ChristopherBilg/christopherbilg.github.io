@@ -29,7 +29,6 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        <!-- Title Slide -->
         <section>
           <h2>Beyond the Linter</h2>
           <h4>Crafting Enduring Code</h4>
@@ -41,7 +40,6 @@
           <p>October 15th, 2025</p>
         </section>
 
-        <!-- Agenda -->
         <section>
           <h2>Agenda</h2>
 
@@ -65,7 +63,6 @@
           </div>
         </section>
 
-        <!-- Section: The Problem -->
         <section>
           <section>
             <h2>The Problem: Linters Can't Catch Everything</h2>
@@ -99,41 +96,28 @@
           </section>
 
           <section>
-            <h2>Example: Linter-Approved Code</h2>
-
-            <br />
+            <h3>Example: Linter-Approved Code</h3>
 
             <p>This code passes all linting checks:</p>
 
-            <br />
-
-            <pre><code class="language-typescript">function processUserData(u: any) {
+            <pre>
+              <code class="language-typescript">
+function processUserData(u: any) {
   if (u.s === 'active') {
     if (u.r === 'admin') {
       if (u.p && u.p.length > 0) {
-        if (u.p[0].t === 'premium') {
-          if (u.l && u.l.ts && Date.now() - u.l.ts < 86400000) {
-            return { access: 'full', features: ['dashboard', 'reports'] };
-          }
-        }
+        ...
       }
     }
   }
   return { access: 'limited', features: ['dashboard'] };
-}</code></pre>
-
-            <br />
-
-            <p>✅ Linter says it's fine. But is it really?</p>
+}
+              </code>
+            </pre>
           </section>
 
           <section>
             <h2>The Spell-Checker Analogy</h2>
-
-            <br />
-            <br />
-
-            <p>Consider this perfectly spelled sentence:</p>
 
             <br />
 
@@ -146,21 +130,12 @@
             <p>✅ Spell-checker: No errors!</p>
             <p>❌ Reader: This makes no sense.</p>
 
-            <br />
-            <br />
-
             <p>
-              Linters check <span class="blue">grammar</span>. They don't check for
-              <span class="blue">meaning</span>.
+              Linters check <span class="blue">grammar</span>. They don't check for <span class="blue">meaning</span>.
             </p>
-          </section>
-
-          <section>
-            <img data-src="./images/philip-j-fry-not-sure-if-bad-code-quality.webp" width="500" />
           </section>
         </section>
 
-        <!-- Section: The Cost of "Just Ship It" -->
         <section>
           <section>
             <h2>The Cost of "Just Ship It"</h2>
@@ -195,7 +170,6 @@
             </div>
 
             <br />
-            <br />
 
             <p>Optimizing for speed today creates maintenance debt tomorrow.</p>
           </section>
@@ -206,7 +180,7 @@
             <br />
             <br />
 
-            <p>Poorly designed code has <strong>higher interest</strong>:</p>
+            <p>Poorly designed code has <strong class="blue">higher interest</strong>:</p>
 
             <br />
 
@@ -236,41 +210,33 @@
           <section>
             <h2>Example: Code Smell</h2>
 
-            <br />
+            <p>
+              <strong>
+                Long Parameter List: This is <span class="blue">hard to call</span>,
+                <span class="blue">hard to test</span>, and <span class="blue">hard to change</span>.
+              </strong>
+            </p>
 
-            <p><strong>Long Parameter List</strong></p>
-
-            <br />
-
-            <pre><code class="language-typescript">async function createAppointment(
+            <pre>
+              <code class="language-typescript">
+async function createAppointment(
   patientId: string,
   providerId: string,
   appointmentType: string,
   startTime: Date,
   endTime: Date,
   timezone: string,
-  insuranceId: string,
-  copay: number,
-  notes: string,
-  isUrgent: boolean,
-  sendReminder: boolean,
-  reminderMethod: 'email' | 'sms'
+  ...
 ) {
-  // Implementation...
-}</code></pre>
-
-            <br />
-
-            <p>This is hard to call, hard to test, and hard to change.</p>
+  ...
+              </code>
+            </pre>
           </section>
 
           <section>
             <h2>The "Jenga" Codebase</h2>
 
             <br />
-            <br />
-
-            <!-- TODO: Add image of Jenga tower or similar fragility metaphor -->
 
             <p>Every "quick fix" makes the tower more unstable.</p>
 
@@ -289,7 +255,6 @@
           </section>
         </section>
 
-        <!-- Section: The Three Pillars -->
         <section>
           <section>
             <h2>The Three Pillars of Enduring Code</h2>
@@ -310,7 +275,7 @@
             <br />
             <br />
 
-            <p><span class="blue">Code should communicate intent clearly.</span></p>
+            <p>Code should <span class="blue">communicate intent clearly</span>.</p>
 
             <br />
 
@@ -328,14 +293,12 @@
             <br />
             <br />
 
-            <p><span class="blue">Code should adapt to change easily.</span></p>
+            <p>Code should <span class="blue">adapt to change easily</span>.</p>
 
             <br />
 
             <ul>
-              <li>
-                <span class="blue">High cohesion:</span> Related functionality stays together
-              </li>
+              <li> <span class="blue">High cohesion:</span> Related functionality stays together </li>
               <li><span class="blue">Low coupling:</span> Components are independent</li>
               <li>Changes in one place don't ripple unpredictably</li>
               <li>New features don't require modifying existing code</li>
@@ -348,7 +311,7 @@
             <br />
             <br />
 
-            <p><span class="blue">Code should be verifiable in isolation.</span></p>
+            <p>Code should <span class="blue">be verifiable in isolation</span>.</p>
 
             <br />
 
@@ -364,23 +327,34 @@
             <h2>The Foundation: SOLID Principles</h2>
 
             <br />
-            <br />
 
             <p>These pillars are supported by time-tested design principles:</p>
 
             <br />
 
             <ul>
-              <li><strong>S</strong>ingle Responsibility: A class should have one reason to change</li>
-              <li><strong>O</strong>pen/Closed: Open for extension, closed for modification</li>
-              <li><strong>L</strong>iskov Substitution: Subtypes must be substitutable for their base types</li>
-              <li><strong>I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces</li>
-              <li><strong>D</strong>ependency Inversion: Depend on abstractions, not concretions</li>
+              <li class="fragment"><strong class="blue">S</strong>ingle Responsibility: A class should have one reason to change</li>
+              <li class="fragment"><strong class="blue">O</strong>pen/Closed: Open for extension, closed for modification</li>
+              <li class="fragment"><strong class="blue">L</strong>iskov Substitution: Subtypes must be substitutable for their base types</li>
+              <li class="fragment"><strong class="blue">I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces</li>
+              <li class="fragment"><strong class="blue">D</strong>ependency Inversion: Depend on abstractions, not concretions</li>
             </ul>
+          </section>
+
+          <section>
+            <h2>SOLID Principles Examples</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment"><span class="blue">Single Responsibility:</span> A UserService handles user logic, not payment processing</li>
+              <li class="fragment"><span class="blue">Open/Closed:</span> Add new payment methods via new classes, not modifying existing code</li>
+              <li class="fragment"><span class="blue">Liskov Substitution:</span> A Square class can be used wherever a Rectangle is expected</li>
+              <li class="fragment"><span class="blue">Interface Segregation:</span> Separate interfaces for reading and writing data</li>
+              <li class="fragment"><span class="blue">Dependency Inversion:</span> Inject database clients via interfaces, not concrete implementations</li>
           </section>
         </section>
 
-        <!-- Section: Practical Patterns -->
         <section>
           <section>
             <h2>Practical Patterns and Refactorings</h2>
@@ -389,9 +363,9 @@
             <br />
 
             <ul>
-              <li>Improving readability with Extract Method</li>
-              <li>Improving maintainability with the Strategy Pattern</li>
-              <li>Improving testability with Dependency Injection</li>
+              <li>Improving readability with the <span class="blue">Extract Method</span></li>
+              <li>Improving maintainability with the <span class="blue">Strategy Pattern</span></li>
+              <li>Improving testability with <span class="blue">Dependency Injection</span></li>
             </ul>
           </section>
 
@@ -401,33 +375,41 @@
             <br />
 
             <p>Replace complex logic blocks with well-named functions.</p>
+          </section>
+
+           <section>
+            <h3>Improving Readability: Extract Method (Before)</h3>
 
             <br />
 
-            <h4>Before:</h4>
-            <pre><code class="language-typescript">function handleRefund(userId: string, orderId: string) {
+            <pre>
+              <code class="language-typescript">
+function handleRefund(userId: string, orderId: string) {
   const user = await getUser(userId);
   const order = await getOrder(orderId);
 
   // Check if user is eligible
   if (
     order.status === 'completed' &&
-    order.purchaseDate > Date.now() - 30 * 24 * 60 * 60 * 1000 &&
+    order.purchaseDate > Date.now() - 24 * 60 * 60 * 1000 &&
     user.refundCount < 3 &&
     !order.isDigitalProduct
   ) {
     await processRefund(order);
   }
-}</code></pre>
+}
+              </code>
+            </pre>
           </section>
 
           <section>
-            <h2>Improving Readability: Extract Method</h2>
+            <h3>Improving Readability: Extract Method (After)</h3>
 
             <br />
 
-            <h4>After:</h4>
-            <pre><code class="language-typescript">function handleRefund(userId: string, orderId: string) {
+            <pre>
+              <code class="language-typescript">
+function handleRefund(userId: string, orderId: string) {
   const user = await getUser(userId);
   const order = await getOrder(orderId);
 
@@ -436,9 +418,9 @@
   }
 }
 
-function isEligibleForRefund(user: User, order: Order): boolean {
+function isEligibleForRefund(user: User, order: Order) {
   const withinRefundWindow =
-    order.purchaseDate > Date.now() - 30 * 24 * 60 * 60 * 1000;
+    order.purchaseDate > Date.now() - 24 * 60 * 60 * 1000;
 
   return (
     order.status === 'completed' &&
@@ -446,11 +428,9 @@ function isEligibleForRefund(user: User, order: Order): boolean {
     user.refundCount < 3 &&
     !order.isDigitalProduct
   );
-}</code></pre>
-
-            <br />
-
-            <p>The function name now reveals the <span class="blue">intent</span>.</p>
+}
+              </code>
+            </pre>
           </section>
 
           <section>
@@ -459,11 +439,16 @@ function isEligibleForRefund(user: User, order: Order): boolean {
             <br />
 
             <p>Replace conditional complexity with polymorphism.</p>
+          </section>
+
+          <section>
+            <h3>Improving Maintainability: Strategy Pattern (Before)</h3>
 
             <br />
 
-            <h4>Before: Conditional Complexity</h4>
-            <pre><code class="language-typescript">function processPayment(method: string, amount: number, details: any) {
+            <pre>
+              <code class="language-typescript">
+function processPayment(method: string, amount: number, details: any) {
   if (method === 'credit_card') {
     return stripePay(details.cardToken, amount);
   } else if (method === 'paypal') {
@@ -472,20 +457,19 @@ function isEligibleForRefund(user: User, order: Order): boolean {
     return applePayProcess(details.token, amount);
   }
   throw new Error('Unknown payment method');
-}</code></pre>
-
-            <br />
-
-            <p>❌ Adding a new payment method requires modifying this function.</p>
+}
+              </code>
+            </pre>
           </section>
 
           <section>
-            <h2>Improving Maintainability: Strategy Pattern</h2>
+            <h3>Improving Maintainability: Strategy Pattern (After)</h3>
 
             <br />
 
-            <h4>After: Open/Closed Principle</h4>
-            <pre><code class="language-typescript">interface PaymentStrategy {
+            <pre>
+              <code class="language-typescript">
+interface PaymentStrategy {
   process(amount: number, details: PaymentDetails): Promise&lt;PaymentResult&gt;;
 }
 
@@ -503,11 +487,9 @@ class PaymentService {
     if (!strategy) throw new Error('Unknown payment method');
     return strategy.process(amount, details);
   }
-}</code></pre>
-
-            <br />
-
-            <p>✅ Add new payment methods without modifying existing code.</p>
+}
+              </code>
+            </pre>
           </section>
 
           <section>
@@ -533,19 +515,40 @@ class PaymentService {
     return appointment;
   }
 }</code></pre>
-
-            <br />
-
-            <p>❌ Tests must interact with live external APIs.</p>
           </section>
 
           <section>
-            <h2>Improving Testability: Dependency Injection</h2>
+            <h2>Improving Testability: Dependency Injection (Before)</h2>
 
             <br />
 
-            <h4>After: Depend on Abstractions</h4>
-            <pre><code class="language-typescript">interface INotificationClient {
+            <pre>
+              <code class="language-typescript">
+class AppointmentService {
+  async scheduleAppointment(data: AppointmentData) {
+    // Hard-coded dependencies - can't test without hitting real APIs
+    const smsClient = new TwilioSmsClient();
+    const calendar = new GoogleCalendarClient();
+
+    const appointment = await this.createAppointment(data);
+    await smsClient.sendSms(appointment.patientPhone, 'Confirmed!');
+    await calendar.addEvent({ title: 'Appointment', start: appointment.startTime });
+
+    return appointment;
+  }
+}
+              </code>
+            </pre>
+          </section>
+
+          <section>
+            <h2>Improving Testability: Dependency Injection (After)</h2>
+
+            <br />
+
+            <pre>
+              <code class="language-typescript">
+interface INotificationClient {
   sendSms(phone: string, message: string): Promise&lt;void&gt;;
 }
 
@@ -565,15 +568,12 @@ class AppointmentService {
     await this.calendar.addEvent({ title: 'Appointment', start: appointment.startTime });
     return appointment;
   }
-}</code></pre>
-
-            <br />
-
-            <p>✅ Inject mocks during testing for true isolation.</p>
+}
+              </code>
+            </pre>
           </section>
         </section>
 
-        <!-- Section: Best Practices -->
         <section>
           <section>
             <h2>Best Practices We Should Follow</h2>
@@ -625,7 +625,6 @@ class AppointmentService {
           </section>
         </section>
 
-        <!-- Conclusion -->
         <section>
           <section>
             <h2>Conclusion + Q&A</h2>
@@ -645,7 +644,7 @@ class AppointmentService {
               </div>
 
               <div>
-                <img data-src="./images/code-quality-measurement-wtfs-per-minute.png" width="300" />
+                <img data-src="./images/philip-j-fry-not-sure-if-bad-code-quality.webp" width="500" />
               </div>
             </div>
           </section>
@@ -656,22 +655,22 @@ class AppointmentService {
             <br />
             <br />
 
-            <!-- TODO: Add image of solid, enduring structure (bridge, Roman aqueduct, etc.) -->
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem">
+              <div style="align-self: center">
+                <p>Small, intentional improvements compound into enduring systems.</p>
+                <p>Enduring code is a fundamental investment in:</p>
 
-            <p>Enduring code is a fundamental investment in:</p>
+                <ul>
+                  <li>Your team's velocity</li>
+                  <li>Your product's reliability</li>
+                  <li>Your company's ability to adapt</li>
+                </ul>
+              </div>
 
-            <br />
-
-            <ul>
-              <li>Your team's velocity</li>
-              <li>Your product's reliability</li>
-              <li>Your company's ability to adapt</li>
-            </ul>
-
-            <br />
-            <br />
-
-            <p>Small, intentional improvements compound into enduring systems.</p>
+              <div>
+                <img data-src="./images/roman-pantheon.jpg" width="400" />
+              </div>
+            </div>
           </section>
 
           <section>
@@ -689,11 +688,6 @@ class AppointmentService {
               <li><span class="blue">Strategy Pattern</span> to improve maintainability</li>
               <li><span class="blue">Dependency Injection</span> to improve testability</li>
             </ol>
-
-            <br />
-            <br />
-
-            <p>Your legacy starts today.</p>
           </section>
 
           <section>
