@@ -71,10 +71,24 @@
             <br />
 
             <ul>
-              <li>Code quality directly impacts team productivity and product reliability</li>
-              <li>Linters are a great start, but they don't ensure maintainable code</li>
-              <li>Understanding design principles helps create systems that endure change</li>
-              <li>Investing in code quality pays off in reduced technical debt and faster feature delivery</li>
+              <li>
+                Code quality directly impacts
+                <span class="blue">team productivity</span> and
+                <span class="blue">product reliability</span>
+              </li>
+              <li>
+                Linters are a great start, but they
+                <span class="blue">don't ensure maintainable code</span>
+              </li>
+              <li>
+                Understanding <span class="blue">design principles</span> helps create systems that
+                <span class="blue">endure change</span>
+              </li>
+              <li>
+                Investing in code quality pays off in
+                <span class="blue">reduced technical debt</span> and
+                <span class="blue">faster feature delivery</span>
+              </li>
             </ul>
           </section>
         </section>
@@ -87,8 +101,8 @@
             <br />
 
             <h4>
-              Note: This presentation focuses on <span class="blue">TypeScript</span>, but the concepts apply to any
-              programming language.
+              Note: This presentation focuses on
+              <span class="blue">TypeScript</span>, but the concepts apply to any programming language.
             </h4>
           </section>
 
@@ -99,16 +113,25 @@
             <br />
 
             <ul>
-              <li>Enforce syntax rules and formatting standards</li>
-              <li>Catch common mistakes (unused variables, missing semicolons)</li>
-              <li>Ensure consistency across the codebase</li>
-              <li>Validate that code is <span class="blue">technically correct</span></li>
+              <li>
+                Enforce <span class="blue">syntax rules</span> and
+                <span class="blue">formatting standards</span>
+              </li>
+              <li>Catch <span class="blue">common mistakes</span> (unused variables, missing semicolons)</li>
+              <li>Ensure <span class="blue">consistency</span> across the codebase</li>
+              <li>
+                Validate that code is
+                <span class="blue">technically correct</span>
+              </li>
             </ul>
 
             <br />
             <br />
 
-            <p>But they can't judge whether code is <span class="blue">understandable or maintainable</span>.</p>
+            <p>
+              But they can't judge whether code is
+              <span class="blue">understandable or maintainable</span>.
+            </p>
           </section>
 
           <section>
@@ -160,9 +183,9 @@ function processUserData(u: any) {
             <br />
 
             <ul>
-              <li>The "writability" trap</li>
-              <li>Technical debt compounds over time</li>
-              <li>Real business costs of poor code quality</li>
+              <li>The <span class="blue">"writability" trap</span></li>
+              <li><span class="blue">Technical debt</span> compounds over time</li>
+              <li>Real <span class="blue">business costs</span> of poor code quality</li>
             </ul>
           </section>
 
@@ -176,21 +199,25 @@ function processUserData(u: any) {
               <div>
                 <h3>Writability ⚡</h3>
 
-                <p>How fast you can write code <strong>now</strong></p>
+                <p>How fast you can write code <span class="blue">now</span></p>
               </div>
 
               <div>
                 <h3>Sustainability 🏛️</h3>
 
                 <p>
-                  How easy it is to <strong>read</strong>, <strong>maintain</strong>, and <strong>test</strong> later
+                  How easy it is to <span class="blue">read</span>, <span class="blue">maintain</span>, and
+                  <span class="blue">test</span> later
                 </p>
               </div>
             </div>
 
             <br />
 
-            <p>Optimizing for speed today creates maintenance debt tomorrow.</p>
+            <p>
+              Optimizing for <span class="blue">speed today</span> creates
+              <span class="blue">maintenance debt tomorrow</span>.
+            </p>
           </section>
 
           <section>
@@ -199,15 +226,18 @@ function processUserData(u: any) {
             <br />
             <br />
 
-            <p>Poorly designed code has <strong class="blue">higher interest</strong>:</p>
+            <p>
+              Poorly designed code has
+              <strong class="blue">higher interest</strong>:
+            </p>
 
             <br />
 
             <ul>
-              <li>Every change takes longer</li>
-              <li>Every bug fix introduces new bugs</li>
-              <li>Every new feature requires refactoring</li>
-              <li>Engineers are afraid to touch the code</li>
+              <li>Every change takes <span class="blue">longer</span></li>
+              <li>Every bug fix introduces <span class="blue">new bugs</span></li>
+              <li>Every new feature requires <span class="blue">refactoring</span></li>
+              <li>Engineers are <span class="blue">afraid to touch</span> the code</li>
             </ul>
           </section>
 
@@ -218,11 +248,11 @@ function processUserData(u: any) {
             <br />
 
             <ul>
-              <li>🐌 Slower feature development</li>
-              <li>🧠 High cognitive load on engineers</li>
-              <li>🐛 Increased bug count and severity</li>
-              <li>💸 Higher onboarding costs</li>
-              <li>⏱️ More time debugging than building</li>
+              <li><span class="blue">Slower</span> feature development</li>
+              <li><span class="blue">High cognitive load</span> on engineers</li>
+              <li><span class="blue">Increased bug count</span> and severity</li>
+              <li><span class="blue">Higher</span> onboarding costs</li>
+              <li><span class="blue">More time</span> debugging than building</li>
             </ul>
           </section>
 
@@ -231,8 +261,9 @@ function processUserData(u: any) {
 
             <p>
               <strong>
-                Long Parameter List: This is <span class="blue">hard to call</span>,
-                <span class="blue">hard to test</span>, and <span class="blue">hard to change</span>.
+                Long Parameter List: This is
+                <span class="blue">hard to call</span>, <span class="blue">hard to test</span>, and
+                <span class="blue">hard to change</span>.
               </strong>
             </p>
 
@@ -255,20 +286,23 @@ async function createAppointment(
           <section>
             <h2>The "Jenga" Codebase</h2>
 
-            <br />
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem">
+              <div style="align-self: center">
+                <p>
+                  Every <span class="blue">"quick fix"</span> makes the tower more <span class="blue">unstable</span>.
+                </p>
 
-            <p>Every "quick fix" makes the tower more unstable.</p>
+                <br />
 
-            <br />
+                <ul>
+                  <li>Fix a bug in <span class="blue">module A</span>...</li>
+                  <li>...and something breaks in <span class="blue">module C</span></li>
+                  <li><span class="blue">Nobody knows why</span> 🎲</li>
+                </ul>
+              </div>
 
-            <ul>
-              <li>Fix a bug in module A...</li>
-              <li>...and something breaks in module C</li>
-              <li>Nobody knows why 🎲</li>
-            </ul>
-
-            <br />
-            <br />
+              <img data-src="./images/regret-per-sloc-jenga.jpeg" height="400" />
+            </div>
 
             <p>This is caused by <span class="blue">high coupling</span>.</p>
           </section>
@@ -299,10 +333,10 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li>Code is read 10x more than it's written</li>
-              <li>Clear naming eliminates the need for comments</li>
-              <li>Functions should do one thing and do it well</li>
-              <li>Self-documenting code reduces cognitive load</li>
+              <li>Code is read <span class="blue">10x more</span> than it's written</li>
+              <li><span class="blue">Clear naming</span> eliminates the need for comments</li>
+              <li>Functions should do <span class="blue">one thing</span> and do it well</li>
+              <li><span class="blue">Self-documenting code</span> reduces cognitive load</li>
             </ul>
           </section>
 
@@ -317,10 +351,16 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li> <span class="blue">High cohesion:</span> Related functionality stays together </li>
+              <li><span class="blue">High cohesion:</span> Related functionality stays together</li>
               <li><span class="blue">Low coupling:</span> Components are independent</li>
-              <li>Changes in one place don't ripple unpredictably</li>
-              <li>New features don't require modifying existing code</li>
+              <li>
+                Changes in one place
+                <span class="blue">don't ripple unpredictably</span>
+              </li>
+              <li>
+                New features
+                <span class="blue">don't require modifying</span> existing code
+              </li>
             </ul>
           </section>
 
@@ -335,10 +375,13 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li>Tests provide confidence in deployment</li>
-              <li>Dependencies can be mocked or stubbed</li>
-              <li>Fast feedback loops during development</li>
-              <li>Testable code is a byproduct of good design</li>
+              <li>Tests provide <span class="blue">confidence in deployment</span></li>
+              <li>Dependencies can be <span class="blue">mocked or stubbed</span></li>
+              <li><span class="blue">Fast feedback loops</span> during development</li>
+              <li>
+                Testable code is a
+                <span class="blue">byproduct of good design</span>
+              </li>
             </ul>
           </section>
 
@@ -347,25 +390,33 @@ async function createAppointment(
 
             <br />
 
-            <p>These pillars are supported by time-tested design principles:</p>
+            <p>
+              These pillars are supported by
+              <span class="blue">time-tested design principles</span>:
+            </p>
 
             <br />
 
             <ul>
               <li class="fragment">
-                <strong class="blue">S</strong>ingle Responsibility: A class should have one reason to change
+                <strong class="blue">S</strong>ingle Responsibility: A class should have
+                <span class="blue">one reason to change</span>
               </li>
               <li class="fragment">
-                <strong class="blue">O</strong>pen/Closed: Open for extension, closed for modification
+                <strong class="blue">O</strong>pen/Closed:
+                <span class="blue">Open for extension, closed for modification</span>
               </li>
               <li class="fragment">
-                <strong class="blue">L</strong>iskov Substitution: Subtypes must be substitutable for their base types
+                <strong class="blue">L</strong>iskov Substitution: Subtypes must be
+                <span class="blue">substitutable</span> for their base types
               </li>
               <li class="fragment">
-                <strong class="blue">I</strong>nterface Segregation: Clients shouldn't depend on unused interfaces
+                <strong class="blue">I</strong>nterface Segregation: Clients shouldn't depend on
+                <span class="blue">unused interfaces</span>
               </li>
               <li class="fragment">
-                <strong class="blue">D</strong>ependency Inversion: Depend on abstractions, not concretions
+                <strong class="blue">D</strong>ependency Inversion: Depend on
+                <span class="blue">abstractions, not concretions</span>
               </li>
             </ul>
           </section>
@@ -407,9 +458,18 @@ async function createAppointment(
             <br />
 
             <ul>
-              <li>Improving readability with the <span class="blue">Extract Method</span></li>
-              <li>Improving maintainability with the <span class="blue">Strategy Pattern</span></li>
-              <li>Improving testability with <span class="blue">Dependency Injection</span></li>
+              <li>
+                Improving readability with the
+                <span class="blue">Extract Method</span>
+              </li>
+              <li>
+                Improving maintainability with the
+                <span class="blue">Strategy Pattern</span>
+              </li>
+              <li>
+                Improving testability with
+                <span class="blue">Dependency Injection</span>
+              </li>
             </ul>
           </section>
 
@@ -418,13 +478,14 @@ async function createAppointment(
 
             <br />
 
-            <p>Replace complex logic blocks with well-named functions.</p>
+            <p>
+              Replace <span class="blue">complex logic blocks</span> with
+              <span class="blue">well-named functions</span>.
+            </p>
           </section>
 
           <section>
             <h3>Improving Readability: Extract Method (Before)</h3>
-
-            <br />
 
             <pre>
               <code class="language-typescript">
@@ -448,8 +509,6 @@ function handleRefund(userId: string, orderId: string) {
 
           <section>
             <h3>Improving Readability: Extract Method (After)</h3>
-
-            <br />
 
             <pre>
               <code class="language-typescript">
@@ -482,13 +541,21 @@ function isEligibleForRefund(user: User, order: Order) {
 
             <br />
 
-            <p>Replace conditional complexity with polymorphism.</p>
+            <p>
+              Replace <span class="blue">conditional complexity</span> with <span class="blue">polymorphism</span>.
+            </p>
+
+            <br />
+
+            <p>
+              <span class="blue">Polymorphism</span> means "many shapes" and is a concept in object-oriented programming
+              where objects of different types can be treated as objects of a common superclass, allowing a single
+              action to be performed in different ways.
+            </p>
           </section>
 
           <section>
             <h3>Improving Maintainability: Strategy Pattern (Before)</h3>
-
-            <br />
 
             <pre>
               <code class="language-typescript">
@@ -508,8 +575,6 @@ function processPayment(method: string, amount: number, details: any) {
 
           <section>
             <h3>Improving Maintainability: Strategy Pattern (After)</h3>
-
-            <br />
 
             <pre>
               <code class="language-typescript">
@@ -541,13 +606,13 @@ class PaymentService {
 
             <br />
 
-            <p>Depend on abstractions, not concrete implementations.</p>
+            <p>
+              Depend on <span class="blue">abstractions</span>, not <span class="blue">concrete implementations</span>.
+            </p>
           </section>
 
           <section>
-            <h2>Improving Testability: Dependency Injection (Before)</h2>
-
-            <br />
+            <h3>Improving Testability: Dependency Injection (Before)</h3>
 
             <pre>
               <code class="language-typescript">
@@ -569,9 +634,7 @@ class AppointmentService {
           </section>
 
           <section>
-            <h2>Improving Testability: Dependency Injection (After)</h2>
-
-            <br />
+            <h3>Improving Testability: Dependency Injection (After)</h3>
 
             <pre>
               <code class="language-typescript">
@@ -609,10 +672,13 @@ class AppointmentService {
             <br />
 
             <ul>
-              <li>Code reviews focused on design, not just correctness</li>
-              <li>Refactor as you go, not as a separate phase</li>
-              <li>Write tests that validate behavior, not implementation</li>
-              <li>Favor composition over inheritance</li>
+              <li>Code reviews focused on <span class="blue">design</span>, not just correctness</li>
+              <li><span class="blue">Refactor as you go</span>, not as a separate phase</li>
+              <li>
+                Write tests that validate
+                <span class="blue">behavior, not implementation</span>
+              </li>
+              <li>Favor <span class="blue">composition over inheritance</span></li>
             </ul>
           </section>
 
@@ -620,18 +686,32 @@ class AppointmentService {
             <h2>Code Review Checklist</h2>
 
             <br />
-            <br />
 
             <p>Beyond "does it work?", ask:</p>
 
             <br />
 
             <ul>
-              <li>Can I understand what this code does without comments?</li>
-              <li>If requirements change, how many files need to be modified?</li>
-              <li>Can I test this code without external dependencies?</li>
-              <li>Does this code follow the Single Responsibility Principle?</li>
-              <li>Are there any obvious code smells (long parameter lists, deep nesting, etc.)?</li>
+              <li>
+                Can I understand what this code does
+                <span class="blue">without comments</span>?
+              </li>
+              <li>
+                If requirements change,
+                <span class="blue">how many files</span> need to be modified?
+              </li>
+              <li>
+                Can I test this code
+                <span class="blue">without external dependencies</span>?
+              </li>
+              <li>
+                Does this code follow the
+                <span class="blue">Single Responsibility Principle</span>?
+              </li>
+              <li>
+                Are there any obvious
+                <span class="blue">code smells</span> (long parameter lists, deep nesting, etc.)?
+              </li>
             </ul>
           </section>
 
@@ -642,12 +722,12 @@ class AppointmentService {
             <br />
 
             <ul>
-              <li> <span class="blue">Long Parameter List:</span> More than 3-4 parameters </li>
-              <li> <span class="blue">Long Method:</span> Functions longer than ~20 lines </li>
-              <li> <span class="blue">Deeply Nested Conditionals:</span> More than 2-3 levels </li>
-              <li> <span class="blue">Duplicate Code:</span> Same logic in multiple places </li>
-              <li> <span class="blue">Large Class:</span> Classes with too many responsibilities </li>
-              <li> <span class="blue">Feature Envy:</span> Methods that use more of another class than their own </li>
+              <li><span class="blue">Long Parameter List:</span> More than 3-4 parameters</li>
+              <li><span class="blue">Long Method:</span> Functions longer than ~20 lines</li>
+              <li><span class="blue">Deeply Nested Conditionals:</span> More than 2-3 levels</li>
+              <li><span class="blue">Duplicate Code:</span> Same logic in multiple places</li>
+              <li><span class="blue">Large Class:</span> Classes with too many responsibilities</li>
+              <li><span class="blue">Feature Envy:</span> Methods that use more of another class than their own</li>
             </ul>
           </section>
         </section>
@@ -680,17 +760,22 @@ class AppointmentService {
             <h2>The Job is to Make It Last</h2>
 
             <br />
-            <br />
 
             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem">
               <div style="align-self: center">
-                <p>Small, intentional improvements compound into enduring systems.</p>
-                <p>Enduring code is a fundamental investment in:</p>
+                <p>
+                  <span class="blue">Small, intentional improvements</span>
+                  compound into <span class="blue">enduring systems</span>.
+                </p>
+                <p>
+                  Enduring code is a
+                  <span class="blue">fundamental investment</span> in:
+                </p>
 
                 <ul>
-                  <li>Your team's velocity</li>
-                  <li>Your product's reliability</li>
-                  <li>Your company's ability to adapt</li>
+                  <li>Your team's <span class="blue">velocity</span></li>
+                  <li>Your product's <span class="blue">reliability</span></li>
+                  <li>Your company's <span class="blue">ability to adapt</span></li>
                 </ul>
               </div>
 
@@ -704,16 +789,24 @@ class AppointmentService {
             <h2>Challenge for Your Next PR</h2>
 
             <br />
-            <br />
 
             <p>Try applying one of these refactorings (if it makes sense to do so):</p>
 
             <br />
 
             <ol>
-              <li><span class="blue">Extract Method</span> to improve readability</li>
-              <li><span class="blue">Strategy Pattern</span> to improve maintainability</li>
-              <li><span class="blue">Dependency Injection</span> to improve testability</li>
+              <li>
+                <span class="blue">Extract Method</span> to improve
+                <span class="blue">readability</span>
+              </li>
+              <li>
+                <span class="blue">Strategy Pattern</span> to improve
+                <span class="blue">maintainability</span>
+              </li>
+              <li>
+                <span class="blue">Dependency Injection</span> to improve
+                <span class="blue">testability</span>
+              </li>
             </ol>
           </section>
 
@@ -725,11 +818,11 @@ class AppointmentService {
 
             <ol>
               <li>
-                <a href="https://refactoring.guru/refactoring" target="_blank">Refactoring Guru: Refactoring</a>
+                <a href="https://refactoring.guru/" target="_blank">Refactoring Guru</a>
               </li>
 
               <li>
-                <a href="https://refactoring.guru/design-patterns" target="_blank">Refactoring Guru: Design Patterns</a>
+                <a href="https://www.patterns.dev/" target="_blank">Patterns.dev</a>
               </li>
 
               <li>
@@ -746,8 +839,12 @@ class AppointmentService {
 
             <ol>
               <li>A single, static webpage.</li>
-              <li><a href="https://revealjs.com/" target="_blank">reveal.js</a></li>
-              <li><a href="https://highlightjs.org/" target="_blank">highlight.js</a></li>
+              <li>
+                <a href="https://revealjs.com/" target="_blank">reveal.js</a>
+              </li>
+              <li>
+                <a href="https://highlightjs.org/" target="_blank">highlight.js</a>
+              </li>
             </ol>
           </section>
         </section>
