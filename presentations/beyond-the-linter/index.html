@@ -276,6 +276,10 @@ async function createAppointment(
   startTime: Date,
   endTime: Date,
   timezone: string,
+  notes?: string,
+  isVirtual?: boolean,
+  isRecurring?: boolean,
+  recurrencePattern?: string,
   ...
 ) {
   ...
@@ -297,7 +301,7 @@ async function createAppointment(
                 <ul>
                   <li>Fix a bug in <span class="blue">module A</span>...</li>
                   <li>...and something breaks in <span class="blue">module C</span></li>
-                  <li><span class="blue">Nobody knows why</span> 🎲</li>
+                  <li>Nobody knows why</li>
                 </ul>
               </div>
 
@@ -547,11 +551,11 @@ function isEligibleForRefund(user: User, order: Order) {
 
             <br />
 
-            <p>
-              <span class="blue">Polymorphism</span> means "many shapes" and is a concept in object-oriented programming
-              where objects of different types can be treated as objects of a common superclass, allowing a single
-              action to be performed in different ways.
-            </p>
+            <ul>
+              <li>"poly" = many</li>
+              <li>"morph" = shape</li>
+              <li>"ism" = practice or philosophy</li>
+            </ul>
           </section>
 
           <section>
@@ -585,6 +589,18 @@ interface PaymentStrategy {
 class CreditCardStrategy implements PaymentStrategy {
   async process(amount: number, details: PaymentDetails) {
     return stripePay(details.cardToken, amount);
+  }
+}
+
+class PaypalStrategy implements PaymentStrategy {
+  async process(amount: number, details: PaymentDetails) {
+    return paypalPay(details.email, amount);
+  }
+}
+
+class ApplePayStrategy implements PaymentStrategy {
+  async process(amount: number, details: PaymentDetails) {
+    return applePayProcess(details.token, amount);
   }
 }
 
@@ -678,7 +694,13 @@ class AppointmentService {
                 Write tests that validate
                 <span class="blue">behavior, not implementation</span>
               </li>
-              <li>Favor <span class="blue">composition over inheritance</span></li>
+              <li>
+                Favor <span class="blue">composition over inheritance</span>
+
+                <ul>
+                  <li>Prefer "has a" relationships over "is a" relationships</li>
+                </ul>
+              </li>
             </ul>
           </section>
 
@@ -692,23 +714,23 @@ class AppointmentService {
             <br />
 
             <ul>
-              <li>
+              <li class="fragment">
                 Can I understand what this code does
                 <span class="blue">without comments</span>?
               </li>
-              <li>
+              <li class="fragment">
                 If requirements change,
                 <span class="blue">how many files</span> need to be modified?
               </li>
-              <li>
+              <li class="fragment">
                 Can I test this code
                 <span class="blue">without external dependencies</span>?
               </li>
-              <li>
+              <li class="fragment">
                 Does this code follow the
                 <span class="blue">Single Responsibility Principle</span>?
               </li>
-              <li>
+              <li class="fragment">
                 Are there any obvious
                 <span class="blue">code smells</span> (long parameter lists, deep nesting, etc.)?
               </li>
