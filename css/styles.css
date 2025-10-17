@@ -186,7 +186,7 @@ figure {
     content: "";
   }
 
-  /* Split project table into 2 columns on medium+ screens */
+  /* Split the table into 2 columns on medium+ screens */
   #link-table[data-columns="2"] {
     display: block;
   }
