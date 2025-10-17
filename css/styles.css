@@ -185,4 +185,45 @@ figure {
   abbr[title]:after {
     content: "";
   }
+
+  /* Split project table into 2 columns on medium+ screens */
+  #link-table[data-columns="2"] {
+    display: block;
+  }
+
+  #link-table[data-columns="2"] tbody {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 0;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  #link-table[data-columns="2"] tbody tr {
+    display: block;
+    margin: 0;
+    background-color: transparent;
+  }
+
+  #link-table[data-columns="2"] tbody tr[hidden] {
+    display: none;
+  }
+
+  #link-table[data-columns="2"] tbody tr td {
+    display: block;
+    border: none;
+    height: -webkit-fill-available;
+  }
+
+  /* Checkerboard pattern for table rows */
+  #link-table[data-columns="2"] tbody tr:nth-child(4n + 1) td,
+  #link-table[data-columns="2"] tbody tr:nth-child(4n + 4) td {
+    background-color: var(--color-accent);
+  }
+
+  #link-table[data-columns="2"] tbody tr:nth-child(4n + 2) td,
+  #link-table[data-columns="2"] tbody tr:nth-child(4n + 3) td {
+    background-color: var(--color-bg);
+    border: 0.1rem solid var(--color-shadow);
+  }
 }
