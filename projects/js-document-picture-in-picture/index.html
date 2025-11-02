@@ -28,6 +28,29 @@
         resizable window that stays on top of other windows. This can be useful for multitasking, as it allows users to
         keep an eye on important content while working on other tasks.
       </p>
+
+      <p>
+        Unlike the traditional video-only Picture-in-Picture API, the <b>Document Picture-in-Picture API</b> allows you
+        to display any HTML content in the floating window. This means you can show interactive elements like buttons,
+        forms, videos, animations, or even entire mini-applications in a separate always-on-top window.
+      </p>
+
+      <h2>Use Cases</h2>
+
+      <ul>
+        <li><b>Video Players:</b> Keep watching a video while browsing other tabs or applications</li>
+        <li><b>Video Conferencing:</b> See participants in a floating window during multitasking</li>
+        <li><b>Productivity Tools:</b> Keep a timer, notes, or calculator always visible</li>
+        <li><b>Live Updates:</b> Monitor live scores, stock prices, or notifications</li>
+        <li><b>Media Controls:</b> Quick access to playback controls while working</li>
+      </ul>
+
+      <h2>Try It Out</h2>
+
+      <p>
+        Click the button below to open a Picture-in-Picture window with interactive content. The floating window will
+        contain a timer and some interactive elements to demonstrate the API's capabilities.
+      </p>
     </main>
 
     <script type="module">
@@ -40,11 +63,331 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
-          init() {}
+        class App extends StyledComponent {
+          init() {
+            this.supported = "documentPictureInPicture" in window;
+            this.isOpen = false;
+            this.pipWindow = null;
+            this.seconds = 0;
+            this.timerInterval = null;
+            this.pipTimerElement = null;
+          }
+
+          async openPictureInPicture() {
+            if (!this.supported) return;
+
+            try {
+              // Open a Picture-in-Picture window
+              this.pipWindow = await window.documentPictureInPicture.requestWindow({
+                width: 400,
+                height: 300,
+              });
+
+              // Copy stylesheets to the PiP window
+              [...document.styleSheets].forEach((styleSheet) => {
+                try {
+                  const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join("");
+                  const style = document.createElement("style");
+                  style.textContent = cssRules;
+                  this.pipWindow.document.head.appendChild(style);
+                } catch (e) {
+                  const link = document.createElement("link");
+                  link.rel = "stylesheet";
+                  link.type = styleSheet.type;
+                  link.media = styleSheet.media;
+                  link.href = styleSheet.href;
+                  this.pipWindow.document.head.appendChild(link);
+                }
+              });
+
+              // Create content for the PiP window
+              const container = this.pipWindow.document.createElement("div");
+              container.style.cssText = `
+                padding: 20px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                gap: 15px;
+                box-sizing: border-box;
+              `;
+
+              // Title
+              const title = this.pipWindow.document.createElement("h2");
+              title.textContent = "Picture-in-Picture Window";
+              title.style.cssText = "margin: 0; color: #007bff;";
+
+              // Timer display
+              const timerLabel = this.pipWindow.document.createElement("p");
+              timerLabel.textContent = "Timer:";
+              timerLabel.style.cssText = "margin: 0; font-weight: bold;";
+
+              this.pipTimerElement = this.pipWindow.document.createElement("div");
+              this.pipTimerElement.style.cssText = `
+                font-size: 2rem;
+                font-weight: bold;
+                color: #28a745;
+                font-family: "Courier New", monospace;
+              `;
+              this.updateTimer();
+
+              // Counter button
+              const counterButton = this.pipWindow.document.createElement("button");
+              counterButton.textContent = "Increment Counter";
+              counterButton.style.cssText = `
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+              `;
+
+              let counter = 0;
+              const counterDisplay = this.pipWindow.document.createElement("p");
+              counterDisplay.textContent = `Counter: ${counter}`;
+              counterDisplay.style.cssText = "font-size: 1.2rem; margin: 0;";
+
+              counterButton.addEventListener("click", () => {
+                counter++;
+                counterDisplay.textContent = `Counter: ${counter}`;
+              });
+
+              // Close button
+              const closeButton = this.pipWindow.document.createElement("button");
+              closeButton.textContent = "Close Window";
+              closeButton.style.cssText = `
+                padding: 10px 20px;
+                background-color: #dc3545;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+                margin-top: auto;
+              `;
+
+              closeButton.addEventListener("click", () => {
+                this.pipWindow.close();
+              });
+
+              // Append all elements
+              container.appendChild(title);
+              container.appendChild(timerLabel);
+              container.appendChild(this.pipTimerElement);
+              container.appendChild(counterButton);
+              container.appendChild(counterDisplay);
+              container.appendChild(closeButton);
+              this.pipWindow.document.body.appendChild(container);
+
+              // Set body styles
+              this.pipWindow.document.body.style.cssText = "margin: 0; padding: 0;";
+
+              // Start timer
+              this.seconds = 0;
+              this.timerInterval = setInterval(() => {
+                this.seconds++;
+                this.updateTimer();
+              }, 1000);
+
+              // Handle window close
+              this.pipWindow.addEventListener("pagehide", () => {
+                this.closePictureInPicture();
+              });
+
+              this.isOpen = true;
+              this.render();
+            } catch (error) {
+              console.error("Error opening Picture-in-Picture:", error);
+            }
+          }
+
+          updateTimer() {
+            if (this.pipTimerElement) {
+              const minutes = Math.floor(this.seconds / 60);
+              const secs = this.seconds % 60;
+              this.pipTimerElement.textContent = `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            }
+          }
+
+          closePictureInPicture() {
+            if (this.timerInterval) {
+              clearInterval(this.timerInterval);
+              this.timerInterval = null;
+            }
+            if (this.pipWindow && !this.pipWindow.closed) {
+              this.pipWindow.close();
+            }
+            this.pipWindow = null;
+            this.pipTimerElement = null;
+            this.isOpen = false;
+            this.seconds = 0;
+            this.render();
+          }
+
+          styles() {
+            return css`
+              .demo-container {
+                margin: 2rem 0;
+                padding: 1.5rem;
+                border: 2px solid #007bff;
+                border-radius: 8px;
+                background-color: rgba(0, 123, 255, 0.05);
+              }
+
+              button {
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 0.75rem 1.5rem;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 1rem;
+                margin: 0.5rem 0.5rem 0.5rem 0;
+                cursor: pointer;
+                border-radius: 4px;
+                transition: background-color 0.2s;
+
+                &:hover:not(:disabled) {
+                  background-color: #0056b3;
+                }
+
+                &:disabled {
+                  background-color: #6c757d;
+                  cursor: not-allowed;
+                }
+
+                &.close-btn {
+                  background-color: #dc3545;
+
+                  &:hover {
+                    background-color: #c82333;
+                  }
+                }
+              }
+
+              .status {
+                margin: 1rem 0;
+                padding: 0.75rem;
+                border-radius: 4px;
+                font-weight: 500;
+              }
+
+              .status.error {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+              }
+
+              .status.success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+              }
+
+              .status.info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+              }
+
+              code {
+                background-color: #f4f4f4;
+                padding: 0.2rem 0.4rem;
+                border-radius: 3px;
+                font-family: "Courier New", monospace;
+              }
+            `;
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                ${
+                  !this.supported
+                    ? vdom`
+                        <div class="status error">
+                          <p>
+                            <strong>Not Supported:</strong> Your browser does not support the Document Picture-in-Picture API.
+                            This feature is currently available in Chromium-based browsers (Chrome, Edge) version 116+.
+                          </p>
+                        </div>
+                      `
+                    : vdom`
+                        <div class="demo-container">
+                          <h3>Interactive Demo</h3>
+                          <p>
+                            This demo will open a floating window with a timer and interactive counter.
+                            The window will stay on top of other windows and can be moved around your screen.
+                          </p>
+
+                          ${
+                            this.isOpen
+                              ? vdom`
+                                  <div class="status success">
+                                    <p><strong>Active:</strong> Picture-in-Picture window is open!</p>
+                                  </div>
+                                  <button class="close-btn" onclick=${this.closePictureInPicture}>
+                                    Close PiP Window
+                                  </button>
+                                `
+                              : vdom`
+                                  <button onclick=${this.openPictureInPicture}>
+                                    Open Picture-in-Picture Window
+                                  </button>
+                                `
+                          }
+                        </div>
+
+                        <div class="status info">
+                          <p>
+                            <strong>Note:</strong> The Picture-in-Picture window will close automatically if you navigate away
+                            from this page or close this tab.
+                          </p>
+                        </div>
+                      `
+                }
+
+                <h2>How It Works</h2>
+
+                <p>The Document Picture-in-Picture API is accessed through the <code>documentPictureInPicture</code> object:</p>
+
+                <ol>
+                  <li>
+                    <strong>Request the window:</strong> Call
+                    <code>documentPictureInPicture.requestWindow()</code> with optional width and height
+                  </li>
+                  <li>
+                    <strong>Populate content:</strong> Add HTML elements to the PiP window's document using standard DOM methods
+                  </li>
+                  <li>
+                    <strong>Copy styles:</strong> Transfer stylesheets from the main page to maintain consistent styling
+                  </li>
+                  <li>
+                    <strong>Handle lifecycle:</strong> Listen for the <code>pagehide</code> event to clean up when the window closes
+                  </li>
+                </ol>
+
+                <h2>Browser Support</h2>
+
+                <p>
+                  The Document Picture-in-Picture API is currently supported in:
+                </p>
+
+                <ul>
+                  <li>Chrome 116+ (Desktop)</li>
+                  <li>Edge 116+ (Desktop)</li>
+                  <li>Other Chromium-based browsers with the feature enabled</li>
+                </ul>
+
+                <p>
+                  <strong>Note:</strong> This is different from the older video-only Picture-in-Picture API, which has broader support
+                  but only works with video elements.
+                </p>
+              </div>
+            `;
           }
         }
 
