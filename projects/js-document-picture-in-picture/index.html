@@ -71,6 +71,10 @@
             this.seconds = 0;
             this.timerInterval = null;
             this.pipTimerElement = null;
+
+            // Bind methods to maintain correct 'this' context
+            this.openPictureInPicture = this.openPictureInPicture.bind(this);
+            this.closePictureInPicture = this.closePictureInPicture.bind(this);
           }
 
           async openPictureInPicture() {
