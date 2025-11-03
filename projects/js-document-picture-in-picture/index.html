@@ -16,8 +16,6 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
@@ -44,13 +42,6 @@
         <li><b>Live Updates:</b> Monitor live scores, stock prices, or notifications</li>
         <li><b>Media Controls:</b> Quick access to playback controls while working</li>
       </ul>
-
-      <h2>Try It Out</h2>
-
-      <p>
-        Click the button below to open a Picture-in-Picture window with interactive content. The floating window will
-        contain a timer and some interactive elements to demonstrate the API's capabilities.
-      </p>
     </main>
 
     <script type="module">
@@ -83,8 +74,8 @@
             try {
               // Open a Picture-in-Picture window
               this.pipWindow = await window.documentPictureInPicture.requestWindow({
-                width: 400,
-                height: 300,
+                width: 500,
+                height: 400,
               });
 
               // Copy stylesheets to the PiP window
@@ -353,44 +344,6 @@
                         </div>
                       `
                 }
-
-                <h2>How It Works</h2>
-
-                <p>The Document Picture-in-Picture API is accessed through the <code>documentPictureInPicture</code> object:</p>
-
-                <ol>
-                  <li>
-                    <strong>Request the window:</strong> Call
-                    <code>documentPictureInPicture.requestWindow()</code> with optional width and height
-                  </li>
-                  <li>
-                    <strong>Populate content:</strong> Add HTML elements to the PiP window's document using standard DOM methods
-                  </li>
-                  <li>
-                    <strong>Copy styles:</strong> Transfer stylesheets from the main page to maintain consistent styling
-                  </li>
-                  <li>
-                    <strong>Handle lifecycle:</strong> Listen for the <code>pagehide</code> event to clean up when the window closes
-                  </li>
-                </ol>
-
-                <h2>Browser Support</h2>
-
-                <p>
-                  The Document Picture-in-Picture API is currently supported in:
-                </p>
-
-                <ul>
-                  <li>Chrome 116+ (Desktop)</li>
-                  <li>Edge 116+ (Desktop)</li>
-                  <li>Other Chromium-based browsers with the feature enabled</li>
-                </ul>
-
-                <p>
-                  <strong>Note:</strong> This is different from the older video-only Picture-in-Picture API, which has broader support
-                  but only works with video elements.
-                </p>
-              </div>
             `;
           }
         }
