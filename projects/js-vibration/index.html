@@ -16,16 +16,20 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Vibration</h1>
 
       <p>
-        This project is a simple demonstration of the <b>Vibration API</b>. It allows you to trigger device vibrations
-        using JavaScript.
+        This project is a simple demonstration of the <b>JavaScript Vibration API</b>. The Vibration API allows web
+        developers to trigger vibration patterns on a user's device. This API is particularly useful for mobile devices
+        that support haptic feedback.
+      </p>
+
+      <p>
+        The API allows you to create simple vibrations or complex patterns by specifying durations in milliseconds. Note
+        that this feature only works on devices that support vibration (typically mobile phones and some tablets).
       </p>
     </main>
 
@@ -39,11 +43,104 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
-          init() {}
+        class App extends StyledComponent {
+          init() {
+            this.supported = !!navigator.vibrate;
+            console.log("Vibration API supported:", navigator.vibrate);
+            this.statusMessage = this.supported
+              ? "Vibration API is supported! Click a button to try it."
+              : "Vibration API is not supported on this device.";
+          }
+
+          vibrateShort() {
+            navigator.vibrate(200);
+            this.statusMessage = "Vibrated for 200ms";
+            this.render();
+          }
+
+          vibrateLong() {
+            navigator.vibrate(1000);
+            this.statusMessage = "Vibrated for 1000ms";
+            this.render();
+          }
+
+          vibratePattern() {
+            navigator.vibrate([200, 100, 200, 100, 200]);
+            this.statusMessage = "Vibrating in pattern: 200ms, pause 100ms, 200ms, pause 100ms, 200ms";
+            this.render();
+          }
+
+          vibrateSOS() {
+            // S = 3 short, O = 3 long, S = 3 short
+            navigator.vibrate([100, 100, 100, 100, 100, 300, 300, 300, 300, 300, 300, 300, 100, 100, 100, 100, 100]);
+            this.statusMessage = "Vibrating SOS pattern (... --- ...)";
+            this.render();
+          }
+
+          stopVibration() {
+            navigator.vibrate(0);
+            this.statusMessage = "Vibration stopped";
+            this.render();
+          }
+
+          styles() {
+            return css`
+              button {
+                background-color: #007bff;
+                border: none;
+                color: white;
+                padding: 0.5rem 1rem;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 1rem;
+                margin: 0.5rem 0rem;
+                cursor: pointer;
+                width: 100%;
+                max-width: 400px;
+
+                &:disabled {
+                  background-color: #6c757d;
+                  cursor: not-allowed;
+                }
+              }
+
+              .button-container {
+                margin: 20px 0;
+              }
+
+              .status {
+                margin-top: 20px;
+                font-weight: bold;
+                color: ${this.supported ? "green" : "red"};
+              }
+            `;
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                <div class="button-container">
+                  <h2>Try It Out:</h2>
+                  <div><button onclick=${() => this.vibrateShort()} disabled=${!this
+              .supported}>Short Vibration (200ms)</button></div>
+                  <div><button onclick=${() => this.vibrateLong()} disabled=${!this
+              .supported}>Long Vibration (1000ms)</button></div>
+                  <div><button onclick=${() => this.vibratePattern()} disabled=${!this
+              .supported}>Pattern Vibration</button></div>
+                  <div><button onclick=${() => this.vibrateSOS()} disabled=${!this.supported}>SOS Pattern</button></div>
+                  <div><button onclick=${() => this.stopVibration()} disabled=${!this
+              .supported}>Stop Vibration</button></div>
+                </div>
+
+                <p class="status">${this.statusMessage}</p>
+                <p>
+                  <b>
+                    Note: Vibration may not work on all devices or browsers. Please test on a mobile device with vibration support.
+                  </b>
+                </p>
+              </div>
+            `;
           }
         }
 
