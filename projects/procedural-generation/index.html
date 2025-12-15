@@ -16,36 +16,47 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>Procedural Generation</h1>
 
-      <p>Description...</p>
+      <p>
+        A simple procedural generation engine demonstrating terrain generation using Perlin-like noise. The terrain is
+        generated algorithmically using mathematical functions rather than manually designed data.
+      </p>
     </main>
 
     <script type="module">
       import * as Arlo from "../../js/arlo/index.js";
+      import { TerrainApp } from "./terrain-app.js";
 
+      // Expose Arlo to global scope for component usage
       for (const exportedName in Arlo) {
         window[exportedName] = Arlo[exportedName];
       }
 
+      // Initialize application
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
-          init() {}
+        // Create terrain application
+        const terrainApp = new TerrainApp(Component, vdom, {
+          width: 600,
+          height: 400,
+          scale: 0.015,
+          octaves: 5,
+          persistence: 0.5,
+        });
 
-          compose() {
-            return vdom``;
-          }
-        }
+        // Create and mount Arlo component
+        const component = terrainApp.createComponent();
+        document.getElementsByTagName("main")[0].appendChild(component.node);
 
-        const app = new App();
-        document.getElementsByTagName("main")[0].appendChild(app.node);
+        // Generate initial terrain
+        setTimeout(() => {
+          component.regenerate();
+        }, 100);
       })();
     </script>
   </body>
