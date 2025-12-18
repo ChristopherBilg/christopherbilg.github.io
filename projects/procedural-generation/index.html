@@ -7,7 +7,7 @@
     <meta name="author" content="Christopher Bilger" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <title>Procedural Generation</title>
+    <title>Procedural Generation (Vibe Coded)</title>
     <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
     <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
     <link rel="stylesheet" media="screen" href="../../css/styles.css" />
@@ -19,7 +19,7 @@
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
-      <h1>Procedural Generation</h1>
+      <h1>Procedural Generation (Vibe Coded)</h1>
 
       <p>
         A simple procedural generation engine demonstrating terrain generation using Perlin-like noise. The terrain is
@@ -40,23 +40,54 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        // Create terrain application
-        const terrainApp = new TerrainApp(Component, vdom, {
+        // Check for shared config in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const configParam = urlParams.get("config");
+        let initialConfig = {
           width: 600,
           height: 400,
           scale: 0.015,
           octaves: 5,
           persistence: 0.5,
-        });
+        };
+
+        if (configParam) {
+          try {
+            const decodedConfig = JSON.parse(atob(configParam));
+            initialConfig = { ...initialConfig, ...decodedConfig };
+          } catch (e) {
+            console.error("Failed to parse shared config:", e);
+          }
+        }
+
+        // Create terrain application
+        const terrainApp = new TerrainApp(Component, vdom, initialConfig);
 
         // Create and mount Arlo component
         const component = terrainApp.createComponent();
         document.getElementsByTagName("main")[0].appendChild(component.node);
 
-        // Generate initial terrain
-        setTimeout(() => {
-          component.regenerate();
-        }, 100);
+        // Apply shared config if present
+        if (configParam) {
+          try {
+            const decodedConfig = JSON.parse(atob(configParam));
+            setTimeout(() => {
+              // Apply all config values using the component's method
+              component._applyImportedConfigData(decodedConfig);
+            }, 100);
+          } catch (e) {
+            // If shared config fails, just generate normally
+            console.error("Failed to apply shared config from URL:", e);
+            setTimeout(() => {
+              component.regenerate();
+            }, 100);
+          }
+        } else {
+          // Generate initial terrain
+          setTimeout(() => {
+            component.regenerate();
+          }, 100);
+        }
       })();
     </script>
   </body>
