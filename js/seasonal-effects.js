@@ -17,46 +17,44 @@ export class SeasonalEffects {
     const month = now.getMonth();
     const day = now.getDate();
 
-    return "july4th";
+    // Special occasions take precedence
+    // New Year's Day (January 1)
+    if (month === 0 && day === 1) {
+      return "newyear";
+    }
 
-    // // Special occasions take precedence
-    // // New Year's Day (January 1)
-    // if (month === 0 && day === 1) {
-    //   return 'newyear';
-    // }
+    // Valentine's Day (February 14)
+    if (month === 1 && day === 14) {
+      return "valentine";
+    }
 
-    // // Valentine's Day (February 14)
-    // if (month === 1 && day === 14) {
-    //   return 'valentine';
-    // }
+    // Independence Day (July 4)
+    if (month === 6 && day === 4) {
+      return "july4th";
+    }
 
-    // // Independence Day (July 4)
-    // if (month === 6 && day === 4) {
-    //   return 'july4th';
-    // }
+    // Regular seasons
+    // Winter: December (11), January (0), February (1)
+    if (month === 11 || month === 0 || month === 1) {
+      return "winter";
+    }
 
-    // // Regular seasons
-    // // Winter: December (11), January (0), February (1)
-    // if (month === 11 || month === 0 || month === 1) {
-    //   return 'winter';
-    // }
+    // Spring: March (2), April (3), May (4)
+    if (month >= 2 && month <= 4) {
+      return "spring";
+    }
 
-    // // Spring: March (2), April (3), May (4)
-    // if (month >= 2 && month <= 4) {
-    //   return 'spring';
-    // }
+    // Summer: June (5), July (6), August (7)
+    if (month >= 5 && month <= 7) {
+      return "summer";
+    }
 
-    // // Summer: June (5), July (6), August (7)
-    // if (month >= 5 && month <= 7) {
-    //   return 'summer';
-    // }
+    // Fall/Autumn: September (8), October (9), November (10)
+    if (month >= 8 && month <= 10) {
+      return "autumn";
+    }
 
-    // // Fall/Autumn: September (8), October (9), November (10)
-    // if (month >= 8 && month <= 10) {
-    //   return 'autumn';
-    // }
-
-    // return null;
+    return null;
   }
 
   getSeasonConfig() {
@@ -65,7 +63,7 @@ export class SeasonalEffects {
         name: "winter",
         storageKey: "seasonal-winter-enabled",
         enabledIcon: "❄️",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable snowfall",
         disabledTitle: "Enable snowfall",
         density: 15000,
@@ -76,7 +74,7 @@ export class SeasonalEffects {
         name: "autumn",
         storageKey: "seasonal-autumn-enabled",
         enabledIcon: "🍂",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable falling leaves",
         disabledTitle: "Enable falling leaves",
         density: 12000,
@@ -87,7 +85,7 @@ export class SeasonalEffects {
         name: "summer",
         storageKey: "seasonal-summer-enabled",
         enabledIcon: "✨",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable fireflies",
         disabledTitle: "Enable fireflies",
         density: 20000,
@@ -98,7 +96,7 @@ export class SeasonalEffects {
         name: "spring",
         storageKey: "seasonal-spring-enabled",
         enabledIcon: "🌸",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable cherry blossoms",
         disabledTitle: "Enable cherry blossoms",
         density: 13000,
@@ -109,7 +107,7 @@ export class SeasonalEffects {
         name: "newyear",
         storageKey: "seasonal-newyear-enabled",
         enabledIcon: "🎉",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable confetti",
         disabledTitle: "Enable confetti",
         density: 8000,
@@ -120,7 +118,7 @@ export class SeasonalEffects {
         name: "valentine",
         storageKey: "seasonal-valentine-enabled",
         enabledIcon: "💝",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable hearts",
         disabledTitle: "Enable hearts",
         density: 18000,
@@ -131,7 +129,7 @@ export class SeasonalEffects {
         name: "july4th",
         storageKey: "seasonal-july4th-enabled",
         enabledIcon: "🎆",
-        disabledIcon: "🔆",
+        disabledIcon: "⭘",
         enabledTitle: "Disable fireworks",
         disabledTitle: "Enable fireworks",
         density: 25000,
@@ -151,9 +149,9 @@ export class SeasonalEffects {
     const config = this.getSeasonConfig();
     if (!config) return;
 
-    // Check localStorage for saved preference
+    // Check localStorage for saved preference (default to OFF)
     const savedPreference = localStorage.getItem(config.storageKey);
-    this.enabled = savedPreference === null ? true : savedPreference === "true";
+    this.enabled = savedPreference === "true"; // Default is false if not set
 
     this.createCanvas();
     this.createToggleButton();
@@ -203,7 +201,7 @@ export class SeasonalEffects {
 
     for (let i = 0; i < density; i++) {
       // For fireworks, stagger the creation with delays
-      if (this.currentSeason === 'july4th') {
+      if (this.currentSeason === "july4th") {
         const delayFrames = Math.floor(Math.random() * 120); // Random delay up to 2 seconds at 60fps
         this.particles.push(this.createFirework(delayFrames));
       } else {
@@ -498,10 +496,10 @@ export class SeasonalEffects {
   // Special - July 4th Fireworks
   createFirework(delayFrames = 0) {
     const colors = [
-      [255, 0, 0],      // Red
-      [255, 255, 255],  // White
-      [0, 0, 255],      // Blue
-      [255, 215, 0],    // Gold
+      [255, 0, 0], // Red
+      [255, 255, 255], // White
+      [0, 0, 255], // Blue
+      [255, 215, 0], // Gold
     ];
     const color = colors[Math.floor(Math.random() * colors.length)];
 
@@ -550,10 +548,7 @@ export class SeasonalEffects {
 
       // Draw sparkle effect for some fireworks
       if (firework.sparkle) {
-        const gradient = this.ctx.createRadialGradient(
-          particle.x, particle.y, 0,
-          particle.x, particle.y, radius * 4
-        );
+        const gradient = this.ctx.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, radius * 4);
         gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.life * 0.8})`);
         gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${particle.life * 0.6})`);
         gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
@@ -763,7 +758,7 @@ export class SeasonalEffects {
     if (!config) return;
 
     // Handle firework recreation
-    if (this.currentSeason === 'july4th') {
+    if (this.currentSeason === "july4th") {
       for (let i = 0; i < this.particles.length; i++) {
         if (this.particles[i]._dead) {
           // Create a new firework with a random delay to stagger explosions
