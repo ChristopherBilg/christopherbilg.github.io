@@ -202,7 +202,13 @@ export class SeasonalEffects {
     this.particles = [];
 
     for (let i = 0; i < density; i++) {
-      this.particles.push(config.particleCreator());
+      // For fireworks, stagger the creation with delays
+      if (this.currentSeason === 'july4th') {
+        const delayFrames = Math.floor(Math.random() * 120); // Random delay up to 2 seconds at 60fps
+        this.particles.push(this.createFirework(delayFrames));
+      } else {
+        this.particles.push(config.particleCreator());
+      }
     }
   }
 
@@ -490,60 +496,78 @@ export class SeasonalEffects {
   }
 
   // Special - July 4th Fireworks
-  createFirework() {
+  createFirework(delayFrames = 0) {
     const colors = [
-      [255, 0, 0], // Red
-      [255, 255, 255], // White
-      [0, 0, 255], // Blue
+      [255, 0, 0],      // Red
+      [255, 255, 255],  // White
+      [0, 0, 255],      // Blue
+      [255, 215, 0],    // Gold
     ];
     const color = colors[Math.floor(Math.random() * colors.length)];
 
+    // Create explosion center point
+    const centerX = Math.random() * this.canvas.width;
+    const centerY = Math.random() * this.canvas.height * 0.6 + 50; // Upper portion
+
+    // Create particles for explosion
+    const particleCount = Math.floor(Math.random() * 20 + 15);
+    const particles = [];
+
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (Math.PI * 2 * i) / particleCount + (Math.random() - 0.5) * 0.5;
+      const speed = Math.random() * 2 + 1.5;
+
+      particles.push({
+        x: centerX,
+        y: centerY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: delayFrames > 0 ? 0 : 1.0, // Start with 0 life if delayed
+        maxLife: 1.0,
+        decay: Math.random() * 0.01 + 0.008,
+      });
+    }
+
     return {
-      x: Math.random() * this.canvas.width,
-      y: Math.random() * this.canvas.height * 0.7, // Keep in upper portion
-      radius: Math.random() * 2 + 1,
-      trailLength: Math.floor(Math.random() * 8 + 5),
-      trail: [],
-      speedY: Math.random() * 0.3 + 0.1,
-      sparkle: Math.random() > 0.5,
-      opacity: Math.random() * 0.5 + 0.5,
+      centerX: centerX,
+      centerY: centerY,
+      particles: particles,
       color: color,
+      exploded: delayFrames === 0,
+      sparkle: Math.random() > 0.3,
+      delayFrames: delayFrames,
     };
   }
 
-  drawFirework(particle) {
-    const [r, g, b] = particle.color;
+  drawFirework(firework) {
+    const [r, g, b] = firework.color;
 
-    // Draw trail
-    for (let i = 0; i < particle.trail.length; i++) {
-      const trailOpacity = particle.opacity * (1 - i / particle.trail.length);
-      this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${trailOpacity})`;
-      this.ctx.beginPath();
-      this.ctx.arc(particle.trail[i].x, particle.trail[i].y, particle.radius * 0.7, 0, Math.PI * 2);
-      this.ctx.fill();
-    }
+    // Draw each particle in the explosion
+    for (const particle of firework.particles) {
+      if (particle.life <= 0) continue;
 
-    // Draw main particle with sparkle
-    if (particle.sparkle) {
-      const gradient = this.ctx.createRadialGradient(
-        particle.x,
-        particle.y,
-        0,
-        particle.x,
-        particle.y,
-        particle.radius * 3
-      );
-      gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.opacity})`);
-      gradient.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, ${particle.opacity})`);
-      gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
-      this.ctx.fillStyle = gradient;
+      const radius = Math.max(1.5 * particle.life, 0.5);
+
+      // Draw sparkle effect for some fireworks
+      if (firework.sparkle) {
+        const gradient = this.ctx.createRadialGradient(
+          particle.x, particle.y, 0,
+          particle.x, particle.y, radius * 4
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 255, ${particle.life * 0.8})`);
+        gradient.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${particle.life * 0.6})`);
+        gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+
+        this.ctx.fillStyle = gradient;
+        this.ctx.beginPath();
+        this.ctx.arc(particle.x, particle.y, radius * 4, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+
+      // Draw main particle
+      this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${particle.life})`;
       this.ctx.beginPath();
-      this.ctx.arc(particle.x, particle.y, particle.radius * 3, 0, Math.PI * 2);
-      this.ctx.fill();
-    } else {
-      this.ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${particle.opacity})`;
-      this.ctx.beginPath();
-      this.ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+      this.ctx.arc(particle.x, particle.y, radius, 0, Math.PI * 2);
       this.ctx.fill();
     }
   }
@@ -673,13 +697,35 @@ export class SeasonalEffects {
       particle.x += particle.drift;
       particle.pulsePhase += particle.pulseSpeed;
     } else if (season === "july4th") {
-      // Add to trail
-      particle.trail.unshift({ x: particle.x, y: particle.y });
-      if (particle.trail.length > particle.trailLength) {
-        particle.trail.pop();
+      // Handle delay countdown
+      if (particle.delayFrames > 0) {
+        particle.delayFrames--;
+        if (particle.delayFrames === 0) {
+          // Trigger explosion
+          particle.exploded = true;
+          for (const p of particle.particles) {
+            p.life = p.maxLife;
+          }
+        }
+        return; // Don't update particles while delayed
       }
 
-      particle.y += particle.speedY;
+      // Update explosion particles
+      let allDead = true;
+      for (const p of particle.particles) {
+        if (p.life > 0) {
+          allDead = false;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.05; // Gravity
+          p.life -= p.decay;
+        }
+      }
+
+      // Mark for recreation if all particles are dead
+      if (allDead) {
+        particle._dead = true;
+      }
     }
 
     // Wrap around logic
@@ -693,14 +739,11 @@ export class SeasonalEffects {
         particle.speedY *= -1;
         particle.y = Math.max(0, Math.min(this.canvas.height, particle.y));
       }
-    } else {
-      // Most effects wrap around from top
+    } else if (season !== "july4th") {
+      // Most effects wrap around from top (except fireworks which recreate themselves)
       if (particle.y > this.canvas.height + 20) {
         particle.y = -20;
         particle.x = Math.random() * this.canvas.width;
-        if (season === "july4th") {
-          particle.trail = [];
-        }
       }
 
       if (particle.x > this.canvas.width + 20) {
@@ -718,6 +761,17 @@ export class SeasonalEffects {
 
     const config = this.getSeasonConfig();
     if (!config) return;
+
+    // Handle firework recreation
+    if (this.currentSeason === 'july4th') {
+      for (let i = 0; i < this.particles.length; i++) {
+        if (this.particles[i]._dead) {
+          // Create a new firework with a random delay to stagger explosions
+          const delayFrames = Math.floor(Math.random() * 60); // 0-1 second delay
+          this.particles[i] = this.createFirework(delayFrames);
+        }
+      }
+    }
 
     for (const particle of this.particles) {
       this.updateParticle(particle);
