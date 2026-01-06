@@ -7,9 +7,8 @@ Scripts for managing encrypted love letter collections.
 Each love letters directory (e.g., `victoria-bilger/`, `charlotte-bilger/`) contains:
 
 - `index.html` - The webpage that decrypts and displays letters
-- `manifest.json` - Lists all letter files (created by split script)
+- `manifest.json` - Lists all letter files
 - `letters/` - Directory containing individual encrypted letter files
-- `encrypted-data.txt` - Legacy single-file format (optional, for backwards compatibility)
 
 ## Scripts
 
@@ -18,7 +17,7 @@ Each love letters directory (e.g., `victoria-bilger/`, `charlotte-bilger/`) cont
 One-time migration script to split a single `encrypted-data.txt` file into individual letter files.
 
 ```bash
-node scripts/split-letters.js <directory> <password> [--dry-run]
+node scripts/love-letters/split-letters.js <directory> <password> [--dry-run]
 ```
 
 **Arguments:**
@@ -34,29 +33,30 @@ node scripts/split-letters.js <directory> <password> [--dry-run]
 
 ```bash
 # Preview what will be created
-node scripts/split-letters.js victoria-bilger mypassword --dry-run
+node scripts/love-letters/split-letters.js victoria-bilger mypassword --dry-run
 
 # Actually split the letters
-node scripts/split-letters.js victoria-bilger mypassword
+node scripts/love-letters/split-letters.js victoria-bilger mypassword
 
 # Works with nested directories too
-node scripts/split-letters.js projects/xyz-love-letters mypassword
+node scripts/love-letters/split-letters.js projects/xyz-love-letters mypassword
 ```
 
 **What it does:**
 
-1. Reads and decrypts `encrypted-data.txt`
+1. Reads and decrypts the source `encrypted-data.txt` file
 2. Creates `letters/` directory
 3. Encrypts each letter individually as `letters/YYYYMMDD.txt`
 4. Creates `manifest.json` listing all letter files
-5. Backs up original file to `encrypted-data.txt.backup`
+
+> **Note:** This is a one-time migration script. After running it, you can delete the original `encrypted-data.txt` file.
 
 ### add-letter.js
 
 Interactive script to add a new love letter to a collection.
 
 ```bash
-node scripts/add-letter.js <directory> <password>
+node scripts/love-letters/add-letter.js <directory> <password>
 ```
 
 **Arguments:**
@@ -67,9 +67,9 @@ node scripts/add-letter.js <directory> <password>
 **Examples:**
 
 ```bash
-node scripts/add-letter.js victoria-bilger mypassword
-node scripts/add-letter.js charlotte-bilger mypassword
-node scripts/add-letter.js projects/xyz-love-letters mypassword
+node scripts/love-letters/add-letter.js victoria-bilger mypassword
+node scripts/love-letters/add-letter.js charlotte-bilger mypassword
+node scripts/love-letters/add-letter.js projects/xyz-love-letters mypassword
 ```
 
 **What it does:**
@@ -82,31 +82,11 @@ node scripts/add-letter.js projects/xyz-love-letters mypassword
 
 ## Workflows
 
-### Initial Setup (One-Time Migration)
-
-If you have an existing `encrypted-data.txt` file with all letters combined:
-
-```bash
-# 1. Preview the split
-node scripts/split-letters.js victoria-bilger YOUR_PASSWORD --dry-run
-
-# 2. Run the actual split
-node scripts/split-letters.js victoria-bilger YOUR_PASSWORD
-
-# 3. Test the webpage to verify it works
-
-# 4. (Optional) Delete the backup file
-rm victoria-bilger/encrypted-data.txt.backup
-
-# 5. (Optional) Delete the original combined file
-rm victoria-bilger/encrypted-data.txt
-```
-
 ### Adding a New Letter
 
 ```bash
 # Run the interactive script
-node scripts/add-letter.js victoria-bilger YOUR_PASSWORD
+node scripts/love-letters/add-letter.js victoria-bilger YOUR_PASSWORD
 
 # Follow the prompts:
 # - Enter title
@@ -147,11 +127,6 @@ These directories are set up for love letters:
 - `charlotte-bilger/`
 - `cassandra-bilger/`
 - `projects/xyz-love-letters/`
-
-The HTML in each directory supports both:
-
-- **Manifest-based** (preferred): Individual files in `letters/` + `manifest.json`
-- **Legacy fallback**: Single `encrypted-data.txt` file
 
 ## Encryption Details
 

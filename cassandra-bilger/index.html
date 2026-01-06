@@ -44,7 +44,7 @@
           init() {
             this.isFetching = false;
             this.isDecrypting = false;
-            this.ciphertextString = null;
+            this.encryptedLetters = null;
 
             this.encoder = new TextEncoder();
             this.decoder = new TextDecoder();
@@ -71,19 +71,15 @@
 
           async handleDecryption() {
             try {
-              if (this.useManifest && this.encryptedLetters) {
-                // Decrypt each letter individually
-                const decryptPromises = this.encryptedLetters.map(async (entry) => {
-                  const plaintextString = await this.decryptData(entry.ciphertext, this.password);
-                  return JSON.parse(plaintextString);
-                });
+              if (!this.encryptedLetters) return;
 
-                this.decrypted = await Promise.all(decryptPromises);
-              } else if (this.ciphertextString) {
-                // Legacy: decrypt single file containing all letters
-                const plaintextString = await this.decryptData(this.ciphertextString, this.password);
-                this.decrypted = JSON.parse(plaintextString);
-              }
+              // Decrypt each letter individually
+              const decryptPromises = this.encryptedLetters.map(async (entry) => {
+                const plaintextString = await this.decryptData(entry.ciphertext, this.password);
+                return JSON.parse(plaintextString);
+              });
+
+              this.decrypted = await Promise.all(decryptPromises);
 
               console.log("Decrypted Data:", this.decrypted);
 
@@ -109,26 +105,20 @@
             this.render();
 
             try {
-              // Try to fetch manifest for split files first
               const manifestResponse = await fetch("./manifest.json");
-              if (manifestResponse.ok) {
-                this.manifest = await manifestResponse.json();
-                this.encryptedLetters = [];
-
-                // Fetch all encrypted letter files in parallel
-                const letterPromises = this.manifest.map(async (entry) => {
-                  const response = await fetch(`./${entry.file}`);
-                  return { date: entry.date, ciphertext: await response.text() };
-                });
-
-                this.encryptedLetters = await Promise.all(letterPromises);
-                this.useManifest = true;
-              } else {
-                // Fall back to single encrypted-data.txt file
-                const response = await fetch("./encrypted-data.txt");
-                this.ciphertextString = await response.text();
-                this.useManifest = false;
+              if (!manifestResponse.ok) {
+                throw new Error("Failed to fetch manifest.json");
               }
+
+              const manifest = await manifestResponse.json();
+
+              // Fetch all encrypted letter files in parallel
+              const letterPromises = manifest.map(async (entry) => {
+                const response = await fetch(`./${entry.file}`);
+                return { date: entry.date, ciphertext: await response.text() };
+              });
+
+              this.encryptedLetters = await Promise.all(letterPromises);
             } catch (error) {
               console.error("Error fetching encrypted data:", error);
             } finally {
@@ -151,7 +141,7 @@
             this.isDecrypting = true;
             this.render();
 
-            if (!this.ciphertextString && !this.encryptedLetters) return;
+            if (!this.encryptedLetters) return;
 
             this.handleDecryption();
           }
