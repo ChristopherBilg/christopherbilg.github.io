@@ -69,45 +69,74 @@
             this.fetchEncryptedData();
           }
 
-          handleDecryption() {
-            this.decryptData(this.ciphertextString, this.password)
-              .then((plaintextString) => {
-                try {
-                  this.decrypted = JSON.parse(plaintextString);
-                } catch (error) {
-                  console.error("Error parsing decrypted data:", error);
-                  this.decrypted = [];
-                }
+          async handleDecryption() {
+            try {
+              if (this.useManifest && this.encryptedLetters) {
+                // Decrypt each letter individually
+                const decryptPromises = this.encryptedLetters.map(async (entry) => {
+                  const plaintextString = await this.decryptData(entry.ciphertext, this.password);
+                  return JSON.parse(plaintextString);
+                });
 
-                return this.encryptData(
+                this.decrypted = await Promise.all(decryptPromises);
+              } else if (this.ciphertextString) {
+                // Legacy: decrypt single file containing all letters
+                const plaintextString = await this.decryptData(this.ciphertextString, this.password);
+                this.decrypted = JSON.parse(plaintextString);
+              }
+
+              console.log("Decrypted Data:", this.decrypted);
+
+              // Log encrypted version with additional letters for adding new ones
+              if (this.additionalLoveLetters.length > 0) {
+                const ciphertextString = await this.encryptData(
                   JSON.stringify(this.decrypted.concat(this.additionalLoveLetters)),
                   this.password
                 );
-              })
-              .then((ciphertextString) => {
-                console.log("Decrypted Data:", this.decrypted);
                 console.log("Encrypted Data + Additional Love Letters:", ciphertextString);
-              })
-              .catch((error) => console.error(error))
-              .finally(() => {
-                this.isDecrypting = false;
-                this.render();
-              });
+              }
+            } catch (error) {
+              console.error("Error during decryption:", error);
+              this.decrypted = [];
+            } finally {
+              this.isDecrypting = false;
+              this.render();
+            }
           }
 
-          fetchEncryptedData() {
+          async fetchEncryptedData() {
             this.isFetching = true;
             this.render();
 
-            fetch("./encrypted-data.txt")
-              .then((response) => response.text())
-              .then((ciphertextString) => (this.ciphertextString = ciphertextString))
-              .finally(() => {
-                this.isFetching = false;
-                this.render();
+            try {
+              // Try to fetch manifest for split files first
+              const manifestResponse = await fetch("./manifest.json");
+              if (manifestResponse.ok) {
+                this.manifest = await manifestResponse.json();
+                this.encryptedLetters = [];
 
-                if (this.isDecrypting) this.handleDecryption();
-              });
+                // Fetch all encrypted letter files in parallel
+                const letterPromises = this.manifest.map(async (entry) => {
+                  const response = await fetch(`./${entry.file}`);
+                  return { date: entry.date, ciphertext: await response.text() };
+                });
+
+                this.encryptedLetters = await Promise.all(letterPromises);
+                this.useManifest = true;
+              } else {
+                // Fall back to single encrypted-data.txt file
+                const response = await fetch("./encrypted-data.txt");
+                this.ciphertextString = await response.text();
+                this.useManifest = false;
+              }
+            } catch (error) {
+              console.error("Error fetching encrypted data:", error);
+            } finally {
+              this.isFetching = false;
+              this.render();
+
+              if (this.isDecrypting) this.handleDecryption();
+            }
           }
 
           handlePasswordInput(event) {
@@ -122,7 +151,7 @@
             this.isDecrypting = true;
             this.render();
 
-            if (!this.ciphertextString) return;
+            if (!this.ciphertextString && !this.encryptedLetters) return;
 
             this.handleDecryption();
           }
