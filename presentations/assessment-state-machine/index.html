@@ -67,11 +67,76 @@
             <h2>Problem Statement</h2>
 
             <br />
+            <br />
 
             <ul>
-              <li>Complex assessment lifecycle with multiple states.</li>
-              <li>Challenges in managing transitions and ensuring consistency.</li>
-              <li>Need for a structured approach to handle state changes.</li>
+              <li class="fragment">Complex assessment lifecycle with multiple states</li>
+              <li class="fragment">Challenges in managing transitions and ensuring consistency</li>
+              <li class="fragment">Need for a structured approach to handle state changes</li>
+              <li class="fragment">Consistency for analytics and reporting</li>
+              <li class="fragment">Difficulty in scaling changes in the assessment</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Complex Assessment Lifecycle</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">No clear boundary between happy, sad, and error states</li>
+              <li class="fragment">Numerous events triggering state transitions</li>
+              <li class="fragment">Interdependencies between states and events</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Challenges in Managing Transitions</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Inconsistent handling of state changes</li>
+              <li class="fragment">Increased risk of errors and mismanagement</li>
+              <li class="fragment">Difficulty in tracking state history and debugging issues</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Need for a Structured Approach</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Clear definition of states and transitions</li>
+              <li class="fragment">Standardized handling of events</li>
+              <li class="fragment">Improved maintainability and scalability</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Consistency for Analytics & Reporting</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Standardized logging, monitoring, and reporting</li>
+              <li class="fragment">Reliable data for performance metrics</li>
+              <li class="fragment">Accurate tracking of assessment outcomes</li>
+              <li class="fragment">Enhanced decision-making based on consistent data</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Difficulty in Scaling Changes</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Complexity in updating state logic</li>
+              <li class="fragment">Increased effort for testing and validation</li>
+              <li class="fragment">Risk of introducing inconsistencies during changes</li>
+              <li class="fragment">Separation of concerns and modularity challenges</li>
             </ul>
           </section>
         </section>
@@ -81,12 +146,22 @@
             <h2>State Machine Overview</h2>
 
             <br />
+            <br />
 
-            <ul>
-              <li>Definition of a finite state machine (FSM).</li>
-              <li>States involved in the assessment process.</li>
-              <li>Transitions between states based on events.</li>
-            </ul>
+            <div style="display: grid; grid-template-columns: 2fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment">Definition of a finite state machine (FSM)</li>
+                  <li class="fragment">States involved in the assessment process</li>
+                  <li class="fragment">Transitions between states based on events</li>
+                  <li class="fragment">Responsibilities and actions of a state machine</li>
+                </ul>
+              </div>
+
+              <div>
+                <img data-src="./images/me-trying-to-explain-fsm.webp" width="300" />
+              </div>
+            </div>
           </section>
         </section>
 
@@ -95,12 +170,23 @@
             <h2>Implementation Details</h2>
 
             <br />
+            <br />
 
-            <ul>
-              <li>Designing the state machine structure.</li>
-              <li>Handling state transitions and events.</li>
-              <li>Integration with existing systems.</li>
-            </ul>
+            <div style="display: grid; grid-template-columns: 2fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment">Designing the state machine structure</li>
+                  <li class="fragment">Handling state transitions and events</li>
+                  <li class="fragment">Integration with existing systems</li>
+                  <li class="fragment">Testing and validation strategies</li>
+                  <li class="fragment">Extensibility and future enhancements</li>
+                </ul>
+              </div>
+
+              <div>
+                <img data-src="./images/turing-machine-always-has-been.jpeg" width="300" />
+              </div>
+            </div>
           </section>
         </section>
 
@@ -110,11 +196,22 @@
 
             <br />
 
-            <ul>
-              <li>Improved consistency in assessment state management.</li>
-              <li>Reduced errors and mismanagement of states.</li>
-              <li>Enhanced clarity and maintainability of the assessment process.</li>
-            </ul>
+            <div style="display: grid; grid-template-columns: 3fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment">Improved consistency in assessment state management</li>
+                  <li class="fragment">Reduced errors and mismanagement of states</li>
+                  <li class="fragment">Enhanced clarity and maintainability of the assessment process</li>
+                  <li class="fragment">Better scalability for future changes and enhancements</li>
+                  <li class="fragment">Reliable data for analytics and reporting</li>
+                  <li class="fragment">Informed decision-making based on consistent data</li>
+                </ul>
+              </div>
+
+              <div>
+                <img data-src="./images/referral-assessment-asm-mermaid.svg" width="300" />
+              </div>
+            </div>
           </section>
         </section>
 
@@ -149,16 +246,16 @@
 
             <ol>
               <li>
-                <a href="https://refactoring.guru/design-patterns" target="_blank">Design Patterns</a>
-              </li>
-
-              <li>
                 <a
                   href="https://ocw.mit.edu/courses/6-004-computation-structures-spring-2017/pages/c6/"
                   target="_blank"
                 >
                   MIT OpenCourseWare
                 </a>
+              </li>
+
+              <li>
+                <a href="https://refactoring.guru/design-patterns" target="_blank">Design Patterns</a>
               </li>
             </ol>
           </section>
