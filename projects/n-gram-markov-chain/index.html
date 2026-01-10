@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>N-Gram Markov Chain</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>N-Gram Markov Chain</h1>
+
+      <p>
+        A Markov chain is a stochastic model that describes a sequence of possible events where the probability of each
+        event depends only on the state attained in the previous event(s). This implementation uses n-grams (sequences
+        of n tokens) to predict the next token based on learned patterns from training text.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        /**
+         * MarkovChain - Core n-gram Markov chain implementation
+         *
+         * Design Patterns Used:
+         * - Builder Pattern: Fluent API for configuration (setN, setTokenizer)
+         * - Strategy Pattern: Pluggable tokenization strategies
+         * - Iterator Pattern: Generate method yields tokens lazily
+         */
+        class MarkovChain {
+          constructor(n = 2) {
+            this.n = n;
+            this.transitions = new Map();
+            this.startStates = [];
+            this.tokenizer = MarkovChain.wordTokenizer;
+          }
+
+          static wordTokenizer(text) {
+            return text.split(/\s+/).filter((token) => token.length > 0);
+          }
+
+          static characterTokenizer(text) {
+            return text.split("");
+          }
+
+          setN(n) {
+            this.n = n;
+            this.clear();
+            return this;
+          }
+
+          setTokenizer(tokenizer) {
+            this.tokenizer = tokenizer;
+            return this;
+          }
+
+          clear() {
+            this.transitions.clear();
+            this.startStates = [];
+            return this;
+          }
+
+          _makeKey(tokens) {
+            return tokens.join("\x00");
+          }
+
+          _parseKey(key) {
+            return key.split("\x00");
+          }
+
+          train(text) {
+            const tokens = this.tokenizer(text);
+            if (tokens.length < this.n) return this;
+
+            for (let i = 0; i <= tokens.length - this.n; i++) {
+              const state = tokens.slice(i, i + this.n - 1);
+              const nextToken = tokens[i + this.n - 1];
+              const key = this._makeKey(state);
+
+              if (i === 0) {
+                this.startStates.push(key);
+              }
+
+              if (!this.transitions.has(key)) {
+                this.transitions.set(key, []);
+              }
+              this.transitions.get(key).push(nextToken);
+            }
+
+            return this;
+          }
+
+          _selectRandom(array) {
+            if (!array || array.length === 0) return null;
+            return array[Math.floor(Math.random() * array.length)];
+          }
+
+          _getRandomStartState() {
+            if (this.startStates.length === 0) return null;
+            const key = this._selectRandom(this.startStates);
+            return this._parseKey(key);
+          }
+
+          generate(maxTokens = 50, seed = null) {
+            if (this.transitions.size === 0) return [];
+
+            let currentState;
+            if (seed && seed.length >= this.n - 1) {
+              currentState = seed.slice(-(this.n - 1));
+            } else {
+              currentState = this._getRandomStartState();
+            }
+
+            if (!currentState) return [];
+
+            const result = [...currentState];
+
+            for (let i = 0; i < maxTokens - (this.n - 1); i++) {
+              const key = this._makeKey(currentState);
+              const nextOptions = this.transitions.get(key);
+
+              if (!nextOptions || nextOptions.length === 0) {
+                currentState = this._getRandomStartState();
+                if (!currentState) break;
+                continue;
+              }
+
+              const nextToken = this._selectRandom(nextOptions);
+              result.push(nextToken);
+
+              currentState = [...currentState.slice(1), nextToken];
+            }
+
+            return result;
+          }
+
+          getStats() {
+            let totalTransitions = 0;
+            let maxTransitions = 0;
+            let minTransitions = Infinity;
+
+            for (const [, transitions] of this.transitions) {
+              totalTransitions += transitions.length;
+              maxTransitions = Math.max(maxTransitions, transitions.length);
+              minTransitions = Math.min(minTransitions, transitions.length);
+            }
+
+            return {
+              n: this.n,
+              uniqueStates: this.transitions.size,
+              totalTransitions,
+              avgTransitionsPerState:
+                this.transitions.size > 0 ? (totalTransitions / this.transitions.size).toFixed(2) : 0,
+              maxTransitions,
+              minTransitions: minTransitions === Infinity ? 0 : minTransitions,
+              startStates: this.startStates.length,
+            };
+          }
+        }
+
+        /**
+         * AppState - Reactive state container using Arlo's Record
+         *
+         * Design Pattern: Observer Pattern
+         * Components bind to this record and re-render when state changes
+         */
+        class AppState extends Record {
+          constructor() {
+            super({
+              n: 2,
+              tokenMode: "word",
+              trainingText: "",
+              outputLength: 50,
+              generatedText: "",
+              stats: null,
+              isTraining: false,
+            });
+            this.chain = new MarkovChain(2);
+          }
+
+          setN(n) {
+            this.chain.setN(n);
+            this.update({ n, stats: null, generatedText: "" });
+            if (this.get("trainingText")) {
+              this.trainChain();
+            }
+          }
+
+          setTokenMode(mode) {
+            const tokenizer = mode === "character" ? MarkovChain.characterTokenizer : MarkovChain.wordTokenizer;
+            this.chain.setTokenizer(tokenizer);
+            this.update({ tokenMode: mode, stats: null, generatedText: "" });
+            if (this.get("trainingText")) {
+              this.trainChain();
+            }
+          }
+
+          setTrainingText(text) {
+            this.update({ trainingText: text });
+          }
+
+          setOutputLength(length) {
+            this.update({ outputLength: length });
+          }
+
+          trainChain() {
+            this.update({ isTraining: true });
+            this.chain.clear();
+            this.chain.train(this.get("trainingText"));
+            this.update({
+              isTraining: false,
+              stats: this.chain.getStats(),
+              generatedText: "",
+            });
+          }
+
+          generateText() {
+            const tokens = this.chain.generate(this.get("outputLength"));
+            const separator = this.get("tokenMode") === "character" ? "" : " ";
+            this.update({ generatedText: tokens.join(separator) });
+          }
+        }
+
+        /**
+         * TrainingInput - Text input component for training data
+         */
+        class TrainingInput extends StyledComponent {
+          init(appState) {
+            this.appState = appState;
+            this.bind(appState, (data) => this.render(data));
+          }
+
+          styles() {
+            return css`
+              margin-bottom: 1rem;
+
+              textarea {
+                width: 100%;
+                min-height: 150px;
+                font-family: inherit;
+                padding: 0.5rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                resize: vertical;
+              }
+
+              label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: bold;
+              }
+            `;
+          }
+
+          handleInput(evt) {
+            this.appState.setTrainingText(evt.target.value);
+          }
+
+          compose(data) {
+            return vdom`<div>
+              <label>Training Text</label>
+              <textarea
+                placeholder="Enter text to train the Markov chain..."
+                oninput="${this.handleInput.bind(this)}"
+              >${data.trainingText}</textarea>
+            </div>`;
+          }
+        }
+
+        /**
+         * Controls - Configuration panel for n-gram settings
+         */
+        class Controls extends StyledComponent {
+          init(appState) {
+            this.appState = appState;
+            this.bind(appState, (data) => this.render(data));
+          }
+
+          styles() {
+            return css`
+              display: flex;
+              flex-wrap: wrap;
+              gap: 1rem;
+              margin-bottom: 1rem;
+              padding: 1rem;
+              background: #f5f5f5;
+              border-radius: 4px;
+
+              .control-group {
+                display: flex;
+                flex-direction: column;
+                gap: 0.25rem;
+              }
+
+              label {
+                font-weight: bold;
+                font-size: 0.9rem;
+              }
+
+              select,
+              input[type="number"] {
+                padding: 0.5rem;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 1rem;
+              }
+
+              .buttons {
+                display: flex;
+                gap: 0.5rem;
+                align-items: flex-end;
+              }
+
+              button {
+                padding: 0.5rem 1rem;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 1rem;
+              }
+
+              .train-btn {
+                background: #4caf50;
+                color: white;
+              }
+
+              .train-btn:hover {
+                background: #45a049;
+              }
+
+              .train-btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+              }
+
+              .generate-btn {
+                background: #2196f3;
+                color: white;
+              }
+
+              .generate-btn:hover {
+                background: #1976d2;
+              }
+
+              .generate-btn:disabled {
+                background: #ccc;
+                cursor: not-allowed;
+              }
+            `;
+          }
+
+          handleNChange(evt) {
+            this.appState.setN(parseInt(evt.target.value, 10));
+          }
+
+          handleModeChange(evt) {
+            this.appState.setTokenMode(evt.target.value);
+          }
+
+          handleLengthChange(evt) {
+            this.appState.setOutputLength(parseInt(evt.target.value, 10));
+          }
+
+          handleTrain() {
+            this.appState.trainChain();
+          }
+
+          handleGenerate() {
+            this.appState.generateText();
+          }
+
+          compose(data) {
+            const canTrain = data.trainingText.length > 0 && !data.isTraining;
+            const canGenerate = data.stats !== null;
+
+            return vdom`<div>
+              <div class="control-group">
+                <label>N-gram Size (n)</label>
+                <select onchange="${this.handleNChange.bind(this)}">
+                  <option value="2" selected="${data.n === 2}">2 (Bigram)</option>
+                  <option value="3" selected="${data.n === 3}">3 (Trigram)</option>
+                  <option value="4" selected="${data.n === 4}">4 (4-gram)</option>
+                  <option value="5" selected="${data.n === 5}">5 (5-gram)</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Token Mode</label>
+                <select onchange="${this.handleModeChange.bind(this)}">
+                  <option value="word" selected="${data.tokenMode === "word"}">Words</option>
+                  <option value="character" selected="${data.tokenMode === "character"}">Characters</option>
+                </select>
+              </div>
+
+              <div class="control-group">
+                <label>Output Length</label>
+                <input
+                  type="number"
+                  min="10"
+                  max="500"
+                  value="${data.outputLength}"
+                  onchange="${this.handleLengthChange.bind(this)}"
+                />
+              </div>
+
+              <div class="buttons">
+                <button
+                  class="train-btn"
+                  onclick="${this.handleTrain.bind(this)}"
+                  disabled="${!canTrain}"
+                >
+                  ${data.isTraining ? "Training..." : "Train"}
+                </button>
+                <button
+                  class="generate-btn"
+                  onclick="${this.handleGenerate.bind(this)}"
+                  disabled="${!canGenerate}"
+                >
+                  Generate
+                </button>
+              </div>
+            </div>`;
+          }
+        }
+
+        /**
+         * StatsDisplay - Shows chain statistics after training
+         */
+        class StatsDisplay extends StyledComponent {
+          init(appState) {
+            this.appState = appState;
+            this.bind(appState, (data) => this.render(data));
+          }
+
+          styles() {
+            return css`
+              margin-bottom: 1rem;
+              padding: 1rem;
+              background: #e3f2fd;
+              border-radius: 4px;
+              font-size: 0.9rem;
+
+              h3 {
+                margin: 0 0 0.5rem 0;
+                font-size: 1rem;
+              }
+
+              .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 0.5rem;
+              }
+
+              .stat {
+                display: flex;
+                justify-content: space-between;
+              }
+
+              .stat-label {
+                color: #666;
+              }
+
+              .stat-value {
+                font-weight: bold;
+              }
+            `;
+          }
+
+          compose(data) {
+            if (!data.stats) {
+              return vdom`<div style="display:none"></div>`;
+            }
+
+            const stats = data.stats;
+            return vdom`<div>
+              <h3>Chain Statistics</h3>
+              <div class="stats-grid">
+                <div class="stat">
+                  <span class="stat-label">N-gram size:</span>
+                  <span class="stat-value">${stats.n}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Unique states:</span>
+                  <span class="stat-value">${stats.uniqueStates}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Total transitions:</span>
+                  <span class="stat-value">${stats.totalTransitions}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Avg per state:</span>
+                  <span class="stat-value">${stats.avgTransitionsPerState}</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Start states:</span>
+                  <span class="stat-value">${stats.startStates}</span>
+                </div>
+              </div>
+            </div>`;
+          }
+        }
+
+        /**
+         * OutputDisplay - Shows generated text
+         */
+        class OutputDisplay extends StyledComponent {
+          init(appState) {
+            this.appState = appState;
+            this.bind(appState, (data) => this.render(data));
+          }
+
+          styles() {
+            return css`
+              label {
+                display: block;
+                margin-bottom: 0.5rem;
+                font-weight: bold;
+              }
+
+              .output {
+                min-height: 100px;
+                padding: 1rem;
+                background: #fff;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+                font-family: Georgia, serif;
+                line-height: 1.6;
+              }
+
+              .placeholder {
+                color: #999;
+                font-style: italic;
+              }
+            `;
+          }
+
+          compose(data) {
+            const hasOutput = data.generatedText.length > 0;
+            return vdom`<div>
+              <label>Generated Output</label>
+              <div class="output ${hasOutput ? "" : "placeholder"}">
+                ${hasOutput ? data.generatedText : "Train the model and click Generate to see output..."}
+              </div>
+            </div>`;
+          }
+        }
+
+        /**
+         * App - Main application component
+         *
+         * Design Pattern: Composite Pattern
+         * Composes child components into a unified interface
+         */
+        class App extends StyledComponent {
+          init() {
+            this.appState = new AppState();
+            this.trainingInput = new TrainingInput(this.appState);
+            this.controls = new Controls(this.appState);
+            this.statsDisplay = new StatsDisplay(this.appState);
+            this.outputDisplay = new OutputDisplay(this.appState);
+          }
+
+          styles() {
+            return css`
+              max-width: 800px;
+              margin: 0 auto;
+            `;
+          }
+
+          compose() {
+            return vdom`<div>
+              ${this.trainingInput.node}
+              ${this.controls.node}
+              ${this.statsDisplay.node}
+              ${this.outputDisplay.node}
+            </div>`;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

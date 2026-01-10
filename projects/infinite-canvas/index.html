@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Infinite Canvas</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Infinite Canvas</h1>
+
+      <p>An infinite canvas that extends endlessly in all directions. Drag to pan, scroll to zoom.</p>
+
+      <div
+        id="canvas-container"
+        style="width: 100%; height: 600px; position: relative; overflow: hidden; border: 1px solid #ddd; cursor: grab"
+      >
+        <canvas id="infinite-canvas" style="position: absolute; top: 0; left: 0"></canvas>
+        <div
+          id="coordinates"
+          style="
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+          "
+        ></div>
+      </div>
+    </main>
+
+    <script type="module">
+      class EventEmitter {
+        constructor() {
+          this.listeners = new Map();
+        }
+
+        on(event, callback) {
+          if (!this.listeners.has(event)) {
+            this.listeners.set(event, []);
+          }
+          this.listeners.get(event).push(callback);
+          return () => this.off(event, callback);
+        }
+
+        off(event, callback) {
+          if (!this.listeners.has(event)) return;
+          const callbacks = this.listeners.get(event);
+          const index = callbacks.indexOf(callback);
+          if (index > -1) callbacks.splice(index, 1);
+        }
+
+        emit(event, data) {
+          if (!this.listeners.has(event)) return;
+          this.listeners.get(event).forEach((callback) => callback(data));
+        }
+      }
+
+      class CanvasState extends EventEmitter {
+        constructor() {
+          super();
+          this._viewX = 0;
+          this._viewY = 0;
+          this._scale = 1;
+          this._mouseX = 0;
+          this._mouseY = 0;
+          this._width = 0;
+          this._height = 0;
+        }
+
+        get viewX() {
+          return this._viewX;
+        }
+        get viewY() {
+          return this._viewY;
+        }
+        get scale() {
+          return this._scale;
+        }
+        get mouseX() {
+          return this._mouseX;
+        }
+        get mouseY() {
+          return this._mouseY;
+        }
+        get width() {
+          return this._width;
+        }
+        get height() {
+          return this._height;
+        }
+
+        setDimensions(width, height) {
+          this._width = width;
+          this._height = height;
+          this.emit("dimensionsChanged", { width, height });
+        }
+
+        centerOnOrigin() {
+          this._viewX = this._width / 2;
+          this._viewY = this._height / 2;
+          // Set initial mouse position to center of canvas
+          this._mouseX = this._width / 2;
+          this._mouseY = this._height / 2;
+        }
+
+        pan(dx, dy) {
+          this._viewX += dx;
+          this._viewY += dy;
+          this.emit("viewChanged", this.getViewData());
+        }
+
+        zoom(newScale, centerX, centerY) {
+          const clampedScale = Math.max(0.1, Math.min(10, newScale)); // Clamp scale between 10% and 1000%
+          const scaleChange = clampedScale / this._scale;
+          this._viewX = centerX - (centerX - this._viewX) * scaleChange;
+          this._viewY = centerY - (centerY - this._viewY) * scaleChange;
+          this._scale = clampedScale;
+          this.emit("viewChanged", this.getViewData());
+        }
+
+        setMousePosition(x, y) {
+          this._mouseX = x;
+          this._mouseY = y;
+          this.emit("mouseChanged", this.getMouseData());
+        }
+
+        screenToWorld(screenX, screenY) {
+          return {
+            x: Math.round((screenX - this._viewX) / this._scale),
+            y: Math.round((screenY - this._viewY) / this._scale),
+          };
+        }
+
+        getViewData() {
+          const world = this.screenToWorld(this._mouseX, this._mouseY);
+          const center = this.screenToWorld(this._width / 2, this._height / 2);
+          return {
+            viewX: this._viewX,
+            viewY: this._viewY,
+            scale: this._scale,
+            worldX: world.x,
+            worldY: world.y,
+            centerX: center.x,
+            centerY: center.y,
+          };
+        }
+
+        getMouseData() {
+          const world = this.screenToWorld(this._mouseX, this._mouseY);
+          return { screenX: this._mouseX, screenY: this._mouseY, worldX: world.x, worldY: world.y };
+        }
+
+        getVisibleBounds() {
+          return {
+            startX: Math.floor(-this._viewX / this._scale),
+            startY: Math.floor(-this._viewY / this._scale),
+            endX: Math.ceil((this._width - this._viewX) / this._scale),
+            endY: Math.ceil((this._height - this._viewY) / this._scale),
+          };
+        }
+      }
+
+      class InteractionState {
+        constructor(context) {
+          this.context = context;
+        }
+        onMouseDown(e) {}
+        onMouseMove(e) {}
+        onMouseUp(e) {}
+        onWheel(e) {}
+        getCursor() {
+          return "default";
+        }
+      }
+
+      class IdleState extends InteractionState {
+        onMouseDown(e) {
+          this.context.setState(new PanningState(this.context, e.clientX, e.clientY));
+        }
+
+        onMouseMove(e) {
+          const rect = this.context.canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          // Only update coordinates when mouse is over the canvas
+          if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+            this.context.state.setMousePosition(x, y);
+          }
+        }
+
+        onWheel(e) {
+          e.preventDefault();
+          const rect = this.context.canvas.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+          this.context.state.zoom(this.context.state.scale * zoomFactor, mouseX, mouseY);
+        }
+
+        getCursor() {
+          return "grab";
+        }
+      }
+
+      class PanningState extends InteractionState {
+        constructor(context, startX, startY) {
+          super(context);
+          this.lastX = startX;
+          this.lastY = startY;
+        }
+
+        onMouseMove(e) {
+          const dx = e.clientX - this.lastX;
+          const dy = e.clientY - this.lastY;
+          this.context.state.pan(dx, dy);
+          this.lastX = e.clientX;
+          this.lastY = e.clientY;
+
+          // Only update coordinates when mouse is over the canvas
+          const rect = this.context.canvas.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          if (x >= 0 && x <= rect.width && y >= 0 && y <= rect.height) {
+            this.context.state.setMousePosition(x, y);
+          }
+        }
+
+        onMouseUp(e) {
+          this.context.setState(new IdleState(this.context));
+        }
+
+        onWheel(e) {
+          e.preventDefault();
+          const rect = this.context.canvas.getBoundingClientRect();
+          const mouseX = e.clientX - rect.left;
+          const mouseY = e.clientY - rect.top;
+          const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+          this.context.state.zoom(this.context.state.scale * zoomFactor, mouseX, mouseY);
+        }
+
+        getCursor() {
+          return "grabbing";
+        }
+      }
+
+      class RenderStrategy {
+        render(ctx, state) {
+          throw new Error("render() must be implemented");
+        }
+      }
+
+      class GridRenderStrategy extends RenderStrategy {
+        constructor(gridSize = 50, dotSpacing = 10) {
+          super();
+          this.gridSize = gridSize;
+          this.dotSpacing = dotSpacing;
+        }
+
+        render(ctx, state) {
+          const bounds = state.getVisibleBounds();
+          const scale = state.scale;
+
+          // Align to grid
+          const startX = Math.floor(bounds.startX / this.gridSize) * this.gridSize;
+          const startY = Math.floor(bounds.startY / this.gridSize) * this.gridSize;
+          const endX = bounds.endX + this.gridSize;
+          const endY = bounds.endY + this.gridSize;
+
+          // Draw dots
+          ctx.fillStyle = "rgba(150, 150, 150, 0.3)";
+          for (let x = startX; x <= endX; x += this.dotSpacing) {
+            for (let y = startY; y <= endY; y += this.dotSpacing) {
+              const isMajor = x % this.gridSize === 0 && y % this.gridSize === 0;
+              const dotSize = (isMajor ? 2 : 1) / scale;
+              ctx.beginPath();
+              ctx.arc(x, y, dotSize, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Draw major grid lines
+          ctx.strokeStyle = "rgba(100, 100, 100, 0.2)";
+          ctx.lineWidth = 1 / scale;
+          ctx.setLineDash([5 / scale, 5 / scale]);
+
+          const majorInterval = this.gridSize * 5;
+          for (let x = startX; x <= endX; x += this.gridSize) {
+            if (x % majorInterval === 0) {
+              ctx.beginPath();
+              ctx.moveTo(x, startY);
+              ctx.lineTo(x, endY);
+              ctx.stroke();
+            }
+          }
+
+          for (let y = startY; y <= endY; y += this.gridSize) {
+            if (y % majorInterval === 0) {
+              ctx.beginPath();
+              ctx.moveTo(startX, y);
+              ctx.lineTo(endX, y);
+              ctx.stroke();
+            }
+          }
+
+          // Draw coordinate labels
+          ctx.setLineDash([]);
+          ctx.fillStyle = "rgba(100, 100, 100, 0.5)";
+          ctx.font = `${10 / scale}px monospace`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          for (let x = startX; x <= endX; x += majorInterval) {
+            for (let y = startY; y <= endY; y += majorInterval) {
+              if (Math.abs(x) > 0 || Math.abs(y) > 0) {
+                ctx.fillText(`${x},${y}`, x, y + 15 / scale);
+              }
+            }
+          }
+        }
+      }
+
+      class OriginRenderStrategy extends RenderStrategy {
+        render(ctx, state) {
+          const scale = state.scale;
+
+          // Crosshair
+          ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
+          ctx.lineWidth = 2 / scale;
+          ctx.setLineDash([]);
+
+          ctx.beginPath();
+          ctx.moveTo(-20, 0);
+          ctx.lineTo(20, 0);
+          ctx.moveTo(0, -20);
+          ctx.lineTo(0, 20);
+          ctx.stroke();
+
+          // Labels
+          ctx.fillStyle = "rgba(255, 0, 0, 0.7)";
+          ctx.font = `${12 / scale}px monospace`;
+          ctx.textAlign = "center";
+          ctx.fillText("ORIGIN", 0, -25);
+          ctx.fillText("(0, 0)", 0, 30);
+        }
+      }
+
+      class BeaconRenderStrategy extends RenderStrategy {
+        constructor() {
+          super();
+          this.beacons = [
+            { x: 1000, y: 0, label: "1K →" },
+            { x: -1000, y: 0, label: "← 1K" },
+            { x: 0, y: 1000, label: "1K ↓" },
+            { x: 0, y: -1000, label: "1K ↑" },
+            { x: 10000, y: 10000, label: "10K" },
+            { x: -10000, y: -10000, label: "10K" },
+            { x: 100000, y: 0, label: "100K" },
+            { x: 0, y: -100000, label: "100K" },
+            { x: 1000000, y: 1000000, label: "1M" },
+            { x: -1000000, y: -1000000, label: "1M" },
+          ];
+          this.rings = [100, 500, 1000, 5000, 10000];
+        }
+
+        render(ctx, state) {
+          const scale = state.scale;
+          const viewX = state.viewX;
+          const viewY = state.viewY;
+          const width = state.width;
+          const height = state.height;
+
+          // Draw beacons
+          ctx.fillStyle = "rgba(0, 100, 255, 0.6)";
+          ctx.strokeStyle = "rgba(0, 100, 255, 0.8)";
+          ctx.lineWidth = 1 / scale;
+          ctx.font = `${14 / scale}px monospace`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          this.beacons.forEach((beacon) => {
+            const screenX = beacon.x * scale + viewX;
+            const screenY = beacon.y * scale + viewY;
+
+            if (screenX > -100 && screenX < width + 100 && screenY > -100 && screenY < height + 100) {
+              ctx.beginPath();
+              ctx.arc(beacon.x, beacon.y, 20, 0, Math.PI * 2);
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.arc(beacon.x, beacon.y, 10, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = "rgba(0, 100, 255, 0.9)";
+              ctx.fillText(beacon.label, beacon.x, beacon.y - 30);
+              ctx.fillStyle = "rgba(0, 100, 255, 0.6)";
+            }
+          });
+
+          // Draw distance rings
+          ctx.strokeStyle = "rgba(0, 150, 200, 0.1)";
+          ctx.setLineDash([10 / scale, 10 / scale]);
+
+          this.rings.forEach((radius) => {
+            if (radius * scale > 5) {
+              ctx.beginPath();
+              ctx.arc(0, 0, radius, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+          });
+        }
+      }
+
+      class CanvasRenderer {
+        constructor(canvas) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext("2d");
+          this.strategies = [];
+        }
+
+        addStrategy(strategy) {
+          this.strategies.push(strategy);
+          return this;
+        }
+
+        removeStrategy(strategy) {
+          const index = this.strategies.indexOf(strategy);
+          if (index > -1) this.strategies.splice(index, 1);
+          return this;
+        }
+
+        render(state) {
+          const width = this.canvas.width;
+          const height = this.canvas.height;
+
+          this.ctx.clearRect(0, 0, width, height);
+          this.ctx.save();
+          this.ctx.translate(state.viewX, state.viewY);
+          this.ctx.scale(state.scale, state.scale);
+
+          this.strategies.forEach((strategy) => strategy.render(this.ctx, state));
+
+          this.ctx.restore();
+        }
+      }
+
+      class CoordinateDisplay {
+        constructor(element) {
+          this.element = element;
+        }
+
+        update(data) {
+          this.element.innerHTML = `
+            <div>Position: (${data.worldX}, ${data.worldY})</div>
+            <div>Center: (${data.centerX}, ${data.centerY})</div>
+            <div>Zoom: ${Math.round(data.scale * 100)}%</div>
+            <div style="margin-top: 4px; opacity: 0.7; font-size: 10px;">Infinite in all directions ∞</div>
+          `;
+        }
+      }
+
+      class InfiniteCanvas {
+        constructor(containerId) {
+          this.container = document.getElementById(containerId);
+          this.canvas = document.getElementById("infinite-canvas");
+          this.state = new CanvasState();
+          this.interactionState = new IdleState(this);
+
+          // Set up renderer with strategies (Strategy + Composite patterns)
+          this.renderer = new CanvasRenderer(this.canvas)
+            .addStrategy(new GridRenderStrategy())
+            .addStrategy(new OriginRenderStrategy())
+            .addStrategy(new BeaconRenderStrategy());
+
+          // Set up coordinate display (Observer pattern)
+          this.coordDisplay = new CoordinateDisplay(document.getElementById("coordinates"));
+
+          this.init();
+        }
+
+        init() {
+          this.setupCanvas();
+          this.setupObservers();
+          this.setupEventListeners();
+          this.render();
+          // Initialize coordinate display
+          this.coordDisplay.update(this.state.getViewData());
+        }
+
+        setupCanvas() {
+          this.resizeCanvas(true); // Center origin on initial load
+          window.addEventListener("resize", () => this.resizeCanvas());
+        }
+
+        resizeCanvas(centerOrigin = false) {
+          const rect = this.container.getBoundingClientRect();
+          this.canvas.width = rect.width;
+          this.canvas.height = rect.height;
+          this.state.setDimensions(rect.width, rect.height);
+          if (centerOrigin) {
+            this.state.centerOnOrigin();
+          }
+          this.render();
+        }
+
+        setupObservers() {
+          // Subscribe coordinate display to state changes
+          this.state.on("viewChanged", (data) => {
+            this.coordDisplay.update(data);
+            this.render();
+          });
+
+          this.state.on("mouseChanged", (data) => {
+            const viewData = this.state.getViewData();
+            this.coordDisplay.update(viewData);
+          });
+        }
+
+        setupEventListeners() {
+          // Delegate to current interaction state (State pattern)
+          this.canvas.addEventListener("mousedown", (e) => {
+            this.interactionState.onMouseDown(e);
+            this.updateCursor();
+          });
+
+          window.addEventListener("mousemove", (e) => {
+            this.interactionState.onMouseMove(e);
+          });
+
+          window.addEventListener("mouseup", (e) => {
+            this.interactionState.onMouseUp(e);
+            this.updateCursor();
+          });
+
+          this.canvas.addEventListener("wheel", (e) => {
+            this.interactionState.onWheel(e);
+          });
+
+          this.setupTouchListeners();
+        }
+
+        setupTouchListeners() {
+          let touchStartDistance = 0;
+          let touchStartScale = 1;
+
+          this.canvas.addEventListener("touchstart", (e) => {
+            if (e.touches.length === 1) {
+              this.setState(new PanningState(this, e.touches[0].clientX, e.touches[0].clientY));
+            } else if (e.touches.length === 2) {
+              const dx = e.touches[0].clientX - e.touches[1].clientX;
+              const dy = e.touches[0].clientY - e.touches[1].clientY;
+              touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+              touchStartScale = this.state.scale;
+            }
+          });
+
+          this.canvas.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            if (e.touches.length === 1) {
+              this.interactionState.onMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+            } else if (e.touches.length === 2) {
+              const dx = e.touches[0].clientX - e.touches[1].clientX;
+              const dy = e.touches[0].clientY - e.touches[1].clientY;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              const newScale = touchStartScale * (distance / touchStartDistance);
+              const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+              const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+              const rect = this.canvas.getBoundingClientRect();
+              this.state.zoom(newScale, centerX - rect.left, centerY - rect.top);
+            }
+          });
+
+          this.canvas.addEventListener("touchend", () => {
+            this.setState(new IdleState(this));
+          });
+        }
+
+        setState(newState) {
+          this.interactionState = newState;
+          this.updateCursor();
+        }
+
+        updateCursor() {
+          this.container.style.cursor = this.interactionState.getCursor();
+        }
+
+        render() {
+          this.renderer.render(this.state);
+        }
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+        const infiniteCanvas = new InfiniteCanvas("canvas-container");
+      })();
+    </script>
+  </body>
+</html>
