@@ -84,7 +84,7 @@
             <br />
 
             <ul>
-              <li class="fragment">No clear boundary between happy, sad, and error states</li>
+              <li class="fragment">No clear boundary between happy, terminal, and error states</li>
               <li class="fragment">Numerous events triggering state transitions</li>
               <li class="fragment">Interdependencies between states and events</li>
             </ul>
@@ -93,6 +93,7 @@
           <section>
             <h2>Challenges in Managing Transitions</h2>
 
+            <br />
             <br />
 
             <ul>
@@ -106,6 +107,7 @@
             <h2>Need for a Structured Approach</h2>
 
             <br />
+            <br />
 
             <ul>
               <li class="fragment">Clear definition of states and transitions</li>
@@ -117,6 +119,7 @@
           <section>
             <h2>Consistency for Analytics & Reporting</h2>
 
+            <br />
             <br />
 
             <ul>
@@ -130,6 +133,7 @@
           <section>
             <h2>Difficulty in Scaling Changes</h2>
 
+            <br />
             <br />
 
             <ul>
@@ -158,10 +162,125 @@
                 </ul>
               </div>
 
-              <div>
+              <div class="fragment">
                 <img data-src="./images/me-trying-to-explain-fsm.webp" width="300" />
               </div>
             </div>
+          </section>
+
+          <section>
+            <h2>What is a Finite State Machine?</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Set of data structures and design patterns</li>
+              <li class="fragment">Consists of a finite number of discrete states</li>
+              <li class="fragment">Used to model complex behaviors in a structured manner</li>
+              <li class="fragment">Transitions between states are triggered by events</li>
+              <li class="fragment">Provides clarity and predictability in system behavior</li>
+              <li class="fragment">Facilitates easier debugging and maintenance</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>States in the Assessment Process</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment"><span class="blue">Initial State</span>: Assessment not started</li>
+              <li class="fragment"><span class="blue">In Progress</span>: Assessment is being conducted</li>
+              <li class="fragment"><span class="blue">Completed</span>: Assessment has been finished</li>
+              <li class="fragment">
+                <span class="blue">Terminated</span>: Assessment was terminated before completion
+              </li>
+              <li class="fragment"><span class="blue">Error</span>: An error occurred during the assessment process</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Screen Transitions Based on Events</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">
+                Root event tells the state machine to go to a new screen based on the current screen and some additional
+                context
+              </li>
+              <li class="fragment">
+                Events include user actions (e.g., start, submit, terminate) and system events (e.g., error occurrence)
+              </li>
+              <li class="fragment">
+                Each event triggers a transition from one state to another, updating the assessment status accordingly
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>State Machine Navigation Observers</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">
+                <span class="blue">Logging</span>: Track state transitions and events for auditing purposes
+              </li>
+              <li class="fragment">
+                <span class="blue">Monitoring</span>: Observe state changes to ensure system health and performance
+              </li>
+              <li class="fragment">
+                <span class="blue">Analytics</span>: Generate reports based on assessment states and outcomes
+              </li>
+              <li class="fragment">
+                <span class="blue">Persistence</span>: Store state information to maintain continuity across webpage
+                refreshes
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>State Machine Navigation Handlers</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Reusable components for verifying context between screen navigation</li>
+              <li class="fragment">
+                Validate navigation rules and conditions
+
+                <ul>
+                  <li class="fragment">Handling invalid navigation attempts gracefully</li>
+                  <li class="fragment">
+                    Ensuring prerequisites are met before transitioning to a new screen
+
+                    <ul class="fragment">
+                      <li class="fragment">Age check</li>
+                      <li class="fragment">State check</li>
+                      <li class="fragment">Guardian checks</li>
+                      <li class="fragment">Schizophrenia check</li>
+                      <li class="fragment">Suicide-risk check</li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>State Machine Navigation Strategies</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">Determine the appropriate navigation path based on current state and events</li>
+              <li class="fragment">Implement fallback strategies for unexpected states or events</li>
+              <li class="fragment">Optimize navigation for user experience and performance</li>
+              <li class="fragment">
+                Modular and extensible design such that reusable is high between intake and referral assessments
+              </li>
+            </ul>
           </section>
         </section>
 
@@ -183,7 +302,7 @@
                 </ul>
               </div>
 
-              <div>
+              <div class="fragment">
                 <img data-src="./images/turing-machine-always-has-been.jpeg" width="300" />
               </div>
             </div>
@@ -208,7 +327,7 @@
                 </ul>
               </div>
 
-              <div>
+              <div class="fragment">
                 <img data-src="./images/referral-assessment-asm-mermaid.svg" width="300" />
               </div>
             </div>
