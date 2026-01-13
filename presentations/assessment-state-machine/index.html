@@ -320,7 +320,7 @@
 
             <br />
 
-            <table style="font-size: 0.75em">
+            <table style="font-size: 0.6em">
               <tr>
                 <th>Observer</th>
                 <th>Purpose</th>
@@ -360,7 +360,7 @@
               <tr>
                 <td><span class="blue">DocumentUpdateObserver</span></td>
                 <td>Update database on termination</td>
-                <td>Terminations only</td>
+                <td>Terminations</td>
               </tr>
             </table>
 
@@ -478,11 +478,11 @@
 
             <br />
 
-            <img data-src="./images/assessment-state-machine-architecture.svg" width="900" />
-
-            <p class="fragment" style="font-size: 0.8em; margin-top: 20px">
+            <p style="font-size: 0.8em">
               <span class="blue">Flow:</span> User Action → Context → State → Strategy → Handlers → Observers → Result
             </p>
+
+            <img data-src="./images/assessment-state-machine-architecture.svg" width="700" />
 
             <aside class="notes">
               This diagram shows the complete flow. When a user clicks Next, we build a navigation context with all
@@ -502,25 +502,33 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 0.9em">
               <div class="fragment">
-                <h4 class="blue">State Pattern</h4>
+                <h4>
+                  <span class="blue">State Pattern</span>
+                </h4>
 
                 <p style="font-size: 0.85em">Manages flow behavior (Normal, Interrupted, Terminal)</p>
               </div>
 
               <div class="fragment">
-                <h4 class="blue">Strategy Pattern</h4>
+                <h4>
+                  <span class="blue">Strategy Pattern</span>
+                </h4>
 
                 <p style="font-size: 0.85em">Screen-specific navigation logic</p>
               </div>
 
               <div class="fragment">
-                <h4 class="blue">Chain of Responsibility</h4>
+                <h4>
+                  <span class="blue">Chain of Responsibility</span>
+                </h4>
 
                 <p style="font-size: 0.85em">Composable validation handlers</p>
               </div>
 
               <div class="fragment">
-                <h4 class="blue">Observer Pattern</h4>
+                <h4>
+                  <span class="blue">Observer Pattern</span>
+                </h4>
 
                 <p style="font-size: 0.85em">Decoupled side effects (analytics, logging)</p>
               </div>
@@ -528,7 +536,7 @@
 
             <br />
 
-            <p class="fragment" style="font-size: 0.85em; margin-top: 30px">
+            <p class="fragment" style="font-size: 0.85em">
               <span class="blue">Result:</span> Behavior changes without conditionals, isolated testable components
             </p>
 
@@ -571,10 +579,6 @@ new AgeValidationHandler()
               </code>
             </pre>
 
-            <p class="fragment" style="font-size: 0.8em; margin-top: 15px">
-              <span class="blue">Reusable across intake and referral assessments</span>
-            </p>
-
             <aside class="notes">
               Here's real code showing Chain of Responsibility. The base class provides the chaining mechanism via
               setNext. Each handler implements the handle method. If validation fails, it returns a termination result.
@@ -607,7 +611,25 @@ new AgeValidationHandler()
                   <code class="language-typescript">chain.setNext(new CustomValidationHandler());</code>
                 </pre>
               </div>
+            </div>
 
+            <aside class="notes">
+              The true test of architecture is extensibility. How easy is it to add new features? With our state
+              machine, it's incredibly simple. New screen? Create a strategy class and register it. That's it.
+              Analytics, progress tracking, persistence - all automatic. New validation rule? Create a handler and chain
+              it. Again, observers work automatically. New side effect like sending data to a new analytics service?
+              Create an observer and register it. No changes to navigation logic. This is why we went from 2-3 days to
+              add a feature down to 3-4 hours. Most of that time is writing tests, not implementation. The architecture
+              practically writes itself.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Extensibility: Adding Features (Cont.)</h2>
+
+            <br />
+
+            <div style="text-align: left; font-size: 0.85em">
               <div class="fragment" style="margin-top: 25px">
                 <p><span class="blue">New Side Effect:</span> Create observer + register</p>
 
@@ -616,7 +638,7 @@ new AgeValidationHandler()
                 </pre>
               </div>
 
-              <p class="fragment" style="margin-top: 25px; text-align: center">
+              <p class="fragment" style="margin-top: 50px; text-align: center">
                 <span class="blue">Analytics, logging, persistence handled automatically</span>
               </p>
             </div>
@@ -752,10 +774,6 @@ new AgeValidationHandler()
                   </ul>
                 </div>
               </div>
-
-              <div class="fragment" style="margin-top: 30px; text-align: center">
-                <img data-src="./images/referral-assessment-asm-mermaid.svg" width="350" />
-              </div>
             </div>
 
             <aside class="notes">
@@ -795,7 +813,7 @@ new AgeValidationHandler()
                 <p style="margin: 0">Shared between assessments</p>
               </div>
 
-              <div class="fragment" style="background: #fff3e0; padding: 20px; border-radius: 10px">
+              <div class="fragment" style="background: #f9ead3; padding: 20px; border-radius: 10px">
                 <h3 style="color: #f57c00; margin: 0">Navigation Bugs</h3>
 
                 <p style="font-size: 1.5em; margin: 10px 0; color: #f57c00">Zero</p>
@@ -819,7 +837,7 @@ new AgeValidationHandler()
             <br />
 
             <div style="font-size: 0.85em; text-align: center">
-              <p class="fragment"> <span class="blue">Task:</span> Add guardian consent flow for minors </p>
+              <p class="fragment"><span class="blue">Task:</span> Add guardian consent flow for minors</p>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; text-align: left">
                 <div class="fragment">
@@ -873,25 +891,25 @@ new AgeValidationHandler()
               <div class="fragment">
                 <h4 class="blue">1. Pattern Selection Matters</h4>
 
-                <p style="margin: 5px 0 15px 20px"> Four patterns working together created powerful synergy </p>
+                <p style="margin: 5px 0 15px 20px">Four patterns working together created powerful synergy</p>
               </div>
 
               <div class="fragment">
                 <h4 class="blue">2. Incremental Migration Works</h4>
 
-                <p style="margin: 5px 0 15px 20px"> Migrated screen-by-screen over 3 sprints without disruption </p>
+                <p style="margin: 5px 0 15px 20px">Migrated screen-by-screen without disruption</p>
               </div>
 
               <div class="fragment">
                 <h4 class="blue">3. Testing Investment Pays Off</h4>
 
-                <p style="margin: 5px 0 15px 20px"> Comprehensive tests enabled confident refactoring </p>
+                <p style="margin: 5px 0 15px 20px">Comprehensive tests enabled confident refactoring</p>
               </div>
 
               <div class="fragment">
                 <h4 class="blue">4. Developer Buy-In Essential</h4>
 
-                <p style="margin: 5px 0 15px 20px"> Architecture reviews and pair programming accelerated adoption </p>
+                <p style="margin: 5px 0 15px 20px">Architecture reviews and pair programming accelerated adoption</p>
               </div>
             </div>
 
@@ -917,14 +935,9 @@ new AgeValidationHandler()
                 <li class="fragment">
                   <span class="blue">Visual state machine editor</span> - Generate code from diagrams
                 </li>
+
                 <li class="fragment">
                   <span class="blue">Enhanced error recovery</span> - Automatic retry and resume
-                </li>
-                <li class="fragment">
-                  <span class="blue">A/B testing integration</span> - Strategy variants by experiment
-                </li>
-                <li class="fragment">
-                  <span class="blue">ML-powered insights</span> - Predict termination risk patterns
                 </li>
               </ul>
             </div>
