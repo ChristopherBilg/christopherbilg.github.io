@@ -684,7 +684,7 @@ new AgeValidationHandler()
 
               <div class="fragment" style="margin-top: 40px">
                 <p style="text-align: center">
-                  <span class="blue">Result:</span> 87% test coverage, 73% faster test execution
+                  <span class="blue">Result:</span> ~98% test coverage of all state machine code
                 </p>
               </div>
             </div>
@@ -692,11 +692,11 @@ new AgeValidationHandler()
             <aside class="notes">
               Testing was a huge win. Every component is testable in isolation. We can unit test a handler without
               loading the entire app. Mock the context, call handle, verify the result. Fast and deterministic.
-              Strategies are just as easy. We went from ~45% test coverage to 87%. And the tests run 73% faster because
-              they're isolated. For integration tests, we can test entire flows by chaining components together. We
-              verify that observers get called correctly. We test edge cases like interrupted flows and terminations.
-              The architecture itself makes testing easier and more reliable. When tests are this easy to write,
-              developers actually write them.
+              Strategies are just as easy. We went from ~45% test coverage to ~98%. And the tests run significantly
+              faster because they're isolated. For integration tests, we can test entire flows by chaining components
+              together. We verify that observers get called correctly. We test edge cases like interrupted flows and
+              terminations. The architecture itself makes testing easier and more reliable. When tests are this easy to
+              write, developers actually write them.
             </aside>
           </section>
 
@@ -793,16 +793,16 @@ new AgeValidationHandler()
 
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; font-size: 0.75em">
               <div class="fragment" style="background: #e3f2fd; padding: 20px; border-radius: 10px">
-                <h3 style="color: #1976d2; margin: 0">Development Speed</h3>
+                <h3 style="color: #1976d2; margin: 0">Test Coverage</h3>
 
-                <p style="font-size: 1.5em; margin: 10px 0; color: #1976d2">83% faster</p>
-                <p style="margin: 0">Adding new screens</p>
+                <p style="font-size: 1.5em; margin: 10px 0; color: #1976d2">~98% overall</p>
+                <p style="margin: 0">State machine unit test coverage</p>
               </div>
 
               <div class="fragment" style="background: #f3e5f5; padding: 20px; border-radius: 10px">
                 <h3 style="color: #7b1fa2; margin: 0">Test Coverage</h3>
 
-                <p style="font-size: 1.5em; margin: 10px 0; color: #7b1fa2">+42%</p>
+                <p style="font-size: 1.5em; margin: 10px 0; color: #7b1fa2">+42% assessment</p>
                 <p style="margin: 0">Unit test coverage increase</p>
               </div>
 
@@ -822,7 +822,7 @@ new AgeValidationHandler()
             </div>
 
             <aside class="notes">
-              Here are the headline numbers. Development speed improved 83% - features that took 2-3 days now take 3-4
+              Here are the headline numbers. Development speed improved ~80% - features that took 2-3 days now take 3-4
               hours. Test coverage jumped from 45% to 87% - a 42 percentage point increase. We achieve 75% code reuse
               between intake and referral assessments - handlers, observers, and many strategies are shared. And most
               impressively, we've had ZERO navigation bugs since implementation. Not one bug related to state
@@ -866,7 +866,7 @@ new AgeValidationHandler()
               </div>
 
               <p class="fragment" style="margin-top: 30px">
-                <span class="blue" style="font-size: 1.1em">83% reduction in development time</span>
+                <span class="blue" style="font-size: 1.1em">~80% reduction in development time</span>
               </p>
             </div>
 
@@ -877,7 +877,7 @@ new AgeValidationHandler()
               analytics tracking, and test across the entire flow to make sure we didn't break anything. After the state
               machine, it took 3-4 hours. We created a GuardianRequirementHandler, chained it into the demographics
               strategy, and that's it. Analytics happened automatically. Tests were isolated to just the handler. This
-              is the 83% improvement - same feature, 6-8 times faster to implement. And more reliable because we can't
+              is the ~80% improvement - same feature, 6-8 times faster to implement. And more reliable because we can't
               forget tracking or introduce bugs in unrelated code.
             </aside>
           </section>
@@ -980,7 +980,7 @@ new AgeValidationHandler()
             <aside class="notes">
               Let me wrap up. We started with complex, scattered navigation logic that was hard to maintain and scale.
               We implemented a state machine using four design patterns - State, Strategy, Chain of Responsibility, and
-              Observer. The results were dramatic - 83% faster development, zero bugs, 42% more test coverage, and 75%
+              Observer. The results were dramatic - ~80% faster development, zero bugs, 42% more test coverage, and 75%
               code reuse. The key insight is that good architecture isn't theoretical - it has measurable business
               impact. We ship features faster with higher quality. Now I'd love to take your questions. Some common ones
               I expect: How long did migration take? What was the biggest challenge? Would I do anything differently?
