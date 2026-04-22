@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .bg { fill: #fafaf7; }
+    .stroke { stroke: #0a0a0a; }
+    .ink { fill: #0a0a0a; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0a0a0a; }
+      .stroke { stroke: #fafaf7; }
+      .ink { fill: #fafaf7; }
+    }
+  </style>
+  <rect class="bg stroke" x="2.5" y="2.5" width="27" height="27" stroke-width="3" />
+  <text
+    class="ink"
+    x="16"
+    y="17"
+    font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+    font-size="13"
+    font-weight="700"
+    text-anchor="middle"
+    dominant-baseline="central"
+    letter-spacing="-0.3"
+  >CB</text>
+</svg>

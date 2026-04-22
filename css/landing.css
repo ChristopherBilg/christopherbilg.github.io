@@ -1,0 +1,974 @@
+/* ============================================================
+         Design tokens
+         ============================================================ */
+:root {
+  /* Surface + ink */
+  --bg: #fafaf7;
+  --bg-elev: #f4f3ee;
+  --ink: #0a0a0a;
+  --ink-dim: #52525b;
+  --ink-mute: #71717a;
+  --rule: #e7e5e0;
+  --rule-strong: #d4d2cc;
+
+  /* Brand accent */
+  --accent: #dc2626;
+  --accent-deep: #991b1b;
+  --on-accent: #ffffff;
+
+  /* Typography stacks */
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "IBM Plex Mono", Menlo, Consolas, monospace;
+  --sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --serif: ui-serif, "New York", "Iowan Old Style", "Charter", Georgia, Cambria, "Times New Roman", serif;
+
+  /* Layout + motion */
+  --gutter: clamp(1.25rem, 3vw, 2.5rem);
+  --nav-h: 64px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* ============================================================
+         Reset + base
+         ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-feature-settings: "ss01", "cv11"; /* Inter stylistic alternates */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Links inherit color; underlines are styled per-context */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Text selection uses the brand accent */
+::selection {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* ============================================================
+         Focus indicators (keyboard-only; suppressed for mouse)
+         ============================================================ */
+:focus {
+  outline: none;
+}
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.contact-cta:focus-visible {
+  outline-offset: 6px;
+}
+.index-item a:focus-visible {
+  outline-offset: -2px;
+}
+
+/* ============================================================
+         Skip link (offscreen until keyboard-focused)
+         ============================================================ */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--ink);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 4px;
+  z-index: 100;
+  transform: translateY(-200%);
+  transition: transform 0.2s var(--ease);
+}
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+         Decorative background layers (all aria-hidden)
+         ============================================================ */
+
+/* Subtle fractal-noise grain overlaid with multiply */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.055;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+}
+
+/* Two soft color blobs drifting behind everything */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.aurora::before,
+.aurora::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.5;
+  animation: drift 22s var(--ease) infinite alternate;
+}
+.aurora::before {
+  width: 55vmax;
+  height: 55vmax;
+  top: -15vmax;
+  left: -10vmax;
+  background: radial-gradient(closest-side, rgba(220, 38, 38, 0.22), transparent 70%);
+}
+.aurora::after {
+  width: 50vmax;
+  height: 50vmax;
+  bottom: -20vmax;
+  right: -15vmax;
+  background: radial-gradient(closest-side, rgba(234, 88, 12, 0.16), transparent 70%);
+  animation-duration: 28s;
+  animation-direction: alternate-reverse;
+}
+@keyframes drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(6vw, 4vh, 0) scale(1.15);
+  }
+}
+
+/* ============================================================
+         Top navigation (fixed, translucent)
+         ============================================================ */
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: var(--nav-h);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--gutter);
+  /* Frosted-glass background over scrolling content */
+  background: color-mix(in oklab, var(--bg) 72%, transparent);
+  backdrop-filter: saturate(140%) blur(14px);
+  -webkit-backdrop-filter: saturate(140%) blur(14px);
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Brand = monogram chip + wordmark */
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.brand-mark {
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  color: var(--bg);
+  border: 1px solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 0.6875rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  transition:
+    background 0.3s var(--ease),
+    color 0.3s var(--ease);
+}
+/* Hover inverts the chip: filled → outlined */
+.brand:hover .brand-mark {
+  background: transparent;
+  color: var(--ink);
+}
+
+/* Primary link list, right-aligned on desktop */
+.nav-panel {
+  margin-left: auto;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.75rem);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.nav-links a {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  position: relative;
+  padding: 0.35rem 0;
+  transition: color 0.25s var(--ease);
+}
+/* Underline slides in from the left on hover */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s var(--ease);
+}
+.nav-links a:hover {
+  color: var(--ink);
+}
+.nav-links a:hover::after {
+  transform: scaleX(1);
+}
+
+/* ---------- CSS-only hamburger (checkbox hack; JS enhances a11y) ---------- */
+
+/* Visually clipped but focusable; drives :checked state via the <label> */
+.nav-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  border: 0;
+  white-space: nowrap;
+}
+.nav-toggle {
+  display: none; /* shown at mobile breakpoint */
+  width: 2.75rem; /* 44px WCAG 2.2 touch target */
+  height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink);
+  border-radius: 4px;
+  margin-left: auto;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Three bars that morph into an X when the input is :checked */
+.hamburger {
+  display: block;
+  width: 22px;
+}
+.hamburger > span {
+  display: block;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 1px;
+  transform-origin: center;
+  transition:
+    transform 0.3s var(--ease),
+    opacity 0.22s var(--ease);
+}
+.hamburger > span:nth-child(2) {
+  margin: 5px 0;
+}
+
+/* Focus ring appears on the visible label when the clipped input is focused */
+.nav-toggle-input:focus-visible ~ .nav-toggle {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+         Layout primitives
+         ============================================================ */
+main {
+  position: relative;
+  z-index: 2; /* above aurora + grain */
+  padding-top: var(--nav-h);
+}
+.section {
+  padding: clamp(3rem, 8vh, 7rem) var(--gutter);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* Section label row: number + title + trailing hairline rule */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  margin-bottom: clamp(1.5rem, 3vh, 2.5rem);
+}
+.eyebrow .num {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+.eyebrow .line {
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+  max-width: 180px;
+}
+/* h2 inside eyebrow keeps semantic heading but inherits visual style */
+.eyebrow > h2 {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+/* ============================================================
+         Hero
+         ============================================================ */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 6vw, 4rem);
+  min-height: calc(100vh - var(--nav-h));
+  padding-block: clamp(2.5rem, 8vh, 6rem);
+  align-items: center;
+}
+/* Two-column asymmetric split above this width */
+@media (min-width: 960px) {
+  .hero {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+}
+.hero-text > .eyebrow {
+  margin-bottom: clamp(1.25rem, 3vh, 2rem);
+}
+
+/* Oversized display type; fluid scale from phone to ultrawide */
+.display {
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin: 0;
+  font-size: clamp(3rem, 10vw + 0.5rem, 9.5rem);
+}
+.display .muted {
+  color: var(--ink-mute);
+  font-weight: 400;
+}
+.display .italic {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+/* Each line is an overflow-clip wrapper for the reveal animation.
+         padding + negative margin holds descenders without visual gap. */
+.display .line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.18em;
+  margin-bottom: -0.18em;
+}
+.display .line:last-child {
+  margin-bottom: 0;
+}
+.display .line > span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: reveal 0.9s var(--ease) forwards;
+}
+.display .line:nth-child(2) > span {
+  animation-delay: 0.08s;
+}
+.display .line:nth-child(3) > span {
+  animation-delay: 0.16s;
+}
+@keyframes reveal {
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Intro paragraph under the name */
+.lede {
+  margin-top: clamp(1.5rem, 4vh, 2.5rem);
+  max-width: 56ch;
+  font-size: clamp(1.125rem, 1.5vw + 0.5rem, 1.5rem);
+  line-height: 1.45;
+  color: var(--ink-dim);
+  font-weight: 400;
+}
+.lede strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+/* Role / company / previously metadata grid */
+.hero-meta {
+  margin-top: clamp(2rem, 5vh, 3rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1.25rem 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--rule);
+  max-width: 640px;
+}
+.hero-meta dt {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--ink-mute);
+  margin-bottom: 0.35rem;
+}
+.hero-meta dd {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+.hero-meta a {
+  border-bottom: 1px solid var(--rule-strong);
+  transition:
+    border-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+}
+.hero-meta a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- Hero visual: framed illustration on graph-paper grid ---------- */
+.hero-visual {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  max-width: 520px;
+  margin-inline: auto;
+  width: 100%;
+}
+.hero-visual .frame {
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--rule);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.05), transparent 60%), var(--bg-elev);
+  overflow: hidden;
+}
+/* 8x8 hairline grid */
+.hero-visual .frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--rule-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule-strong) 1px, transparent 1px);
+  background-size: 12.5% 12.5%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* 2x2 stronger quadrant rule on top */
+.hero-visual .frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--ink) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--ink) 1px, transparent 1px);
+  background-size: 50% 50%;
+  opacity: 0.12;
+  pointer-events: none;
+}
+/* Centered illustration desaturates by default; restores on hover */
+.hero-visual img {
+  position: absolute;
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0.85;
+  transition:
+    filter 0.6s var(--ease),
+    opacity 0.6s var(--ease),
+    transform 0.8s var(--ease);
+}
+.hero-visual:hover img {
+  filter: grayscale(0) contrast(1);
+  opacity: 1;
+  transform: scale(1.02);
+}
+/* Accent-colored corner crops at each corner of the frame */
+.hero-visual .corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--accent);
+}
+.hero-visual .corner.tl {
+  top: -1px;
+  left: -1px;
+  border-right: 0;
+  border-bottom: 0;
+}
+.hero-visual .corner.tr {
+  top: -1px;
+  right: -1px;
+  border-left: 0;
+  border-bottom: 0;
+}
+.hero-visual .corner.bl {
+  bottom: -1px;
+  left: -1px;
+  border-right: 0;
+  border-top: 0;
+}
+.hero-visual .corner.br {
+  bottom: -1px;
+  right: -1px;
+  border-left: 0;
+  border-top: 0;
+}
+/* Availability tag with pulsing dot */
+.hero-visual .tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+.hero-visual .tag .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  animation: pulse 2.4s var(--ease) infinite;
+  vertical-align: middle;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+  }
+  50% {
+    opacity: 0.6;
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+}
+
+/* ============================================================
+         Index: oversized row links
+         ============================================================ */
+.index-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+.index-item a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 2.5rem);
+  padding: clamp(1.25rem, 3vw, 2rem) 0;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  transition: color 0.3s var(--ease);
+}
+/* Warm accent wash sweeps across the row on hover */
+.index-item a::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.06) 30%, transparent);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+  pointer-events: none;
+}
+.index-item a:hover::before {
+  opacity: 1;
+}
+
+.index-num {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--ink-mute);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5ch;
+}
+.index-label {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-size: clamp(1.75rem, 4.5vw, 3.5rem);
+  line-height: 1.05;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.index-label .sub {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  font-weight: 400;
+}
+.index-arrow {
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.35s var(--ease),
+    border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
+  flex-shrink: 0;
+}
+.index-arrow svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.35s var(--ease);
+}
+/* Arrow fills accent + nudges up-right on hover */
+.index-item a:hover .index-arrow {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+.index-item a:hover .index-arrow svg {
+  transform: translate(2px, -2px);
+}
+.index-item a:hover .index-label {
+  color: var(--ink);
+}
+
+/* ============================================================
+         About / editorial
+         ============================================================ */
+.editorial {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+}
+/* Heading on left, body on right once there's room */
+@media (min-width: 900px) {
+  .editorial {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+}
+.editorial h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  margin: 0;
+}
+/* Serif-italic callout inside the h2 */
+.editorial h2 em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.editorial-body {
+  font-size: clamp(1.0625rem, 1.1vw + 0.5rem, 1.25rem);
+  line-height: 1.6;
+  color: var(--ink-dim);
+  max-width: 60ch;
+  display: grid;
+  gap: 1.25rem;
+}
+.editorial-body strong {
+  color: var(--ink);
+  font-weight: 500;
+}
+.editorial-body a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--rule-strong);
+  transition:
+    color 0.25s var(--ease),
+    border-color 0.25s var(--ease);
+}
+.editorial-body a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ============================================================
+         Contact band
+         ============================================================ */
+.contact {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: clamp(4rem, 12vh, 8rem) var(--gutter);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+/* Soft red glow behind the CTA */
+.contact::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.1), transparent 60%);
+  pointer-events: none;
+}
+.contact .eyebrow {
+  justify-content: center;
+}
+.contact .eyebrow .line {
+  max-width: 80px;
+}
+
+/* Giant serif-italic CTA; hover fills bottom-to-top with accent */
+.contact-cta {
+  display: inline-block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.25rem, 6vw, 5.5rem);
+  letter-spacing: -0.015em;
+  line-height: 1.05;
+  position: relative;
+  color: var(--ink);
+}
+.contact-cta span {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-size: 100% 2px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  /* Fill height and text color animate in lockstep */
+  transition:
+    background-size 0.5s var(--ease),
+    color 0.5s var(--ease);
+}
+.contact-cta:hover span {
+  background-size: 100% 100%;
+  color: var(--on-accent);
+}
+.contact-sub {
+  margin-top: 1.25rem;
+  color: var(--ink-mute);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ============================================================
+         Footer
+         ============================================================ */
+footer {
+  padding: 2rem var(--gutter);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================================
+         Reveal-on-scroll (JS-only; falls back to visible w/o JS)
+         ============================================================ */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.8s var(--ease),
+    transform 0.8s var(--ease);
+}
+.js .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* ============================================================
+         Accessibility: reduced motion
+         ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .display .line > span {
+    transform: none;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================================================
+         Print
+         ============================================================ */
+@media print {
+  .aurora,
+  .hero-visual .corner,
+  .hero-visual .tag,
+  body::before {
+    display: none;
+  }
+  body {
+    background: #fff;
+    color: #000;
+  }
+  .nav {
+    position: static;
+    background: none;
+  }
+  .hero-visual img {
+    filter: none;
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+         Mobile breakpoints
+         ============================================================ */
+
+/* <=720px: nav collapses into a hamburger drawer */
+@media (max-width: 720px) {
+  .nav-toggle {
+    display: inline-flex;
+  }
+
+  .nav-panel {
+    position: absolute;
+    inset: 100% 0 auto 0;
+    margin-left: 0;
+    background: color-mix(in oklab, var(--bg) 96%, transparent);
+    backdrop-filter: saturate(140%) blur(14px);
+    -webkit-backdrop-filter: saturate(140%) blur(14px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.5rem var(--gutter) 1.25rem;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    /* Delayed visibility keeps focus from reaching hidden links */
+    transition:
+      opacity 0.28s var(--ease),
+      transform 0.28s var(--ease),
+      visibility 0s linear 0.28s;
+  }
+  .nav-toggle-input:checked ~ .nav-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition:
+      opacity 0.28s var(--ease),
+      transform 0.28s var(--ease),
+      visibility 0s linear;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .nav-links li + li {
+    border-top: 1px solid var(--rule);
+  }
+  .nav-links a {
+    display: block;
+    padding: 0.9rem 0.25rem;
+    font-size: 0.78rem;
+  }
+  .nav-links a::after {
+    display: none;
+  }
+
+  /* Hamburger bars morph into X when the toggle is :checked */
+  .nav-toggle-input:checked ~ .nav-toggle .hamburger > span:nth-child(1) {
+    transform: translateY(6.5px) rotate(45deg);
+  }
+  .nav-toggle-input:checked ~ .nav-toggle .hamburger > span:nth-child(2) {
+    opacity: 0;
+  }
+  .nav-toggle-input:checked ~ .nav-toggle .hamburger > span:nth-child(3) {
+    transform: translateY(-6.5px) rotate(-45deg);
+  }
+}
+
+/* <=480px: compact tweaks for small phones */
+@media (max-width: 480px) {
+  .brand-mark {
+    width: 20px;
+    height: 20px;
+  }
+  .index-item a {
+    gap: 0.875rem;
+  }
+  .index-arrow {
+    width: 2rem;
+    height: 2rem;
+  }
+}

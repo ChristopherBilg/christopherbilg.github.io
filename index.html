@@ -1,250 +1,319 @@
-<!DOCTYPE html>
-<html lang="en" color-mode="user">
+<!doctype html>
+<html lang="en">
   <head>
+    <!-- Character encoding + responsive viewport -->
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO + page metadata -->
     <meta name="description" content="Christopher Bilger's Portfolio" />
     <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
     <meta name="author" content="Christopher Bilger" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fafaf7" />
 
+    <!-- Open Graph preview (social / link unfurl) -->
     <meta property="og:url" content="https://chrisbilger.com" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Chris Bilger's Portfolio" />
     <meta property="og:description" content="Christopher Bilger's Portfolio" />
     <meta property="og:image" content="https://chrisbilger.com/images/portfolio.avif" />
 
-    <title>Chris Bilger</title>
-    <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
+    <title>Chris Bilger | Staff Software Engineer</title>
 
-    <script type="module" src="./js/casper/index.js" defer></script>
-    <script type="module" src="./js/seasonal-effects/index.js" defer></script>
+    <!-- Favicon: modern SVG (adapts to dark browser chrome) with ICO fallback -->
+    <link rel="icon" type="image/svg+xml" href="./images/favicon.svg" />
+    <link rel="alternate icon" type="image/x-icon" href="./images/favicon.ico" />
 
-    <style>
-      html {
-        height: 100%;
-      }
+    <!-- Progressive-enhancement flag; CSS gates JS-dependent styles on html.js -->
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
 
-      body {
-        height: 100%;
-        margin: 0;
-        display: flex;
-      }
-
-      main {
-        margin: auto;
-        padding: 3rem;
-        font-family: system-ui, sans-serif;
-        color: #566b78;
-      }
-
-      a {
-        color: #118bee;
-        font-weight: 500;
-
-        &:hover {
-          filter: brightness(80%);
-        }
-      }
-
-      .details {
-        font-size: 1.5rem;
-        font-weight: 500;
-        margin: 2rem 0;
-        max-width: 900px;
-      }
-
-      .black {
-        color: #000000;
-      }
-
-      #introduction {
-        max-width: 1400px;
-      }
-
-      #name {
-        font-size: 7rem;
-        margin: 0;
-      }
-
-      #content {
-        display: flex;
-        justify-content: space-between;
-        max-width: 1400px;
-      }
-
-      #description {
-        font-size: 3rem;
-        margin: 2rem 0;
-        max-width: 900px;
-      }
-
-      #title {
-        font-weight: 500;
-      }
-
-      #navigation {
-        max-width: 900px;
-
-        & ul {
-          display: flex;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-
-          & li {
-            margin-right: 1rem;
-            font-size: 1.5rem;
-          }
-        }
-      }
-
-      #image {
-        margin: auto 0;
-
-        & img {
-          max-width: 500px;
-        }
-      }
-
-      @media print {
-        #name {
-          font-size: 5rem;
-        }
-
-        #image {
-          display: none;
-        }
-      }
-
-      @media only screen and (max-width: 1100px) {
-        #name {
-          font-size: 6rem;
-        }
-
-        #content {
-          flex-direction: column;
-        }
-
-        #image {
-          text-align: center;
-          margin: 2rem auto;
-
-          & img {
-            max-width: min(500px, 100%);
-          }
-        }
-      }
-
-      @media only screen and (max-width: 900px) {
-        #name {
-          font-size: 5rem;
-        }
-
-        #description {
-          font-size: 2.5rem;
-        }
-      }
-
-      @media only screen and (max-width: 700px) {
-        main {
-          padding: 2rem;
-        }
-
-        #name {
-          font-size: 4rem;
-        }
-
-        #description {
-          font-size: 2rem;
-        }
-      }
-
-      @media only screen and (max-width: 525px) {
-        main {
-          padding: 1rem;
-        }
-
-        #name {
-          font-size: 3rem;
-        }
-
-        #description {
-          font-size: 1.5rem;
-        }
-
-        #navigation {
-          & ul {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-
-            & li {
-              margin-right: 0;
-              margin-bottom: 1rem;
-              text-align: center;
-            }
-          }
-        }
-      }
-    </style>
+    <!-- Page styles -->
+    <link rel="stylesheet" href="./css/landing.css" />
   </head>
 
   <body>
-    <main>
-      <div id="introduction">
-        <div>
-          <h1 id="name">Hi, I'm <span class="black">Chris Bilger</span></h1>
+    <!-- Skip link: keyboard jumps straight to main content -->
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <!-- Decorative ambient background blobs -->
+    <div class="aurora" aria-hidden="true"></div>
+
+    <!-- Primary site header / navigation -->
+    <header class="nav">
+      <a href="/" class="brand" aria-label="Home">
+        <span class="brand-mark">CB</span>
+        <span>Chris Bilger</span>
+      </a>
+
+      <!-- CSS-only toggle (hidden checkbox); JS adds aria-expanded + outside-click -->
+      <input type="checkbox" id="nav-toggle" class="nav-toggle-input" aria-label="Toggle navigation menu" />
+      <label for="nav-toggle" class="nav-toggle">
+        <span class="hamburger" aria-hidden="true"><span></span><span></span><span></span></span>
+      </label>
+
+      <nav id="nav-panel" class="nav-panel" aria-label="Primary">
+        <ul class="nav-links">
+          <li><a href="/portfolio">Portfolio</a></li>
+          <li><a href="/projects">Projects</a></li>
+          <li><a href="/github">GitHub</a></li>
+          <li><a href="/Christopher-Bilger-Resume.pdf">Resume</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main">
+      <!-- 01. Hero: name, role, current work -->
+      <section class="section hero" aria-labelledby="hero-title">
+        <div class="hero-text">
+          <div class="eyebrow">
+            <span class="num">01</span>
+            <span>Introduction</span>
+            <span class="line" aria-hidden="true"></span>
+          </div>
+
+          <h1 id="hero-title" class="display">
+            <span class="line"><span>Chris</span></span>
+            <span class="line"><span>Bilger</span></span>
+            <span class="line"><span class="italic muted">Engineer, builder.</span></span>
+          </h1>
+
+          <p class="lede">
+            <strong>Staff Software Engineer</strong> specializing in product development. Currently building a platform
+            at <a href="https://www.talkiatry.com/">Talkiatry</a> to make mental health care more accessible.
+          </p>
+
+          <dl class="hero-meta">
+            <div>
+              <dt>Role</dt>
+              <dd>Staff Software Engineer</dd>
+            </div>
+            <div>
+              <dt>Company</dt>
+              <dd><a href="https://www.talkiatry.com/">Talkiatry</a></dd>
+            </div>
+            <div>
+              <dt>Previously</dt>
+              <dd><a href="https://www.lockheedmartin.com/en-us/index.html">Lockheed Martin</a></dd>
+            </div>
+            <div>
+              <dt>Based</dt>
+              <dd>United States</dd>
+            </div>
+          </dl>
         </div>
-      </div>
 
-      <div id="content">
-        <div>
-          <h2 id="description">
-            I'm a <span class="black">Staff Software Engineer</span> specializing in Product Development.
-          </h2>
+        <!-- Decorative illustration; aria-hidden (lede already conveys the message) -->
+        <div class="hero-visual" aria-hidden="true">
+          <div class="frame">
+            <img src="./images/landing.png" alt="" />
+          </div>
+          <span class="corner tl"></span>
+          <span class="corner tr"></span>
+          <span class="corner bl"></span>
+          <span class="corner br"></span>
+          <span class="tag"><span class="dot"></span>Available for the right problem</span>
+        </div>
+      </section>
 
-          <p class="details">
-            You might know me from places like
-            <a href="https://www.talkiatry.com/">Talkiatry</a> or
-            <a href="https://www.lockheedmartin.com/en-us/index.html">Lockheed Martin</a>.
-          </p>
-
-          <p class="details">
-            I enjoy
-            <a href="/projects">experimenting</a>
-            with, and
-            <a href="/github">creating</a>
-            new technologies.
-          </p>
-
-          <p class="details">
-            As a
-            <span id="title" class="black">Staff Software Engineer</span>
-            at Talkiatry I'm building a platform to make mental health care more accessible.
-          </p>
-
-          <p class="details">
-            If you want to contact me,
-            <a href="mailto:christopherbilg@gmail.com">email</a> is the best way to do so.
-          </p>
-
-          <nav id="navigation">
-            <ul>
-              <li>
-                <a href="https://www.linkedin.com/in/christopher-bilger/">LinkedIn</a>
-              </li>
-              <li><a href="/Christopher-Bilger-Resume.pdf">Resume</a></li>
-              <li><a href="/portfolio">Portfolio</a></li>
-              <li><a href="https://github.com/ChristopherBilg">GitHub</a></li>
-            </ul>
-          </nav>
+      <!-- 02. Index: large row-style links to main destinations -->
+      <section class="section reveal" aria-labelledby="index-title">
+        <div class="eyebrow">
+          <span class="num">02</span>
+          <h2 id="index-title">Index</h2>
+          <span class="line" aria-hidden="true"></span>
         </div>
 
-        <div id="image">
-          <img src="./images/landing.png" alt="Chris Bilger" />
+        <ul class="index-list">
+          <li class="index-item">
+            <a href="/portfolio">
+              <span class="index-num">01</span>
+              <span class="index-label">Portfolio <span class="sub">/ Resume &amp; experience</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="index-item">
+            <a href="/projects">
+              <span class="index-num">02</span>
+              <span class="index-label">Projects <span class="sub">/ Experiments &amp; prototypes</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="index-item">
+            <a href="/presentations">
+              <span class="index-num">03</span>
+              <span class="index-label">Presentations <span class="sub">/ Talks &amp; slides</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="index-item">
+            <a href="/github">
+              <span class="index-num">04</span>
+              <span class="index-label">GitHub <span class="sub">/ Open source</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="index-item">
+            <a href="https://www.linkedin.com/in/christopher-bilger/">
+              <span class="index-num">05</span>
+              <span class="index-label">LinkedIn <span class="sub">/ Professional network</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+          <li class="index-item">
+            <a href="/Christopher-Bilger-Resume.pdf">
+              <span class="index-num">06</span>
+              <span class="index-label">Résumé <span class="sub">/ PDF download</span></span>
+              <span class="index-arrow" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 12L12 4M12 4H6M12 4V10" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 03. About: editorial intro -->
+      <section class="section reveal" aria-labelledby="about-title">
+        <div class="eyebrow">
+          <span class="num">03</span>
+          <span id="about-title">About</span>
+          <span class="line" aria-hidden="true"></span>
         </div>
-      </div>
+
+        <div class="editorial">
+          <h2>Building software that <em>quietly</em> does the hard work.</h2>
+          <div class="editorial-body">
+            <p>
+              I'm a staff software engineer focused on product development. It's the kind of work that turns messy,
+              ambiguous problems into systems people can actually use. My background spans healthcare, defense, and
+              research, and the common thread is building things that hold up under real-world load.
+            </p>
+            <p>
+              At <strong>Talkiatry</strong> I work on a platform designed to make mental health care more accessible.
+              Previously at <strong>Lockheed Martin</strong> I contributed to mission-critical systems and led research
+              initiatives that moved from prototype to production.
+            </p>
+            <p>
+              I enjoy <a href="/projects">experimenting</a> with new technologies and
+              <a href="/github">creating</a> tools that make day-to-day work a little sharper, from note-taking systems
+              to language interpreters.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04. Contact: giant mailto CTA -->
+      <section class="contact" aria-labelledby="contact-title">
+        <div class="eyebrow">
+          <span class="num">04</span>
+          <h2 id="contact-title">Contact</h2>
+          <span class="line" aria-hidden="true"></span>
+        </div>
+        <a class="contact-cta" href="mailto:christopherbilg@gmail.com">
+          <span>Let's build something.</span>
+        </a>
+        <div class="contact-sub">christopherbilg@gmail.com</div>
+      </section>
     </main>
 
-    <casper-command-palette />
+    <footer>
+      <span>&copy; <span id="year">2026</span> Chris Bilger</span>
+      <span>Philadelphia / Remote</span>
+      <span><a href="mailto:christopherbilg@gmail.com">christopherbilg@gmail.com</a></span>
+    </footer>
+
+    <!-- Progressive enhancements: footer year, scroll reveal, hamburger a11y + UX -->
+    <script>
+      (() => {
+        "use strict";
+
+        // Update footer copyright year to the current year
+        const yearEl = document.getElementById("year");
+        if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
+        // Reveal sections as they scroll into view; fall back to visible if unsupported
+        const reveals = document.querySelectorAll(".reveal");
+        if ("IntersectionObserver" in window) {
+          const io = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
+                entry.target.classList.add("in");
+                io.unobserve(entry.target);
+              }
+            },
+            { rootMargin: "0px 0px -10% 0px", threshold: 0.08 },
+          );
+          reveals.forEach((el) => io.observe(el));
+        } else {
+          reveals.forEach((el) => el.classList.add("in"));
+        }
+
+        // Hamburger menu enhancements: aria-expanded sync + outside-click/Escape to close
+        const toggle = document.getElementById("nav-toggle");
+        const panel = document.getElementById("nav-panel");
+        const header = document.querySelector("header.nav");
+
+        if (toggle && panel && header) {
+          toggle.setAttribute("aria-controls", panel.id);
+
+          // Mirror the checkbox's checked state onto aria-expanded for screen readers
+          const syncAriaExpanded = () => {
+            toggle.setAttribute("aria-expanded", String(toggle.checked));
+          };
+          syncAriaExpanded();
+
+          // Close the menu; optionally return keyboard focus to the toggle
+          const closeMenu = (returnFocus = false) => {
+            if (!toggle.checked) return;
+            toggle.checked = false;
+            syncAriaExpanded();
+            if (returnFocus) toggle.focus();
+          };
+
+          toggle.addEventListener("change", syncAriaExpanded);
+
+          // Click anywhere outside the header closes the menu
+          document.addEventListener("click", (event) => {
+            if (!toggle.checked) return;
+            if (header.contains(event.target)) return;
+            closeMenu();
+          });
+
+          // Escape closes the menu and returns focus to the toggle
+          document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && toggle.checked) closeMenu(true);
+          });
+
+          // Activating any link inside the panel closes the menu
+          panel.addEventListener("click", (event) => {
+            if (event.target.closest("a")) closeMenu();
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
