@@ -12,8 +12,8 @@
   --rule-strong: #d4d2cc;
 
   /* Brand accent */
-  --accent: #dc2626;
-  --accent-deep: #991b1b;
+  --accent: #118bee;
+  --accent-deep: #0a5ea8;
   --on-accent: #ffffff;
 
   /* Typography stacks */
@@ -154,14 +154,14 @@ body::before {
   height: 55vmax;
   top: -15vmax;
   left: -10vmax;
-  background: radial-gradient(closest-side, rgba(220, 38, 38, 0.22), transparent 70%);
+  background: radial-gradient(closest-side, rgba(17, 139, 238, 0.22), transparent 70%);
 }
 .aurora::after {
   width: 50vmax;
   height: 50vmax;
   bottom: -20vmax;
   right: -15vmax;
-  background: radial-gradient(closest-side, rgba(234, 88, 12, 0.16), transparent 70%);
+  background: radial-gradient(closest-side, rgba(146, 13, 233, 0.16), transparent 70%);
   animation-duration: 28s;
   animation-direction: alternate-reverse;
 }
@@ -499,7 +499,7 @@ main {
   position: absolute;
   inset: 0;
   border: 1px solid var(--rule);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.05), transparent 60%), var(--bg-elev);
+  background: linear-gradient(180deg, rgba(17, 139, 238, 0.05), transparent 60%), var(--bg-elev);
   overflow: hidden;
 }
 /* 8x8 hairline grid */
@@ -601,11 +601,11 @@ main {
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+    box-shadow: 0 0 0 0 rgba(17, 139, 238, 0.5);
   }
   50% {
     opacity: 0.6;
-    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+    box-shadow: 0 0 0 8px rgba(17, 139, 238, 0);
   }
 }
 
@@ -633,7 +633,7 @@ main {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(220, 38, 38, 0.06) 30%, transparent);
+  background: linear-gradient(90deg, transparent, rgba(17, 139, 238, 0.06) 30%, transparent);
   opacity: 0;
   transition: opacity 0.4s var(--ease);
   pointer-events: none;
@@ -767,7 +767,7 @@ main {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, rgba(220, 38, 38, 0.1), transparent 60%);
+  background: radial-gradient(ellipse at center, rgba(17, 139, 238, 0.1), transparent 60%);
   pointer-events: none;
 }
 .contact .eyebrow {
@@ -790,6 +790,7 @@ main {
   color: var(--ink);
 }
 .contact-cta span {
+  padding: 0.1em 0.35em;
   background-image: linear-gradient(var(--accent), var(--accent));
   background-size: 100% 2px;
   background-position: 0 100%;
@@ -927,6 +928,12 @@ footer {
       opacity 0.28s var(--ease),
       transform 0.28s var(--ease),
       visibility 0s linear;
+  }
+
+  /* Suppress transitions while the viewport is actively resizing so the
+             breakpoint crossover doesn't animate the panel hidden. */
+  body.is-resizing .nav-panel {
+    transition: none;
   }
 
   .nav-links {
