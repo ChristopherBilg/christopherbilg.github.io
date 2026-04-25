@@ -1,5 +1,11 @@
 import { ObjectProxy } from './ObjectProxy.js';
 import { LinkCoordinator } from './LinkCoordinator.js';
+import { ConstraintEngine } from './ConstraintEngine.js';
+import { ComputedRegistry } from './ComputedRegistry.js';
+import { QueryBuilder } from './QueryBuilder.js';
+import { SecurityProvider } from './SecurityProvider.js';
+import { BranchManager } from './BranchManager.js';
+import { CRDTClock, crdtCompare } from './CRDTClock.js';
 import { LocalState } from '../store/LocalState.js';
 
 export class Ontology {
@@ -9,6 +15,11 @@ export class Ontology {
     this.listeners = new Map();
     this.loaded = false;
     this.links = new LinkCoordinator(this);
+    this.constraints = new ConstraintEngine(this);
+    this.computed = new ComputedRegistry(this);
+    this.security = new SecurityProvider();
+    this.branches = new BranchManager();
+    this.clock = new CRDTClock();
   }
 
   defineObject(name, config) {
@@ -40,6 +51,10 @@ export class Ontology {
     const base = this.cache.get(`${typeName}:${id}`);
     if (!base) return null;
     if (!isVisible(base, context)) return null;
+    if (this.security) {
+      const merged = this.mergeEdits(typeName, id, base, context);
+      if (!this.security.canRead(typeName, merged)) return null;
+    }
     return new ObjectProxy(this, typeName, id, base, context);
   }
 
@@ -58,13 +73,22 @@ export class Ontology {
   mergeEdits(typeName, id, baseRow, context) {
     const edits = this.getEdits(typeName, id, context);
     if (!edits.length) return { ...baseRow };
-    return edits.reduce((acc, e) => ({ ...acc, ...e.changes }), { ...baseRow });
+    const sorted = edits.slice().sort(crdtCompare);
+    return sorted.reduce((acc, e) => ({ ...acc, ...e.changes }), { ...baseRow });
   }
 
   getEdits(typeName, id, context) {
     const edits = LocalState.getEditsFor(typeName, id);
-    if (!context) return edits;
-    return edits.filter((e) => isVisible(e, context));
+    const activeBranches = this.branches ? this.branches.activeBranches() : null;
+    return edits.filter((e) => {
+      if (activeBranches && !activeBranches.has(e.branchId || 'main')) return false;
+      if (context && !isVisible(e, context)) return false;
+      return true;
+    });
+  }
+
+  query() {
+    return new QueryBuilder(this);
   }
 
   on(event, cb) {

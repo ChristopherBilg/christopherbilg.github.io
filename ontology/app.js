@@ -2,6 +2,8 @@ import { Ontology } from './core/Ontology.js';
 import { ActionEngine } from './core/ActionEngine.js';
 import { Agent } from './core/Agent.js';
 import { ConfigProvider } from './config/ConfigProvider.js';
+import { SecurityProvider } from './core/SecurityProvider.js';
+import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
 
 const ontology = new Ontology();
@@ -29,6 +31,95 @@ const FLIGHT_STATES = {
 
 function canTransition(from, to) {
   return FLIGHT_STATES[from]?.next.includes(to) ?? false;
+}
+
+function registerComputed() {
+  ontology.computed.define('Pilot', 'experience_tier', (pilot) => {
+    const hours = pilot.flight_hours;
+    if (hours == null) return 'unknown';
+    if (hours < 3000) return 'novice';
+    if (hours < 8000) return 'experienced';
+    return 'veteran';
+  });
+
+  ontology.computed.define('Pilot', 'assigned_flight_count', (pilot) => {
+    return pilot.links('pilot_flights').length;
+  });
+
+  ontology.computed.define('Pilot', 'has_active_flight', (pilot) => {
+    return pilot.links('pilot_flights').some((f) => f.status === 'InAir' || f.status === 'Scheduled');
+  });
+
+  ontology.computed.define('Flight', 'pilot_name', (flight) => {
+    const pilot = flight.links('flight_pilot')[0];
+    return pilot ? pilot.name : null;
+  });
+
+  ontology.computed.define('Flight', 'route_label', (flight) => {
+    const o = flight.links('flight_origin')[0];
+    const d = flight.links('flight_destination')[0];
+    if (!o || !d) return `${flight.origin} → ${flight.destination}`;
+    return `${o.city} → ${d.city}`;
+  });
+}
+
+function invalidateComputedFor(cs) {
+  if (!cs || !cs.changes) {
+    ontology.computed.invalidateAll();
+    return;
+  }
+  for (const prop of Object.keys(cs.changes)) {
+    ontology.computed.invalidate(cs.objectType, cs.objectId, prop);
+  }
+}
+
+function registerConstraints() {
+  ontology.constraints.define('originDestinationDistinct', {
+    objectType: 'Flight',
+    description: "A flight's origin must differ from its destination.",
+    triggers: ['origin', 'destination'],
+    check: (target, changes) => {
+      const origin = changes.origin ?? target.origin;
+      const destination = changes.destination ?? target.destination;
+      if (origin === destination) return 'Origin and destination must differ';
+      return null;
+    },
+  });
+
+  ontology.constraints.define('pilotSingleScheduledAssignment', {
+    objectType: 'Flight',
+    description: 'A pilot can only be assigned to one Scheduled flight at a time.',
+    triggers: ['pilot_id', 'status'],
+    check: (target, changes, ont) => {
+      const newPilotId = changes.pilot_id ?? target.pilot_id;
+      const newStatus = changes.status ?? target.status;
+      if (newStatus !== 'Scheduled') return null;
+      if (!newPilotId) return null;
+      const conflicts = ont.all('Flight').filter(
+        (f) => f.id !== target.id && f.pilot_id === newPilotId && f.status === 'Scheduled',
+      );
+      if (conflicts.length > 0) {
+        return `Pilot ${newPilotId} is already assigned to Scheduled flight ${conflicts[0].id}`;
+      }
+      return null;
+    },
+  });
+
+  ontology.constraints.define('departureNotInPast', {
+    objectType: 'Flight',
+    description: 'A Scheduled flight must depart in the future.',
+    triggers: ['departure_time', 'status'],
+    check: (target, changes) => {
+      const newStatus = changes.status ?? target.status;
+      if (newStatus !== 'Scheduled') return null;
+      const newTime = changes.departure_time ?? target.departure_time;
+      if (!newTime) return null;
+      if (new Date(newTime).getTime() < Date.now()) {
+        return `Departure ${newTime} is in the past`;
+      }
+      return null;
+    },
+  });
 }
 
 function registerActions() {
@@ -173,6 +264,10 @@ function registerEffectHandlers() {
     const verb = ACTION_VERBS[cs.action] || cs.action;
     notify(`${verb} · ${cs.objectType}:${cs.objectId}`);
   });
+
+  actions.use((cs) => {
+    ontology.clock.publish(cs);
+  });
 }
 
 const TIME_PRESETS = [
@@ -218,6 +313,7 @@ $resetBtn.addEventListener('click', () => {
   if (!confirm('Clear all kinetic edits from localStorage?')) return;
   LocalState.clear();
   state.lastError = null;
+  ontology.clock.publishReset();
   ontology.emit('undo', null);
 });
 
@@ -283,7 +379,7 @@ $aipSchemaToggle.addEventListener('click', () => {
 $integrityRescan.addEventListener('click', () => requestIntegrityScan());
 
 $integrityInject.addEventListener('click', () => {
-  LocalState.appendChangeSet({
+  const cs = {
     id: `manual_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     action: '__test_orphan',
     objectType: 'Flight',
@@ -292,7 +388,12 @@ $integrityInject.addEventListener('click', () => {
     changes: { pilot_id: 'P999_BOGUS' },
     created_at: new Date().toISOString(),
     valid_from: new Date().toISOString(),
-  });
+    branchId: ontology.branches.currentBranch,
+    lamport: ontology.clock.tick(),
+    nodeId: ontology.clock.nodeId,
+  };
+  LocalState.appendChangeSet(cs);
+  ontology.clock.publish(cs);
   ontology.emit('action', null);
   notify('Injected orphan FK on N101AA', 'warn');
 });
@@ -476,6 +577,12 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
+function formatComputedValue(v) {
+  if (v == null) return '—';
+  if (typeof v === 'object') return JSON.stringify(v);
+  return String(v);
+}
+
 function formatDate(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
@@ -536,6 +643,14 @@ function renderDetail() {
   const origin = flight.links('flight_origin')[0];
   const destination = flight.links('flight_destination')[0];
   const edits = ontology.getEdits('Flight', flight.id, state.context);
+  const computedNames = ontology.computed.computedNames('Flight');
+  const computedHtml = computedNames.length
+    ? computedNames.map((name) => {
+        let v;
+        try { v = flight[name]; } catch (e) { v = `<error: ${e.message}>`; }
+        return `<dt>${escapeHtml(name)}</dt><dd>${escapeHtml(formatComputedValue(v))}</dd>`;
+      }).join('')
+    : '<dt class="hint" style="grid-column:1/-1">no computed properties</dt>';
 
   let actionsHtml;
   if (isReadOnly()) {
@@ -552,7 +667,7 @@ function renderDetail() {
     <div class="link-row">
       <div>
         <div class="type">flight_pilot</div>
-        ${pilot ? `${escapeHtml(pilot.name)} <span class="hint">(${escapeHtml(pilot.pilot_id)} · ${escapeHtml(pilot.license_level)} · ${pilot.flight_hours.toLocaleString()} hrs)</span>` : '<span class="hint">unassigned at this point in time</span>'}
+        ${pilot ? `${escapeHtml(pilot.name)} <span class="hint">(${escapeHtml(pilot.pilot_id)} · ${escapeHtml(pilot.license_level)} · ${pilot.flight_hours.toLocaleString()} hrs · tier: ${escapeHtml(pilot.experience_tier)})</span>` : '<span class="hint">unassigned at this point in time</span>'}
       </div>
     </div>
     <div class="link-row">
@@ -591,6 +706,11 @@ function renderDetail() {
       <div class="detail-section">
         <h4>Links</h4>
         ${linksHtml}
+      </div>
+
+      <div class="detail-section">
+        <h4>Computed <span class="hint">(memoized · invalidated by deps)</span></h4>
+        <dl class="kv">${computedHtml}</dl>
       </div>
 
       <div class="detail-section">
@@ -662,6 +782,8 @@ function renderActionRow(flight, { name }, pilots) {
 
 function renderLog() {
   let history = actions.history();
+  const activeBranches = ontology.branches.activeBranches();
+  history = history.filter((cs) => activeBranches.has(cs.branchId || 'main'));
   if (state.context) {
     history = history.filter((cs) => {
       if (state.context.asOfTx && cs.created_at > state.context.asOfTx) return false;
@@ -669,7 +791,7 @@ function renderLog() {
       return true;
     });
   }
-  history = history.slice().reverse();
+  history = history.slice().sort((a, b) => crdtCompare(b, a));
 
   if (!history.length) {
     $log.innerHTML = '<div class="hint">No actions visible at this point in time.</div>';
@@ -684,7 +806,7 @@ function renderLog() {
         <span class="action-name">${escapeHtml(cs.action)}</span>
         ${undoVisible ? `<button class="btn undo-btn" data-undo="${escapeHtml(cs.id)}">undo</button>` : ''}
       </div>
-      <div class="target">${escapeHtml(cs.objectType)}:${escapeHtml(cs.objectId)} · tx ${escapeHtml(formatDate(cs.created_at))}${cs.valid_from && cs.valid_from !== cs.created_at ? ` · valid ${escapeHtml(formatDate(cs.valid_from))}` : ''}</div>
+      <div class="target">${escapeHtml(cs.objectType)}:${escapeHtml(cs.objectId)} · clk ${cs.lamport ?? '?'}@${escapeHtml(cs.nodeId || '?')}${cs.branchId && cs.branchId !== 'main' ? ` · branch <code>${escapeHtml(cs.branchId)}</code>` : ''}</div>
       <div class="changes">${escapeHtml(JSON.stringify(cs.changes, null, 2))}</div>
     </div>
   `,
@@ -714,6 +836,97 @@ function renderEnvSwitcher() {
   $envSelect.addEventListener('change', () => config.switchTo($envSelect.value));
 }
 
+function renderRoleSwitcher() {
+  const $roleSelect = document.getElementById('role-select');
+  if (!$roleSelect) return;
+
+  const refresh = () => {
+    const current = ontology.security.role;
+    $roleSelect.innerHTML = SecurityProvider.knownRoles()
+      .map((r) => `<option value="${r}"${r === current ? ' selected' : ''}>${r}</option>`)
+      .join('');
+  };
+
+  refresh();
+  $roleSelect.addEventListener('change', () => ontology.security.setRole($roleSelect.value));
+  ontology.security.onChange(refresh);
+}
+
+function renderBranchSwitcher() {
+  const $branchSelect = document.getElementById('branch-select');
+  const $branchNew = document.getElementById('branch-new');
+  const $branchMerge = document.getElementById('branch-merge');
+  const $branchDiscard = document.getElementById('branch-discard');
+  if (!$branchSelect) return;
+
+  const refresh = () => {
+    const branches = ontology.branches.list();
+    const current = ontology.branches.currentBranch;
+    $branchSelect.innerHTML = branches
+      .map((b) => `<option value="${escapeHtml(b)}"${b === current ? ' selected' : ''}>${escapeHtml(b)}</option>`)
+      .join('');
+    const isMain = ontology.branches.isMain();
+    $branchMerge.disabled = isMain;
+    $branchDiscard.disabled = isMain;
+  };
+
+  refresh();
+
+  $branchSelect.addEventListener('change', () => {
+    ontology.branches.switchTo($branchSelect.value);
+  });
+
+  $branchNew.addEventListener('click', () => {
+    const name = prompt('New branch name (alphanumeric, dash, underscore):');
+    if (!name) return;
+    try {
+      ontology.branches.create(name.trim());
+      ontology.branches.switchTo(name.trim());
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  $branchMerge.addEventListener('click', () => {
+    const name = ontology.branches.currentBranch;
+    if (name === 'main') return;
+    if (!confirm(`Merge "${name}" into main? Its ChangeSets will be promoted.`)) return;
+    try {
+      ontology.branches.merge(name, LocalState);
+      notify(`Merged ${name} → main`);
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  $branchDiscard.addEventListener('click', () => {
+    const name = ontology.branches.currentBranch;
+    if (name === 'main') return;
+    if (!confirm(`Discard "${name}"? All its ChangeSets will be dropped.`)) return;
+    try {
+      ontology.branches.discard(name, LocalState);
+      notify(`Discarded ${name}`, 'warn');
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  ontology.branches.onChange(() => {
+    refresh();
+    ontology.computed.invalidateAll();
+    state.lastError = null;
+    render();
+    requestIntegrityScan();
+  });
+}
+
+function renderCRDTBadge() {
+  const $badge = document.getElementById('crdt-badge');
+  if (!$badge) return;
+  const { nodeId, lamport, channel } = ontology.clock.status();
+  $badge.textContent = `${nodeId} · clk ${lamport}${channel ? '' : ' (no channel)'}`;
+}
+
 function renderTxBadge() {
   if (!state.context) {
     $txBadge.textContent = 'live';
@@ -726,6 +939,7 @@ function renderTxBadge() {
 
 function render() {
   renderTxBadge();
+  renderCRDTBadge();
   renderFlightList();
   renderDetail();
   renderLog();
@@ -738,16 +952,32 @@ ontology.on('undo', render);
 ontology.on('loaded', requestIntegrityScan);
 ontology.on('action', requestIntegrityScan);
 ontology.on('undo', requestIntegrityScan);
+ontology.on('action', invalidateComputedFor);
+ontology.on('undo', invalidateComputedFor);
 
 (async function main() {
   config = new ConfigProvider();
   await config.load();
   renderManifestBadge();
   renderEnvSwitcher();
+  renderRoleSwitcher();
+  renderBranchSwitcher();
+  ontology.security.onChange(() => {
+    ontology.computed.invalidateAll();
+    state.lastError = null;
+    render();
+    requestIntegrityScan();
+  });
   renderTxPresets();
   setupOntology();
+  registerConstraints();
+  registerComputed();
   registerActions();
   registerEffectHandlers();
+  ontology.clock.onMessage(() => {
+    ontology.computed.invalidateAll();
+    ontology.emit('action', null);
+  });
   startIntegrityWorker();
   await ontology.load();
   agent = new Agent(ontology, actions);
@@ -762,3 +992,9 @@ window.links = ontology.links;
 window.appState = state;
 Object.defineProperty(window, 'agent', { get: () => agent });
 Object.defineProperty(window, 'config', { get: () => config });
+window.constraints = ontology.constraints;
+window.computed = ontology.computed;
+window.query = () => ontology.query();
+window.security = ontology.security;
+window.branches = ontology.branches;
+window.clock = ontology.clock;

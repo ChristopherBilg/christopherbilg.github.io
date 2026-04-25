@@ -83,6 +83,69 @@ export class Agent {
         }),
         example: 'list pilots',
       },
+      {
+        name: 'pilots-flying-to',
+        pattern: /^pilots?\s+(?:flying\s+)?to\s+([A-Z]+)$/i,
+        kind: 'read',
+        run: (m) => {
+          const code = m[1].toUpperCase();
+          const q = this.ontology.query()
+            .from('Flight')
+            .where((f) => f.destination === code && f.status !== 'Cancelled')
+            .traverse('flight_pilot');
+          return {
+            query: q.describe(),
+            type: 'Pilot',
+            items: q.collect().map((p) => ({
+              pilot_id: p.pilot_id,
+              name: p.name,
+              experience_tier: p.experience_tier,
+            })),
+          };
+        },
+        example: 'pilots to LAX',
+      },
+      {
+        name: 'flights-from',
+        pattern: /^flights?\s+from\s+([A-Z]+)$/i,
+        kind: 'read',
+        run: (m) => {
+          const code = m[1].toUpperCase();
+          const q = this.ontology.query()
+            .from('Flight')
+            .where((f) => f.origin === code);
+          return {
+            query: q.describe(),
+            type: 'Flight',
+            items: q.collect().map((f) => ({
+              tail_number: f.tail_number,
+              destination: f.destination,
+              status: f.status,
+              pilot_name: f.pilot_name,
+            })),
+          };
+        },
+        example: 'flights from JFK',
+      },
+      {
+        name: 'destinations-of',
+        pattern: /^destinations?\s+(?:of|for)\s+(P\d+)$/i,
+        kind: 'read',
+        run: (m) => {
+          const pilotId = m[1].toUpperCase();
+          const q = this.ontology.query()
+            .from('Pilot')
+            .where((p) => p.pilot_id === pilotId)
+            .traverse('pilot_flights')
+            .traverse('flight_destination');
+          return {
+            query: q.describe(),
+            type: 'Airport',
+            items: q.collect().map((a) => ({ code: a.code, name: a.name, city: a.city })),
+          };
+        },
+        example: 'destinations of P001',
+      },
     ];
   }
 
@@ -118,6 +181,7 @@ export class Agent {
     return {
       ...this.ontology.getSchema(),
       actions: this.actions.getSchema(),
+      constraints: this.ontology.constraints?.getSchema() || [],
       intents: this.intents.map((i) => ({
         name: i.name,
         pattern: i.pattern.source,

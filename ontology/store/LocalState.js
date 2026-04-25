@@ -36,4 +36,8 @@ export const LocalState = {
   clear() {
     localStorage.removeItem(STORAGE_KEY);
   },
+
+  replaceAll(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  },
 };

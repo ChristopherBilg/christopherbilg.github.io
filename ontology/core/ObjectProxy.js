@@ -9,7 +9,14 @@ export class ObjectProxy {
     return new Proxy(this, {
       get(target, prop, receiver) {
         if (prop in target) return Reflect.get(target, prop, receiver);
-        const merged = target.ontology.mergeEdits(target.typeName, target.id, target._base, target._context);
+        const ont = target.ontology;
+        if (ont.computed && typeof prop === 'string' && ont.computed.has(target.typeName, prop)) {
+          return ont.computed.evaluate(target.typeName, target.id, prop, receiver);
+        }
+        if (ont.computed && typeof prop === 'string') {
+          ont.computed.recordRead(target.typeName, target.id, prop);
+        }
+        const merged = ont.mergeEdits(target.typeName, target.id, target._base, target._context);
         return merged[prop];
       },
       has(target, prop) {

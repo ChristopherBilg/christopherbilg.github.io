@@ -6,10 +6,13 @@ export class ActionEngine {
     this.definitions = new Map();
     this.middlewares = [];
 
+    this.middlewares.push(authorizeMW);
     this.middlewares.push(resolveTargetMW);
     this.middlewares.push(validateMW);
     this.middlewares.push(preprocessMW);
-    this.middlewares.push(executeMW);
+    this.middlewares.push(computeChangesMW);
+    this.middlewares.push(constraintsMW);
+    this.middlewares.push(buildChangeSetMW);
     this.middlewares.push(persistMW);
   }
 
@@ -43,9 +46,11 @@ export class ActionEngine {
 
   availableFor(target) {
     const out = [];
+    const sec = this.ontology.security;
     for (const [name, spec] of this.definitions) {
       if (spec.objectType !== target.typeName) continue;
       if (spec.availableWhen && !spec.availableWhen(target, this.ontology)) continue;
+      if (sec && !sec.canDispatch(name)) continue;
       out.push({ name, spec });
     }
     return out;
@@ -71,7 +76,10 @@ export class ActionEngine {
 
   undo(changeSetId) {
     const removed = LocalState.removeChangeSet(changeSetId);
-    if (removed) this.ontology.emit('undo', removed);
+    if (removed) {
+      this.ontology.emit('undo', removed);
+      this.ontology.clock?.publishUndo(removed);
+    }
     return removed;
   }
 
@@ -91,6 +99,14 @@ export class ActionEngine {
     }
     return out;
   }
+}
+
+function authorizeMW(ctx, next) {
+  const sec = ctx.ontology.security;
+  if (sec && !sec.canDispatch(ctx.name)) {
+    throw new Error(`Permission denied: role "${sec.role}" cannot dispatch "${ctx.name}"`);
+  }
+  next();
 }
 
 function resolveTargetMW(ctx, next) {
@@ -115,17 +131,34 @@ function preprocessMW(ctx, next) {
   next();
 }
 
-function executeMW(ctx, next) {
+function computeChangesMW(ctx, next) {
   const changes = ctx.spec.apply(ctx.target, ctx.params, ctx.ontology);
   if (!changes || typeof changes !== 'object') {
     throw new Error(`Action "${ctx.name}" must return a changes object`);
   }
   ctx.changes = changes;
+  next();
+}
 
+function constraintsMW(ctx, next) {
+  const ce = ctx.ontology.constraints;
+  if (!ce) return next();
+  const violation = ce.check(ctx.target, ctx.changes);
+  if (violation) {
+    throw new Error(`Constraint "${violation.constraint}": ${violation.message}`);
+  }
+  next();
+}
+
+function buildChangeSetMW(ctx, next) {
   const createdAt = new Date().toISOString();
   const validFrom = ctx.spec.validFrom
     ? ctx.spec.validFrom(ctx.target, ctx.params, ctx.ontology) || createdAt
     : createdAt;
+
+  const clock = ctx.ontology.clock;
+  const lamport = clock ? clock.tick() : 0;
+  const nodeId = clock?.nodeId || 'local';
 
   ctx.changeSet = {
     id: (crypto.randomUUID && crypto.randomUUID()) || `cs_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -133,9 +166,12 @@ function executeMW(ctx, next) {
     objectType: ctx.spec.objectType,
     objectId: ctx.objectId,
     params: ctx.params,
-    changes,
+    changes: ctx.changes,
     created_at: createdAt,
     valid_from: validFrom,
+    branchId: ctx.ontology.branches?.currentBranch || 'main',
+    lamport,
+    nodeId,
   };
   next();
 }

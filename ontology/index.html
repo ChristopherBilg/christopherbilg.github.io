@@ -17,6 +17,11 @@
         env
         <select id="env-select"></select>
       </label>
+      <label class="env-switch">
+        role
+        <select id="role-select"></select>
+      </label>
+      <span id="crdt-badge" class="badge" title="CRDT node id and Lamport clock">node ?</span>
       <span id="manifest-badge" class="badge">loading manifest…</span>
       <button id="reset-btn" class="btn btn-ghost" title="Clear kinetic layer (localStorage)">Reset state</button>
     </div>
@@ -29,6 +34,14 @@
     <span class="hint">Presets:</span>
     <span id="tx-presets" class="presets"></span>
     <span id="tx-badge" class="badge">live</span>
+
+    <span class="time-bar-divider"></span>
+
+    <label for="branch-select">Branch:</label>
+    <select id="branch-select"></select>
+    <button class="btn btn-ghost btn-tiny" id="branch-new">+ new</button>
+    <button class="btn btn-ghost btn-tiny" id="branch-merge" disabled>merge</button>
+    <button class="btn btn-ghost btn-tiny" id="branch-discard" disabled>discard</button>
   </div>
 
   <main class="layout">
@@ -86,13 +99,19 @@
         <li><strong>Adapter</strong> — each object type binds to a backing JSON source via a <code>backingData</code> URL and primary key.</li>
         <li><strong>Proxy</strong> — <code>ObjectProxy</code> lazily merges base rows with kinetic edits on every property read.</li>
         <li><strong>Command</strong> — every mutation goes through <code>ActionEngine.dispatch</code>; validation, state machine, and side effects are encapsulated in the action spec.</li>
-        <li><strong>Chain of Responsibility</strong> — <code>dispatch</code> runs a middleware pipeline (resolve → validate → preprocess → execute → persist → effects). Plug your own with <code>actions.use(handler)</code>; effect handlers run after persistence and see the committed ChangeSet. The toast notifications and console logs are wired this way.</li>
+        <li><strong>Chain of Responsibility</strong> — <code>dispatch</code> runs a middleware pipeline (resolve → validate → preprocess → computeChanges → constraints → buildChangeSet → persist → effects). Plug your own with <code>actions.use(handler)</code>; effect handlers run after persistence and see the committed ChangeSet. The toast notifications and console logs are wired this way.</li>
+        <li><strong>Constraint Engine</strong> — declarative cross-object invariants registered on the Ontology and enforced by a pre-persist middleware. Demo constraints: <code>originDestinationDistinct</code>, <code>pilotSingleScheduledAssignment</code>, <code>departureNotInPast</code>. Try reassigning N101AA to P002 — it'll be rejected because P002 already holds the Scheduled flight N107AA.</li>
+        <li><strong>Computed properties</strong> — derivation functions registered per <code>(type, prop)</code>. <code>ObjectProxy</code> intercepts reads of computed names and evaluates inside a dependency-tracking scope; results memoize by recorded deps and cascade-invalidate on <code>action</code>/<code>undo</code>. Examples: <code>Pilot.experience_tier</code>, <code>Flight.pilot_name</code>, <code>Pilot.assigned_flight_count</code>. Try <code>computed.stats()</code>.</li>
+        <li><strong>Semantic branching</strong> — <code>BranchManager</code> tracks the active branch; ChangeSets carry a <code>branchId</code>. Reading from a branch overlays it on top of <code>main</code>; writing while on a branch isolates new actions there. Use the topbar to create a "what-if" branch, dispatch some actions, switch back to <code>main</code> and watch them disappear, then <strong>merge</strong> to promote them. Console: <code>branches.list()</code>.</li>
+        <li><strong>Recursive graph queries</strong> — fluent builder over <code>LinkCoordinator</code>: <code>ontology.query().from(type).where(p).traverse(link).collect()</code>. Cycle protection via per-step visited-sets and a max-depth limit. AIP intents like <code>pilots to LAX</code> and <code>destinations of P001</code> compile to multi-hop traversals. Try <code>query().from('Flight').where(f =&gt; f.status === 'Scheduled').traverse('flight_pilot').collect()</code>.</li>
         <li><strong>Memento</strong> — ChangeSets persist to <code>localStorage</code>; each is addressable and reversible.</li>
         <li><strong>Observer</strong> — UI subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events; no direct DOM coupling to mutations.</li>
         <li><strong>State</strong> — <code>Flight.status</code> transitions are gated by the action validators (<code>Scheduled → InAir → Landed</code>, with <code>Cancelled</code> as an early exit).</li>
         <li><strong>Bi-temporal</strong> — every base row and ChangeSet carries <code>created_at</code> (transaction time) and <code>valid_from</code> (valid time). Reads accept an optional <code>{ asOfTx, asOfValid }</code> context that filters out records the system wouldn't have known yet. The time-travel slider is the user-facing surface; the kernel does the same filtering for any caller.</li>
         <li><strong>AIP / tool-use</strong> — <code>Ontology</code>, <code>LinkCoordinator</code>, and <code>ActionEngine</code> each export a <code>getSchema()</code>; the <code>Agent</code> aggregates them into the catalog an LLM would see, then dispatches typed actions through the existing pipeline. Try <code>agent.getSchema()</code> in the console.</li>
+        <li><strong>CRDT multi-tab sync</strong> — every ChangeSet carries a Lamport clock and the writer's <code>nodeId</code> (per-tab, sessionStorage). <code>mergeEdits</code> replays in <code>(lamport, nodeId)</code> order — deterministic across tabs even with concurrent writes. <code>BroadcastChannel</code> publishes locally-committed ChangeSets to peer tabs, which advance their clock to <code>max(local, remote) + 1</code>. Open this page in two tabs and dispatch from each — the topbar shows your <code>nodeId · clk</code>. <code>storage</code> events cover the case where BroadcastChannel is unavailable.</li>
         <li><strong>Data integrity worker</strong> — a Web Worker scans base data + ChangeSets out-of-band for orphan FKs, orphan ChangeSets, and kinetic drift. The kernel doesn't know about it; it subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events and posts findings back to the main thread. Click <strong>Inject test issue</strong> to see drift detection in action.</li>
+        <li><strong>Security/Policy layer</strong> — <code>SecurityProvider</code> attaches to <code>Ontology</code>; <code>authorizeMW</code> is the first stage of <code>ActionEngine</code>'s pipeline. Roles: <code>viewer</code> (no actions; can't see Cancelled flights), <code>dispatcher</code> (depart/land/delay only), <code>admin</code> (everything). Switch roles via the topbar; the read filter and action availability update immediately. Try <code>security.permissions()</code>.</li>
         <li><strong>Apollo-sim</strong> — three environments under <code>env/{dev,staging,prod}/manifest.json</code>; <code>ConfigProvider</code> reads the <code>?env=</code> URL parameter and resolves both feature flags and data-source URLs. Switching environments via the topbar dropdown reloads with a different manifest. <code>prod</code> locks down all mutation actions; <code>dev</code> opens everything.</li>
       </ul>
     </section>
