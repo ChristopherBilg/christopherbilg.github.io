@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "environment": "development",
+  "features": {
+    "allowCancellation": true,
+    "allowPilotReassignment": true,
+    "allowDelay": true,
+    "strictStateTransitions": true
+  }
+}

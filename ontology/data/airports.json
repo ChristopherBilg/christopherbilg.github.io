@@ -1,0 +1,10 @@
+[
+  { "code": "JFK", "name": "John F. Kennedy International", "city": "New York", "country": "USA" },
+  { "code": "LAX", "name": "Los Angeles International",   "city": "Los Angeles", "country": "USA" },
+  { "code": "ORD", "name": "O'Hare International",         "city": "Chicago", "country": "USA" },
+  { "code": "DFW", "name": "Dallas/Fort Worth International", "city": "Dallas", "country": "USA" },
+  { "code": "SEA", "name": "Seattle-Tacoma International", "city": "Seattle", "country": "USA" },
+  { "code": "ATL", "name": "Hartsfield-Jackson Atlanta",   "city": "Atlanta", "country": "USA" },
+  { "code": "BOS", "name": "Logan International",          "city": "Boston", "country": "USA" },
+  { "code": "SFO", "name": "San Francisco International",  "city": "San Francisco", "country": "USA" }
+]

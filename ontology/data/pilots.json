@@ -1,0 +1,8 @@
+[
+  { "pilot_id": "P001", "name": "Amelia Rhodes",   "license_level": "ATP",        "flight_hours": 8420 },
+  { "pilot_id": "P002", "name": "Marcus Chen",     "license_level": "ATP",        "flight_hours": 12100 },
+  { "pilot_id": "P003", "name": "Priya Shah",      "license_level": "Commercial", "flight_hours": 3200 },
+  { "pilot_id": "P004", "name": "Luca Romano",     "license_level": "ATP",        "flight_hours": 6750 },
+  { "pilot_id": "P005", "name": "Sarah Jenkins",   "license_level": "Commercial", "flight_hours": 2100 },
+  { "pilot_id": "P006", "name": "Noah Abebe",      "license_level": "ATP",        "flight_hours": 9800 }
+]

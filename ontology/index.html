@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ontology — a Palantir-lite learning project</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">
+      <h1>Ontology</h1>
+      <p class="tagline">A semantic layer over static data — with write-back, actions, and an audit log.</p>
+    </div>
+    <div class="topbar-actions">
+      <span id="manifest-badge" class="badge">loading manifest…</span>
+      <button id="reset-btn" class="btn btn-ghost" title="Clear kinetic layer (localStorage)">Reset state</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel panel-list">
+      <h2>Flights <span class="hint">Object type: <code>Flight</code></span></h2>
+      <div id="flight-list" class="grid"></div>
+    </section>
+
+    <section class="panel panel-detail">
+      <div id="detail">
+        <div class="empty">Select a flight to see its merged state, links, and available actions.</div>
+      </div>
+    </section>
+
+    <aside class="panel panel-log">
+      <h2>Audit log <span class="hint">ChangeSets (Memento + Command)</span></h2>
+      <div id="log" class="log"></div>
+    </aside>
+  </main>
+
+  <footer class="footer">
+    <section class="arch">
+      <h3>What this demonstrates</h3>
+      <ul>
+        <li><strong>Facade / Registry</strong> — <code>Ontology</code> is the single entry point; object &amp; link types are registered declaratively.</li>
+        <li><strong>Adapter</strong> — each object type binds to a backing JSON source via a <code>backingData</code> URL and primary key.</li>
+        <li><strong>Proxy</strong> — <code>ObjectProxy</code> lazily merges base rows with kinetic edits on every property read.</li>
+        <li><strong>Command</strong> — every mutation goes through <code>ActionEngine.dispatch</code>; validation, state machine, and side effects are encapsulated in the action spec.</li>
+        <li><strong>Memento</strong> — ChangeSets persist to <code>localStorage</code>; each is addressable and reversible.</li>
+        <li><strong>Observer</strong> — UI subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events; no direct DOM coupling to mutations.</li>
+        <li><strong>State</strong> — <code>Flight.status</code> transitions are gated by the action validators (<code>Scheduled → InAir → Landed</code>, with <code>Cancelled</code> as an early exit).</li>
+        <li><strong>Apollo-sim</strong> — <code>manifest.json</code> feature flags gate which actions are exposed, mimicking environment-versioned rollout.</li>
+      </ul>
+    </section>
+  </footer>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
