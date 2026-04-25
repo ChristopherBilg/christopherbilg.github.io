@@ -1,10 +1,10 @@
 [
-  { "code": "JFK", "name": "John F. Kennedy International", "city": "New York", "country": "USA" },
-  { "code": "LAX", "name": "Los Angeles International",   "city": "Los Angeles", "country": "USA" },
-  { "code": "ORD", "name": "O'Hare International",         "city": "Chicago", "country": "USA" },
-  { "code": "DFW", "name": "Dallas/Fort Worth International", "city": "Dallas", "country": "USA" },
-  { "code": "SEA", "name": "Seattle-Tacoma International", "city": "Seattle", "country": "USA" },
-  { "code": "ATL", "name": "Hartsfield-Jackson Atlanta",   "city": "Atlanta", "country": "USA" },
-  { "code": "BOS", "name": "Logan International",          "city": "Boston", "country": "USA" },
-  { "code": "SFO", "name": "San Francisco International",  "city": "San Francisco", "country": "USA" }
+  { "code": "JFK", "name": "John F. Kennedy International",  "city": "New York",      "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "LAX", "name": "Los Angeles International",      "city": "Los Angeles",   "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "ORD", "name": "O'Hare International",           "city": "Chicago",       "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "DFW", "name": "Dallas/Fort Worth International","city": "Dallas",        "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "SEA", "name": "Seattle-Tacoma International",   "city": "Seattle",       "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "ATL", "name": "Hartsfield-Jackson Atlanta",     "city": "Atlanta",       "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "BOS", "name": "Logan International",            "city": "Boston",        "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" },
+  { "code": "SFO", "name": "San Francisco International",    "city": "San Francisco", "country": "USA", "created_at": "2026-01-01T00:00:00Z", "valid_from": "2026-01-01T00:00:00Z" }
 ]

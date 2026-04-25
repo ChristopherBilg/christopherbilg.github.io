@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-staging",
+  "environment": "staging",
+  "features": {
+    "allowCancellation": true,
+    "allowPilotReassignment": true,
+    "allowDelay": false,
+    "strictStateTransitions": true
+  },
+  "dataSources": {
+    "Airport": "./data/airports.json",
+    "Pilot":   "./data/pilots.json",
+    "Flight":  "./data/flights.json"
+  }
+}

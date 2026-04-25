@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0-dev",
+  "environment": "dev",
+  "features": {
+    "allowCancellation": true,
+    "allowPilotReassignment": true,
+    "allowDelay": true,
+    "strictStateTransitions": true
+  },
+  "dataSources": {
+    "Airport": "./data/airports.json",
+    "Pilot":   "./data/pilots.json",
+    "Flight":  "./data/flights.json"
+  }
+}

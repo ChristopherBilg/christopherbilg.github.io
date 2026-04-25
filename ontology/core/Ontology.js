@@ -1,21 +1,18 @@
 import { ObjectProxy } from './ObjectProxy.js';
+import { LinkCoordinator } from './LinkCoordinator.js';
 import { LocalState } from '../store/LocalState.js';
 
 export class Ontology {
   constructor() {
     this.objectTypes = new Map();
-    this.linkTypes = new Map();
     this.cache = new Map();
     this.listeners = new Map();
     this.loaded = false;
+    this.links = new LinkCoordinator(this);
   }
 
   defineObject(name, config) {
     this.objectTypes.set(name, config);
-  }
-
-  defineLink(name, config) {
-    this.linkTypes.set(name, config);
   }
 
   async load() {
@@ -39,53 +36,35 @@ export class Ontology {
     this.emit('loaded');
   }
 
-  get(typeName, id) {
+  get(typeName, id, context) {
     const base = this.cache.get(`${typeName}:${id}`);
     if (!base) return null;
-    return new ObjectProxy(this, typeName, id, base);
+    if (!isVisible(base, context)) return null;
+    return new ObjectProxy(this, typeName, id, base, context);
   }
 
-  all(typeName) {
+  all(typeName, context) {
     const out = [];
     const prefix = `${typeName}:`;
     for (const key of this.cache.keys()) {
-      if (key.startsWith(prefix)) {
-        const id = key.slice(prefix.length);
-        out.push(this.get(typeName, id));
-      }
+      if (!key.startsWith(prefix)) continue;
+      const id = key.slice(prefix.length);
+      const obj = this.get(typeName, id, context);
+      if (obj) out.push(obj);
     }
     return out;
   }
 
-  resolveLink(linkName, sourceId) {
-    const link = this.linkTypes.get(linkName);
-    if (!link) return [];
-    const source = this.get(link.source, sourceId);
-    if (!source) return [];
-
-    if (link.direction === 'reverse') {
-      return this.findByProperty(link.target, link.fk, sourceId);
-    }
-
-    const fkValue = source[link.fk];
-    if (fkValue == null) return [];
-    const target = this.get(link.target, fkValue);
-    return target ? [target] : [];
-  }
-
-  findByProperty(typeName, prop, value) {
-    const target = String(value);
-    return this.all(typeName).filter((obj) => String(obj[prop]) === target);
-  }
-
-  mergeEdits(typeName, id, baseRow) {
-    const edits = LocalState.getEditsFor(typeName, id);
+  mergeEdits(typeName, id, baseRow, context) {
+    const edits = this.getEdits(typeName, id, context);
     if (!edits.length) return { ...baseRow };
-    return edits.reduce((acc, edit) => ({ ...acc, ...edit.changes }), { ...baseRow });
+    return edits.reduce((acc, e) => ({ ...acc, ...e.changes }), { ...baseRow });
   }
 
-  getEdits(typeName, id) {
-    return LocalState.getEditsFor(typeName, id);
+  getEdits(typeName, id, context) {
+    const edits = LocalState.getEditsFor(typeName, id);
+    if (!context) return edits;
+    return edits.filter((e) => isVisible(e, context));
   }
 
   on(event, cb) {
@@ -96,4 +75,31 @@ export class Ontology {
   emit(event, payload) {
     (this.listeners.get(event) || []).forEach((cb) => cb(payload));
   }
+
+  getSchema() {
+    const objects = {};
+    for (const [name, config] of this.objectTypes) {
+      const sample = this._firstRowOf(name);
+      objects[name] = {
+        pk: config.pk,
+        properties: sample ? Object.keys(sample).sort() : [],
+      };
+    }
+    return { objects, links: this.links.getSchema() };
+  }
+
+  _firstRowOf(typeName) {
+    const prefix = `${typeName}:`;
+    for (const [key, row] of this.cache) {
+      if (key.startsWith(prefix)) return row;
+    }
+    return null;
+  }
+}
+
+function isVisible(record, context) {
+  if (!context) return true;
+  if (context.asOfTx && record.created_at && record.created_at > context.asOfTx) return false;
+  if (context.asOfValid && record.valid_from && record.valid_from > context.asOfValid) return false;
+  return true;
 }

@@ -10,13 +10,26 @@
   <header class="topbar">
     <div class="title">
       <h1>Ontology</h1>
-      <p class="tagline">A semantic layer over static data — with write-back, actions, and an audit log.</p>
+      <p class="tagline">A semantic layer over static data — with write-back, actions, time travel, and an audit log.</p>
     </div>
     <div class="topbar-actions">
+      <label class="env-switch">
+        env
+        <select id="env-select"></select>
+      </label>
       <span id="manifest-badge" class="badge">loading manifest…</span>
       <button id="reset-btn" class="btn btn-ghost" title="Clear kinetic layer (localStorage)">Reset state</button>
     </div>
   </header>
+
+  <div class="time-bar">
+    <label for="tx-input">View as of (transaction time):</label>
+    <input type="datetime-local" id="tx-input" />
+    <button class="btn btn-ghost" id="tx-now">Now</button>
+    <span class="hint">Presets:</span>
+    <span id="tx-presets" class="presets"></span>
+    <span id="tx-badge" class="badge">live</span>
+  </div>
 
   <main class="layout">
     <section class="panel panel-list">
@@ -36,21 +49,56 @@
     </aside>
   </main>
 
+  <section class="panel integrity-panel">
+    <h2>Data integrity <span class="hint">Background scan via Web Worker</span></h2>
+    <div class="integrity-meta">
+      <span class="badge" id="integrity-badge">awaiting scan…</span>
+      <button class="btn btn-ghost btn-tiny" id="integrity-rescan">Rescan</button>
+      <button class="btn btn-ghost btn-tiny" id="integrity-inject">Inject test issue</button>
+    </div>
+    <div id="integrity-findings" class="integrity-findings"></div>
+  </section>
+
+  <section class="panel aip-panel">
+    <h2>AIP <span class="hint">Tool-use over the Ontology</span></h2>
+    <p class="aip-blurb">
+      A simulated agent. It holds a typed catalog of objects, links, and actions (the same schema an LLM would consume), matches your prompt against an intent table, and dispatches a real Action through the same middleware pipeline as the UI buttons. No model in the loop — just the wiring.
+    </p>
+    <div class="aip-input">
+      <input type="text" id="aip-prompt" placeholder='Try: "depart N101AA", "delay N105AA by 45 minutes", "show N107AA", "list pilots"' />
+      <button class="btn btn-primary" id="aip-ask">Ask</button>
+      <button class="btn btn-ghost" id="aip-schema-toggle">View schema</button>
+    </div>
+    <div class="aip-examples-wrap">
+      <span class="hint">Examples:</span>
+      <span id="aip-examples" class="presets"></span>
+    </div>
+    <div id="aip-output" class="aip-output"></div>
+    <pre id="aip-schema" class="aip-schema" hidden></pre>
+  </section>
+
   <footer class="footer">
     <section class="arch">
       <h3>What this demonstrates</h3>
       <ul>
-        <li><strong>Facade / Registry</strong> — <code>Ontology</code> is the single entry point; object &amp; link types are registered declaratively.</li>
+        <li><strong>Facade / Registry</strong> — <code>Ontology</code> is the single entry point; object types are registered declaratively, link types via the <code>LinkCoordinator</code>.</li>
+        <li><strong>LinkCoordinator</strong> — relationship logic is decoupled from objects: the coordinator owns a directed graph of declared links and resolves both forward FK joins and reverse property scans. Try <code>links.outgoingFor('Flight')</code> in the console.</li>
         <li><strong>Adapter</strong> — each object type binds to a backing JSON source via a <code>backingData</code> URL and primary key.</li>
         <li><strong>Proxy</strong> — <code>ObjectProxy</code> lazily merges base rows with kinetic edits on every property read.</li>
         <li><strong>Command</strong> — every mutation goes through <code>ActionEngine.dispatch</code>; validation, state machine, and side effects are encapsulated in the action spec.</li>
+        <li><strong>Chain of Responsibility</strong> — <code>dispatch</code> runs a middleware pipeline (resolve → validate → preprocess → execute → persist → effects). Plug your own with <code>actions.use(handler)</code>; effect handlers run after persistence and see the committed ChangeSet. The toast notifications and console logs are wired this way.</li>
         <li><strong>Memento</strong> — ChangeSets persist to <code>localStorage</code>; each is addressable and reversible.</li>
         <li><strong>Observer</strong> — UI subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events; no direct DOM coupling to mutations.</li>
         <li><strong>State</strong> — <code>Flight.status</code> transitions are gated by the action validators (<code>Scheduled → InAir → Landed</code>, with <code>Cancelled</code> as an early exit).</li>
-        <li><strong>Apollo-sim</strong> — <code>manifest.json</code> feature flags gate which actions are exposed, mimicking environment-versioned rollout.</li>
+        <li><strong>Bi-temporal</strong> — every base row and ChangeSet carries <code>created_at</code> (transaction time) and <code>valid_from</code> (valid time). Reads accept an optional <code>{ asOfTx, asOfValid }</code> context that filters out records the system wouldn't have known yet. The time-travel slider is the user-facing surface; the kernel does the same filtering for any caller.</li>
+        <li><strong>AIP / tool-use</strong> — <code>Ontology</code>, <code>LinkCoordinator</code>, and <code>ActionEngine</code> each export a <code>getSchema()</code>; the <code>Agent</code> aggregates them into the catalog an LLM would see, then dispatches typed actions through the existing pipeline. Try <code>agent.getSchema()</code> in the console.</li>
+        <li><strong>Data integrity worker</strong> — a Web Worker scans base data + ChangeSets out-of-band for orphan FKs, orphan ChangeSets, and kinetic drift. The kernel doesn't know about it; it subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events and posts findings back to the main thread. Click <strong>Inject test issue</strong> to see drift detection in action.</li>
+        <li><strong>Apollo-sim</strong> — three environments under <code>env/{dev,staging,prod}/manifest.json</code>; <code>ConfigProvider</code> reads the <code>?env=</code> URL parameter and resolves both feature flags and data-source URLs. Switching environments via the topbar dropdown reloads with a different manifest. <code>prod</code> locks down all mutation actions; <code>dev</code> opens everything.</li>
       </ul>
     </section>
   </footer>
+
+  <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
 
   <script type="module" src="./app.js"></script>
 </body>
