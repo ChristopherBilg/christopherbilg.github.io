@@ -6,6 +6,7 @@ import { SecurityProvider } from './core/SecurityProvider.js';
 import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
 import { GraphView } from './views/GraphView.js';
+import { renderActionForm } from './views/ActionForm.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -202,7 +203,7 @@ function registerActions() {
       description: 'Reassign the pilot of a Scheduled flight.',
       params: {
         flightId:   { type: 'string', description: 'tail_number of the Flight' },
-        newPilotId: { type: 'string', description: 'pilot_id of the replacement pilot' },
+        newPilotId: { type: 'string', ref: 'Pilot', description: 'pilot_id of the replacement pilot' },
       },
       availableWhen: (flight) => flight.status === 'Scheduled',
       validate: (flight, params, ont) => {
@@ -642,9 +643,8 @@ function renderFlightDetail(id) {
     actionsHtml = '<div class="hint">Time-travel view is read-only. Click <strong>Now</strong> to re-enable actions.</div>';
   } else {
     const available = actions.availableFor(flight);
-    const allPilots = ontology.all('Pilot');
     actionsHtml = available.length
-      ? available.map((a) => renderActionRow(flight, a, allPilots)).join('')
+      ? '<div data-actions-slot="true"></div>'
       : '<div class="hint">No actions available in current state.</div>';
   }
 
@@ -706,24 +706,22 @@ function renderFlightDetail(id) {
     </div>
   `;
 
-  $detail.querySelectorAll('[data-action]').forEach((el) => {
-    el.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const actionName = el.dataset.action;
-      const form = el.closest('.action-row');
-      const params = { flightId: flight.id };
-      form.querySelectorAll('[data-param]').forEach((input) => {
-        params[input.dataset.param] = input.value;
-      });
-      try {
-        actions.dispatch(actionName, params);
-        state.lastError = null;
-      } catch (err) {
-        state.lastError = err.message;
-        render();
+  if (!isReadOnly()) {
+    const $slot = $detail.querySelector('[data-actions-slot]');
+    if ($slot) {
+      const available = actions.availableFor(flight);
+      const deps = {
+        ontology,
+        actions,
+        state,
+        render,
+        getContext: () => state.context,
+      };
+      for (const a of available) {
+        renderActionForm(a, flight, $slot, deps);
       }
-    });
-  });
+    }
+  }
 }
 
 function renderPilotDetail(id) {
@@ -841,44 +839,6 @@ function renderAirportDetail(id) {
   `;
 }
 
-function renderActionRow(flight, { name }, pilots) {
-  switch (name) {
-    case 'departFlight':
-      return `<div class="action-row">
-        <button class="btn btn-primary" data-action="departFlight">Depart flight</button>
-        <span class="hint">Scheduled → InAir</span>
-      </div>`;
-    case 'landFlight':
-      return `<div class="action-row">
-        <button class="btn btn-primary" data-action="landFlight">Land flight</button>
-        <span class="hint">InAir → Landed</span>
-      </div>`;
-    case 'cancelFlight':
-      return `<div class="action-row">
-        <input type="text" data-param="reason" placeholder="Cancellation reason" />
-        <button class="btn btn-danger" data-action="cancelFlight">Cancel flight</button>
-      </div>`;
-    case 'reassignPilot': {
-      const options = pilots
-        .filter((p) => p.pilot_id !== flight.pilot_id)
-        .map((p) => `<option value="${escapeHtml(p.pilot_id)}">${escapeHtml(p.name)} (${escapeHtml(p.pilot_id)})</option>`)
-        .join('');
-      return `<div class="action-row">
-        <select data-param="newPilotId">${options}</select>
-        <button class="btn" data-action="reassignPilot">Reassign pilot</button>
-      </div>`;
-    }
-    case 'delayFlight':
-      return `<div class="action-row">
-        <input type="number" data-param="minutes" placeholder="Minutes" min="1" value="30" style="width:100px" />
-        <button class="btn" data-action="delayFlight">Delay</button>
-      </div>`;
-    default:
-      return `<div class="action-row">
-        <button class="btn" data-action="${escapeHtml(name)}">${escapeHtml(name)}</button>
-      </div>`;
-  }
-}
 
 function renderLog() {
   let history = actions.history();
