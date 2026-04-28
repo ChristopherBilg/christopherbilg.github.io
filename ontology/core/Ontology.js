@@ -7,6 +7,7 @@ import { SecurityProvider } from './SecurityProvider.js';
 import { BranchManager } from './BranchManager.js';
 import { CRDTClock, crdtCompare } from './CRDTClock.js';
 import { JSONAdapter } from './JSONAdapter.js';
+import { DuckDBAdapter } from './DuckDBAdapter.js';
 import { LocalState } from '../store/LocalState.js';
 
 export class Ontology {
@@ -29,7 +30,8 @@ export class Ontology {
   }
 
   _makeAdapter(typeName, config) {
-    if (config.adapter === 'json') return new JSONAdapter(typeName, config, this);
+    if (config.adapter === 'json')   return new JSONAdapter(typeName, config, this);
+    if (config.adapter === 'duckdb') return new DuckDBAdapter(typeName, config, this);
     throw new Error(`Unknown adapter type "${config.adapter}" for ${typeName}`);
   }
 

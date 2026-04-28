@@ -7,6 +7,11 @@
     "allowDelay": false,
     "strictStateTransitions": true
   },
+  "adapters": {
+    "Airport": "json",
+    "Pilot": "json",
+    "Flight": "duckdb"
+  },
   "dataSources": {
     "Airport": "./data/airports.json",
     "Pilot":   "./data/pilots.json",

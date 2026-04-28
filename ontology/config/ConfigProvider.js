@@ -27,6 +27,11 @@ export class ConfigProvider {
     return `./data/${typeName.toLowerCase()}s.json`;
   }
 
+  resolveAdapter(typeName) {
+    const adapters = this.manifest?.adapters || {};
+    return adapters[typeName] || 'json';
+  }
+
   features() {
     return this.manifest?.features || {};
   }

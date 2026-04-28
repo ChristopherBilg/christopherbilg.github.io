@@ -12,9 +12,22 @@ let agent = null;
 let config = null;
 
 function setupOntology() {
-  ontology.defineObject('Airport', { backingData: config.resolveDataSource('Airport'), pk: 'code' });
-  ontology.defineObject('Pilot',   { backingData: config.resolveDataSource('Pilot'),   pk: 'pilot_id' });
-  ontology.defineObject('Flight',  { backingData: config.resolveDataSource('Flight'),  pk: 'tail_number' });
+  const adapterFor = (typeName) => config.resolveAdapter(typeName);
+  ontology.defineObject('Airport', {
+    adapter: adapterFor('Airport'),
+    backingData: config.resolveDataSource('Airport'),
+    pk: 'code',
+  });
+  ontology.defineObject('Pilot', {
+    adapter: adapterFor('Pilot'),
+    backingData: config.resolveDataSource('Pilot'),
+    pk: 'pilot_id',
+  });
+  ontology.defineObject('Flight', {
+    adapter: adapterFor('Flight'),
+    backingData: config.resolveDataSource('Flight'),
+    pk: 'tail_number',
+  });
 
   ontology.links.define('flight_pilot',       { source: 'Flight', target: 'Pilot',   fk: 'pilot_id' });
   ontology.links.define('flight_origin',      { source: 'Flight', target: 'Airport', fk: 'origin' });
@@ -979,7 +992,25 @@ ontology.on('undo', invalidateComputedFor);
     ontology.emit('action', null);
   });
   startIntegrityWorker();
-  await ontology.load();
+  try {
+    await ontology.load();
+  } catch (err) {
+    const msg = String(err).toLowerCase();
+    if (msg.includes('duckdb') || msg.includes('read_json') || msg.includes('wasm')) {
+      console.warn('[duckdb] init failed; falling back to JSONAdapter for Flight:', err.message);
+      ontology.defineObject('Flight', {
+        adapter: 'json',
+        backingData: './data/flights.json',
+        pk: 'tail_number',
+      });
+      for (const key of Array.from(ontology.cache.keys())) {
+        if (key.startsWith('Flight:')) ontology.cache.delete(key);
+      }
+      await ontology.load();
+    } else {
+      throw err;
+    }
+  }
   agent = new Agent(ontology, actions);
   renderAipExamples();
   renderAip();
