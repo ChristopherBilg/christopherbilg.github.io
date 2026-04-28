@@ -6,6 +6,8 @@ import { SecurityProvider } from './core/SecurityProvider.js';
 import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
 import { GraphView } from './views/GraphView.js';
+import { Omnibar } from './views/Omnibar.js';
+import { renderActionForm } from './views/ActionForm.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -202,7 +204,12 @@ function registerActions() {
       description: 'Reassign the pilot of a Scheduled flight.',
       params: {
         flightId:   { type: 'string', description: 'tail_number of the Flight' },
-        newPilotId: { type: 'string', description: 'pilot_id of the replacement pilot' },
+        newPilotId: {
+          type: 'string',
+          ref: 'Pilot',
+          description: 'pilot_id of the replacement pilot',
+          filter: (pilot, flight) => pilot.pilot_id !== flight.pilot_id,
+        },
       },
       availableWhen: (flight) => flight.status === 'Scheduled',
       validate: (flight, params, ont) => {
@@ -228,7 +235,13 @@ function registerActions() {
       description: 'Push back the departure time of a Scheduled flight.',
       params: {
         flightId: { type: 'string', description: 'tail_number of the Flight' },
-        minutes:  { type: 'number', description: 'minutes to add to departure_time' },
+        minutes:  {
+          type: 'number',
+          description: 'minutes to add to departure_time',
+          placeholder: 'Minutes',
+          min: 1,
+          default: 30,
+        },
       },
       availableWhen: (flight) => flight.status === 'Scheduled',
       validate: (flight, params) => {
@@ -305,6 +318,7 @@ let integrityWorker = null;
 
 const $graphCanvas = document.getElementById('graph-canvas');
 let graphView = null;
+let omnibar = null;
 const $detail = document.getElementById('detail');
 const $log = document.getElementById('log');
 const $manifestBadge = document.getElementById('manifest-badge');
@@ -637,14 +651,13 @@ function renderFlightDetail(id) {
       }).join('')
     : '<dt class="hint" style="grid-column:1/-1">no computed properties</dt>';
 
+  const available = isReadOnly() ? [] : actions.availableFor(flight);
   let actionsHtml;
   if (isReadOnly()) {
     actionsHtml = '<div class="hint">Time-travel view is read-only. Click <strong>Now</strong> to re-enable actions.</div>';
   } else {
-    const available = actions.availableFor(flight);
-    const allPilots = ontology.all('Pilot');
     actionsHtml = available.length
-      ? available.map((a) => renderActionRow(flight, a, allPilots)).join('')
+      ? '<div data-actions-slot="true"></div>'
       : '<div class="hint">No actions available in current state.</div>';
   }
 
@@ -706,24 +719,23 @@ function renderFlightDetail(id) {
     </div>
   `;
 
-  $detail.querySelectorAll('[data-action]').forEach((el) => {
-    el.addEventListener('click', (ev) => {
-      ev.preventDefault();
-      const actionName = el.dataset.action;
-      const form = el.closest('.action-row');
-      const params = { flightId: flight.id };
-      form.querySelectorAll('[data-param]').forEach((input) => {
-        params[input.dataset.param] = input.value;
-      });
-      try {
-        actions.dispatch(actionName, params);
-        state.lastError = null;
-      } catch (err) {
-        state.lastError = err.message;
-        render();
+  if (!isReadOnly() && available.length) {
+    const $slot = $detail.querySelector('[data-actions-slot]');
+    if ($slot) {
+      const deps = {
+        ontology,
+        actions,
+        state,
+        render,
+        getContext: () => state.context,
+      };
+      for (const a of available) {
+        // ActionEngine.availableFor returns { name, spec }; flatten so
+        // ActionForm can read params/idParam directly off the entry.
+        renderActionForm({ name: a.name, ...a.spec }, flight, $slot, deps);
       }
-    });
-  });
+    }
+  }
 }
 
 function renderPilotDetail(id) {
@@ -841,44 +853,6 @@ function renderAirportDetail(id) {
   `;
 }
 
-function renderActionRow(flight, { name }, pilots) {
-  switch (name) {
-    case 'departFlight':
-      return `<div class="action-row">
-        <button class="btn btn-primary" data-action="departFlight">Depart flight</button>
-        <span class="hint">Scheduled → InAir</span>
-      </div>`;
-    case 'landFlight':
-      return `<div class="action-row">
-        <button class="btn btn-primary" data-action="landFlight">Land flight</button>
-        <span class="hint">InAir → Landed</span>
-      </div>`;
-    case 'cancelFlight':
-      return `<div class="action-row">
-        <input type="text" data-param="reason" placeholder="Cancellation reason" />
-        <button class="btn btn-danger" data-action="cancelFlight">Cancel flight</button>
-      </div>`;
-    case 'reassignPilot': {
-      const options = pilots
-        .filter((p) => p.pilot_id !== flight.pilot_id)
-        .map((p) => `<option value="${escapeHtml(p.pilot_id)}">${escapeHtml(p.name)} (${escapeHtml(p.pilot_id)})</option>`)
-        .join('');
-      return `<div class="action-row">
-        <select data-param="newPilotId">${options}</select>
-        <button class="btn" data-action="reassignPilot">Reassign pilot</button>
-      </div>`;
-    }
-    case 'delayFlight':
-      return `<div class="action-row">
-        <input type="number" data-param="minutes" placeholder="Minutes" min="1" value="30" style="width:100px" />
-        <button class="btn" data-action="delayFlight">Delay</button>
-      </div>`;
-    default:
-      return `<div class="action-row">
-        <button class="btn" data-action="${escapeHtml(name)}">${escapeHtml(name)}</button>
-      </div>`;
-  }
-}
 
 function renderLog() {
   let history = actions.history();
@@ -1107,6 +1081,16 @@ ontology.on('undo', invalidateComputedFor);
   });
   graphView.mount();
   agent = new Agent(ontology, actions);
+  omnibar = new Omnibar({
+    agent,
+    ontology,
+    onSelect: ({ type, id }) => {
+      state.selection = { type, id };
+      state.lastError = null;
+      render();
+    },
+    getContext: () => state.context,
+  });
   renderAipExamples();
   renderAip();
   renderIntegrity();
@@ -1124,3 +1108,10 @@ window.query = () => ontology.query();
 window.security = ontology.security;
 window.branches = ontology.branches;
 window.clock = ontology.clock;
+
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    if (omnibar) omnibar.open();
+  }
+});

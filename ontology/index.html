@@ -114,12 +114,14 @@
         <li><strong>Data integrity worker</strong> — a Web Worker scans base data + ChangeSets out-of-band for orphan FKs, orphan ChangeSets, and kinetic drift. The kernel doesn't know about it; it subscribes to <code>action</code>/<code>undo</code>/<code>loaded</code> events and posts findings back to the main thread. Click <strong>Inject test issue</strong> to see drift detection in action.</li>
         <li><strong>WebGL graph</strong> — <code>views/GraphView.js</code> mounts a <code>force-graph</code> 2D canvas as the primary navigation surface. Subscribes to <code>loaded</code>/<code>action</code>/<code>undo</code> events and rebuilds <code>{nodes, links}</code> from the same ontology read APIs the rest of the UI uses, so security filtering, time travel, and branching all flow through it for free. Click a node to drive the detail panel via <code>state.selection: { type, id }</code>.</li>
         <li><strong>Security/Policy layer</strong> — <code>SecurityProvider</code> attaches to <code>Ontology</code>; <code>authorizeMW</code> is the first stage of <code>ActionEngine</code>'s pipeline. Roles: <code>viewer</code> (no actions; can't see Cancelled flights), <code>dispatcher</code> (depart/land/delay only), <code>admin</code> (everything). Switch roles via the topbar; the read filter and action availability update immediately. Try <code>security.permissions()</code>.</li>
+        <li><strong>Schema-driven UI</strong> — action params declare <code>type</code>/<code>ref</code>/<code>enum</code>/<code>description</code> directly on the action spec. <code>views/ActionForm.js</code> reads those and renders inputs without any per-action HTML; the Cmd+K omnibar (<code>views/Omnibar.js</code>, hit <kbd>⌘K</kbd>) is the keyboard-first surface for the same <code>agent.ask</code> the AIP panel uses. Both are thin glass over the action and intent declarations.</li>
         <li><strong>Apollo-sim</strong> — three environments under <code>env/{dev,staging,prod}/manifest.json</code>; <code>ConfigProvider</code> reads the <code>?env=</code> URL parameter and resolves both feature flags and data-source URLs. Switching environments via the topbar dropdown reloads with a different manifest. <code>prod</code> locks down all mutation actions; <code>dev</code> opens everything.</li>
       </ul>
     </section>
   </footer>
 
   <div id="toast-stack" class="toast-stack" aria-live="polite"></div>
+  <div id="omnibar-root" class="omnibar-root" hidden></div>
 
   <script type="module" src="./app.js"></script>
 </body>
