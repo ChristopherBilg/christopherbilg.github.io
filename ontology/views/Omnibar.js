@@ -6,6 +6,10 @@ const PK_FIELD = {
   Airport: 'code',
 };
 
+function pkOf(type, item) {
+  return PK_FIELD[type] ? item[PK_FIELD[type]] : (item.id || '');
+}
+
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -23,28 +27,29 @@ function debounce(fn, ms) {
 }
 
 function cardForItem(type, item) {
+  const pk = pkOf(type, item);
   if (type === 'Flight') {
     return {
-      pk:       item.tail_number,
+      pk,
       headline: item.tail_number,
       subline:  `${item.origin} → ${item.destination} · ${item.status}`,
     };
   }
   if (type === 'Pilot') {
     return {
-      pk:       item.pilot_id,
+      pk,
       headline: item.name || item.pilot_id,
       subline:  `${item.pilot_id}${item.experience_tier ? ` · ${item.experience_tier}` : ''}${item.flight_hours != null ? ` · ${item.flight_hours} hrs` : ''}`,
     };
   }
   if (type === 'Airport') {
     return {
-      pk:       item.code,
+      pk,
       headline: `${item.name} (${item.code})`,
       subline:  `${item.city}, ${item.country}`,
     };
   }
-  return { pk: item.id || '', headline: String(item.id || '?'), subline: type };
+  return { pk, headline: String(pk || '?'), subline: type };
 }
 
 export class Omnibar {
@@ -61,8 +66,8 @@ export class Omnibar {
     this._input = null;
     this._results = null;
     this._highlightIdx = -1;
-    this._lastResult = null;
     this._closeTimer = null;
+    this._submitGen = 0;
     this._debouncedInput = debounce(() => this._submit(), 120);
     this._boundDocKeydown = (e) => this._onModalKeydown(e);
   }
@@ -77,8 +82,8 @@ export class Omnibar {
     this._root.hidden = false;
     this._root.innerHTML = `
       <div class="omnibar-backdrop">
-        <div class="omnibar-modal" role="dialog" aria-modal="true">
-          <input class="omnibar-input" type="text" placeholder="Ask the agent…" autocomplete="off" />
+        <div class="omnibar-modal" role="dialog" aria-modal="true" aria-label="Command palette">
+          <input class="omnibar-input" type="text" placeholder="Ask the agent…" autocomplete="off" aria-label="Ask the agent" />
           <div class="omnibar-results"></div>
           <div class="omnibar-hint">Esc to close · ↑↓ to navigate · Enter to activate</div>
         </div>
@@ -113,7 +118,6 @@ export class Omnibar {
     this._input = null;
     this._results = null;
     this._highlightIdx = -1;
-    this._lastResult = null;
     this._root.innerHTML = '';
     this._root.hidden = true;
   }
@@ -207,17 +211,21 @@ export class Omnibar {
       return;
     }
 
+    // Generation token — discard responses that resolve out-of-order behind a
+    // newer query (debounce only spaces invocations; it doesn't cancel a slow
+    // in-flight ask when the user types again).
+    const gen = ++this._submitGen;
+
     let result;
     try {
       result = await this.agent.ask(text);
     } catch (err) {
-      if (!this._modal) return;
+      if (!this._modal || gen !== this._submitGen) return;
       this._renderError(err.message || String(err));
       return;
     }
-    if (!this._modal) return;
+    if (!this._modal || gen !== this._submitGen) return;
 
-    this._lastResult = result;
     if (result.error) {
       this._renderError(result.error);
       return;
