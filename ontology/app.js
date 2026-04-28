@@ -292,7 +292,7 @@ const TIME_PRESETS = [
 ];
 
 const state = {
-  selectedFlightId: null,
+  selection: null,
   lastError: null,
   context: null,
   aipResult: null,
@@ -612,9 +612,10 @@ function renderFlightList() {
     return;
   }
 
+  const selectedId = state.selection?.type === 'Flight' ? state.selection.id : null;
   $flightList.innerHTML = flights
     .map((f) => {
-      const selected = f.id === state.selectedFlightId ? ' selected' : '';
+      const selected = f.id === selectedId ? ' selected' : '';
       const edited = f.hasEdits() ? '<span class="edit-flag">kinetic</span>' : '';
       return `
         <div class="card${selected}" data-tail="${escapeHtml(f.id)}">
@@ -633,7 +634,7 @@ function renderFlightList() {
 
   $flightList.querySelectorAll('.card').forEach((el) => {
     el.addEventListener('click', () => {
-      state.selectedFlightId = el.dataset.tail;
+      state.selection = { type: 'Flight', id: el.dataset.tail };
       state.lastError = null;
       render();
     });
@@ -641,12 +642,19 @@ function renderFlightList() {
 }
 
 function renderDetail() {
-  if (!state.selectedFlightId) {
-    $detail.innerHTML = '<div class="empty">Select a flight to see its merged state, links, and available actions.</div>';
+  if (!state.selection) {
+    $detail.innerHTML = '<div class="empty">Select a flight, pilot, or airport to see its merged state, links, and available actions.</div>';
     return;
   }
+  const { type, id } = state.selection;
+  if (type === 'Flight')  return renderFlightDetail(id);
+  if (type === 'Pilot')   return renderPilotDetail(id);
+  if (type === 'Airport') return renderAirportDetail(id);
+  $detail.innerHTML = `<div class="empty">Unknown type: ${escapeHtml(type)}</div>`;
+}
 
-  const flight = ontology.get('Flight', state.selectedFlightId, state.context);
+function renderFlightDetail(id) {
+  const flight = ontology.get('Flight', id, state.context);
   if (!flight) {
     $detail.innerHTML = '<div class="empty">Selected flight does not exist at this point in time.</div>';
     return;
@@ -752,6 +760,121 @@ function renderDetail() {
       }
     });
   });
+}
+
+function renderPilotDetail(id) {
+  const pilot = ontology.get('Pilot', id, state.context);
+  if (!pilot) {
+    $detail.innerHTML = '<div class="empty">Selected pilot does not exist at this point in time.</div>';
+    return;
+  }
+  const flights = pilot.links('pilot_flights') || [];
+  const computedNames = ontology.computed.computedNames('Pilot');
+  const computedHtml = computedNames.length
+    ? computedNames.map((name) => {
+        let v;
+        try { v = pilot[name]; } catch (e) { v = `<error: ${e.message}>`; }
+        return `<dt>${escapeHtml(name)}</dt><dd>${escapeHtml(formatComputedValue(v))}</dd>`;
+      }).join('')
+    : '<dt class="hint" style="grid-column:1/-1">no computed properties</dt>';
+
+  $detail.innerHTML = `
+    <div class="detail">
+      <h3>${escapeHtml(pilot.name)} <span class="hint">(${escapeHtml(pilot.pilot_id)})</span></h3>
+      <div class="sub">Pilot · created ${escapeHtml(formatDate(pilot.created_at))}</div>
+
+      <div class="detail-section">
+        <h4>Merged state</h4>
+        <dl class="kv">
+          <dt>pilot_id</dt>      <dd>${escapeHtml(pilot.pilot_id)}</dd>
+          <dt>name</dt>          <dd>${escapeHtml(pilot.name)}</dd>
+          <dt>license_level</dt> <dd>${escapeHtml(pilot.license_level)}</dd>
+          <dt>flight_hours</dt>  <dd>${escapeHtml(String(pilot.flight_hours))}</dd>
+        </dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Computed</h4>
+        <dl class="kv">${computedHtml}</dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Flights (${flights.length})</h4>
+        ${flights.length
+          ? flights.slice(0, 20).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_pilot</div>
+                  ${escapeHtml(f.tail_number)} <span class="hint">(${escapeHtml(f.origin)} → ${escapeHtml(f.destination)} · ${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (flights.length > 20 ? `<div class="hint">… and ${flights.length - 20} more</div>` : '')
+          : '<div class="hint">No flights linked to this pilot.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Actions</h4>
+        <div class="hint">No actions defined for Pilot.</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAirportDetail(id) {
+  const airport = ontology.get('Airport', id, state.context);
+  if (!airport) {
+    $detail.innerHTML = '<div class="empty">Selected airport does not exist at this point in time.</div>';
+    return;
+  }
+  const departures = ontology.links.findByProperty('Flight', 'origin', id, state.context);
+  const arrivals   = ontology.links.findByProperty('Flight', 'destination', id, state.context);
+
+  $detail.innerHTML = `
+    <div class="detail">
+      <h3>${escapeHtml(airport.name)} <span class="hint">(${escapeHtml(airport.code)})</span></h3>
+      <div class="sub">Airport · ${escapeHtml(airport.city)}, ${escapeHtml(airport.country)}</div>
+
+      <div class="detail-section">
+        <h4>Merged state</h4>
+        <dl class="kv">
+          <dt>code</dt>    <dd>${escapeHtml(airport.code)}</dd>
+          <dt>name</dt>    <dd>${escapeHtml(airport.name)}</dd>
+          <dt>city</dt>    <dd>${escapeHtml(airport.city)}</dd>
+          <dt>country</dt> <dd>${escapeHtml(airport.country)}</dd>
+        </dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Departures (${departures.length})</h4>
+        ${departures.length
+          ? departures.slice(0, 10).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_origin</div>
+                  ${escapeHtml(f.tail_number)} → ${escapeHtml(f.destination)} <span class="hint">(${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (departures.length > 10 ? `<div class="hint">… and ${departures.length - 10} more</div>` : '')
+          : '<div class="hint">No departures.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Arrivals (${arrivals.length})</h4>
+        ${arrivals.length
+          ? arrivals.slice(0, 10).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_destination</div>
+                  ${escapeHtml(f.tail_number)} ← ${escapeHtml(f.origin)} <span class="hint">(${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (arrivals.length > 10 ? `<div class="hint">… and ${arrivals.length - 10} more</div>` : '')
+          : '<div class="hint">No arrivals.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Actions</h4>
+        <div class="hint">No actions defined for Airport.</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderActionRow(flight, { name }, pilots) {
