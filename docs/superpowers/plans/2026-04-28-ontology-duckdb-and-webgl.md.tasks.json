@@ -1,0 +1,66 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-28-ontology-duckdb-and-webgl.md",
+  "tasks": [
+    {
+      "id": 10,
+      "subject": "Task 1: BackingAdapter interface + JSONAdapter refactor",
+      "status": "pending",
+      "description": "**Goal:** Extract Ontology.load() fetch-and-cache logic into BackingAdapter interface with JSONAdapter implementation. Behavior-preserving refactor.\n\n**Files:**\n- Create: ontology/core/BackingAdapter.js\n- Create: ontology/core/JSONAdapter.js\n- Modify: ontology/core/Ontology.js\n\n**Acceptance Criteria:**\n- ontology.objectTypes.get('Flight').adapter === 'json' (defaulting)\n- All existing UI flows preserved\n- [adapter:json] loaded log lines\n- Cache size matches total rows\n\n**Verify:** Open ontology/index.html → all flows work. Console: Array.from(ontology.objectTypes.entries()).map(([n, c]) => [n, c.adapter]) returns json triples.\n\n```json:metadata\n{\"files\": [\"ontology/core/BackingAdapter.js\", \"ontology/core/JSONAdapter.js\", \"ontology/core/Ontology.js\"], \"verifyCommand\": \"manual: open ontology/index.html, run console assertions\", \"acceptanceCriteria\": [\"adapter field defaults to 'json'\", \"all existing flows preserved\", \"[adapter:json] loaded log lines\", \"cache.size matches total rows\"]}\n```"
+    },
+    {
+      "id": 11,
+      "subject": "Task 2: Synthetic data generator + new dataset",
+      "status": "pending",
+      "description": "**Goal:** Generate deterministic ~5000 Flight / 200 Pilot / 100 Airport dataset as JSON and Parquet via Node duckdb binding.\n\n**Files:**\n- Create: package.json, .gitignore, tools/generate-data.mjs, tools/README.md\n- Create: ontology/data/flights.parquet\n- Modify: ontology/data/{airports,pilots,flights}.json\n\n**Acceptance Criteria:**\n- npm install + npm run gen-data succeed\n- Re-run produces byte-identical output (deterministic)\n- Status mix ~60/15/20/5\n- Zero orphan FKs\n- Pilot tiers each ≥ 20\n- node_modules/ git-ignored\n\n**Verify:** node -e validation script.\n\n```json:metadata\n{\"files\": [\"package.json\", \".gitignore\", \"tools/generate-data.mjs\", \"tools/README.md\", \"ontology/data/airports.json\", \"ontology/data/pilots.json\", \"ontology/data/flights.json\", \"ontology/data/flights.parquet\"], \"verifyCommand\": \"npm install && npm run gen-data && node -e validation\", \"acceptanceCriteria\": [\"deterministic output\", \"5000/200/100 row counts\", \"status distribution within target\", \"zero orphan FKs\", \"all three pilot tiers populated\"]}\n```"
+    },
+    {
+      "id": 12,
+      "subject": "Task 3: DuckDBProvider singleton",
+      "status": "pending",
+      "blockedBy": [11],
+      "description": "**Goal:** Singleton owning DuckDB-Wasm instance. init() (idempotent, parallel-safe), registerParquet(name, url), query(sql, params).\n\n**Files:**\n- Create: ontology/core/DuckDBProvider.js\n\n**Acceptance Criteria:**\n- DuckDBProvider.shared() singleton\n- Idempotent init()\n- registerParquet creates queryable VIEW\n- query() returns plain rows; bigint coerced to number\n- Parameterized queries via prepared statements\n\n**Verify:** Browser console import + init + query (must serve via http://).\n\n```json:metadata\n{\"files\": [\"ontology/core/DuckDBProvider.js\"], \"verifyCommand\": \"manual: serve via http and run console import + init + query\", \"acceptanceCriteria\": [\"singleton dedup\", \"idempotent init\", \"parquet registration\", \"parameterized query path\", \"BigInt -> Number coercion\"]}\n```"
+    },
+    {
+      "id": 13,
+      "subject": "Task 4: DuckDBAdapter + wire Flight via manifests",
+      "status": "pending",
+      "blockedBy": [10, 12],
+      "description": "**Goal:** DuckDBAdapter using DuckDBProvider; Flight wired in staging/prod manifests; dev keeps JSON; fallback on init failure.\n\n**Files:**\n- Create: ontology/core/DuckDBAdapter.js\n- Modify: Ontology.js, env/{dev,staging,prod}/manifest.json, app.js, ConfigProvider.js\n\n**Acceptance Criteria:**\n- ?env=staging: [duckdb] ready + [adapter:duckdb] loaded Flight (5000)\n- adapter resolves correctly per env\n- ontology.cache.size === 5300\n- All existing flows work with DuckDB-backed Flight\n- Broken CDN URL → fallback to JSON, app still boots\n\n**Verify:** Browser load each env; simulate broken CDN.\n\n```json:metadata\n{\"files\": [\"ontology/core/DuckDBAdapter.js\", \"ontology/core/Ontology.js\", \"ontology/env/dev/manifest.json\", \"ontology/env/staging/manifest.json\", \"ontology/env/prod/manifest.json\", \"ontology/app.js\", \"ontology/config/ConfigProvider.js\"], \"verifyCommand\": \"serve and load ?env=staging, ?env=dev, simulate CDN failure\", \"acceptanceCriteria\": [\"adapter selection per manifest\", \"DuckDB hydration of Flight\", \"fallback to JSON on init failure\", \"all existing UI flows preserved\"]}\n```"
+    },
+    {
+      "id": 14,
+      "subject": "Task 5: QueryBuilder.sql() escape hatch",
+      "status": "pending",
+      "blockedBy": [12],
+      "description": "**Goal:** .sql(text, params) on QueryBuilder. Returns ObjectProxy[] via Ontology.get(type, pk) so security/temporal/proxy filtering applies.\n\n**Files:**\n- Modify: ontology/core/QueryBuilder.js (add .sql, async collect/count)\n- Modify: Agent.js, app.js (await callsites)\n\n**Acceptance Criteria:**\n- .sql() returns proxies\n- Without .from() → throws clear error\n- Kinetic edits applied post-SQL\n- viewer role + temporal filter both apply\n\n**Verify:** Browser console SQL queries with role/temporal toggles.\n\n```json:metadata\n{\"files\": [\"ontology/core/QueryBuilder.js\", \"ontology/core/Agent.js\", \"ontology/app.js\"], \"verifyCommand\": \"console SQL query with role/temporal toggles\", \"acceptanceCriteria\": [\".sql() returns proxies\", \"kinetic overlay applied\", \"security filter applied\", \"temporal filter applied\", \"param binding required\"]}\n```"
+    },
+    {
+      "id": 15,
+      "subject": "Task 6: Generalized detail panel + state.selection refactor",
+      "status": "pending",
+      "description": "**Goal:** Detail panel for Pilot/Airport selection; state.selectedFlightId → state.selection: { type, id }.\n\n**Files:**\n- Modify: ontology/app.js\n\n**Acceptance Criteria:**\n- state.selection replaces selectedFlightId\n- Flight detail unchanged\n- Pilot detail: state, computed, linked flights\n- Airport detail: state, departures, arrivals\n- No actions for non-Flight types\n- Time travel + role switching still affect detail panel\n\n**Verify:** Click flight, then console-set selection to Pilot/Airport.\n\n```json:metadata\n{\"files\": [\"ontology/app.js\"], \"verifyCommand\": \"manual: click flight, then console-set selection to Pilot and Airport\", \"acceptanceCriteria\": [\"state.selection object shape\", \"Flight render unchanged\", \"Pilot/Airport renderers\", \"no actions for non-Flight types\"]}\n```"
+    },
+    {
+      "id": 16,
+      "subject": "Task 7: GraphView module (built but not yet mounted)",
+      "status": "pending",
+      "blockedBy": [15],
+      "description": "**Goal:** views/GraphView.js owning force-graph instance, ontology→{nodes, links}, click→select bridge.\n\n**Files:**\n- Create: ontology/views/GraphView.js\n\n**Acceptance Criteria:**\n- Constructor: (canvasEl, ontology, { onSelect, getContext })\n- mount() subscribes to loaded/action/undo\n- refresh() produces ~5300 nodes / ~15k links\n- Type:pk node ids\n- Forward link types only\n- Click → onSelect with {type, id}\n\n**Verify:** Console temp-mount in floating div.\n\n```json:metadata\n{\"files\": [\"ontology/views/GraphView.js\"], \"verifyCommand\": \"console: import GraphView, mount in floating div, observe nodes and click bridge\", \"acceptanceCriteria\": [\"constructor signature\", \"mount/refresh/refreshLight\", \"forward links only\", \"click → onSelect with {type, id}\", \"color by status for Flight, by type for Pilot/Airport\"]}\n```"
+    },
+    {
+      "id": 17,
+      "subject": "Task 8: Layout refactor + app.js wiring + remove flight list",
+      "status": "pending",
+      "blockedBy": [13, 16],
+      "description": "**Goal:** Replace flight-list panel with graph canvas; mount GraphView; delete renderFlightList.\n\n**Files:**\n- Modify: ontology/index.html, styles.css, app.js\n\n**Acceptance Criteria:**\n- Layout: graph(60%) | detail | audit-log(320px)\n- Click node → detail panel populates\n- renderFlightList/.panel-list/#flight-list all removed\n- Render < 5s, interactive\n- cancelFlight re-colors without full layout rebuild\n- Branching, time travel, viewer role, integrity, AIP, multi-tab CRDT all work\n\n**Verify:** ?env=staging end-to-end UI walkthrough (10 sub-checks).\n\n```json:metadata\n{\"files\": [\"ontology/index.html\", \"ontology/styles.css\", \"ontology/app.js\"], \"verifyCommand\": \"?env=staging full UI walkthrough\", \"acceptanceCriteria\": [\"new 3-column layout\", \"graph mounts and renders\", \"click selection drives detail panel\", \"flight list code removed\", \"all existing flows preserved including branching, time travel, viewer role, integrity worker, AIP, multi-tab CRDT\"]}\n```"
+    },
+    {
+      "id": 18,
+      "subject": "Task 9: Final verification sweep + footer docs update",
+      "status": "pending",
+      "blockedBy": [13, 14, 17],
+      "description": "**Goal:** Walk both spec verification checklists end-to-end; add Adapter, OLAP escape hatch, and Graph view bullets to footer.\n\n**Files:**\n- Modify: ontology/index.html (footer arch list)\n\n**Acceptance Criteria:**\n- All Phase A items pass on staging and dev\n- All Phase B items pass on staging\n- Footer has 3 new/updated bullets\n- No console errors on clean reload\n\n**Verify:** Walk every spec §6 checkbox.\n\n```json:metadata\n{\"files\": [\"ontology/index.html\"], \"verifyCommand\": \"walk full spec §6 verification checklists Phase A and Phase B\", \"acceptanceCriteria\": [\"all spec §6 items pass on staging and dev\", \"footer documentation updated\", \"no console errors\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-04-28T00:00:00Z"
+}
