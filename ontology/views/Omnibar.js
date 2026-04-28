@@ -82,10 +82,10 @@ export class Omnibar {
     this._root.hidden = false;
     this._root.innerHTML = `
       <div class="omnibar-backdrop">
-        <div class="omnibar-modal" role="dialog" aria-modal="true" aria-label="Command palette">
+        <div class="omnibar-modal" role="dialog" aria-modal="true" aria-label="Command palette" aria-describedby="omnibar-hint">
           <input class="omnibar-input" type="text" placeholder="Ask the agent…" autocomplete="off" aria-label="Ask the agent" />
           <div class="omnibar-results"></div>
-          <div class="omnibar-hint">Esc to close · ↑↓ to navigate · Enter to activate</div>
+          <div class="omnibar-hint" id="omnibar-hint">Esc to close · ↑↓ to navigate · Enter to activate</div>
         </div>
       </div>
     `;

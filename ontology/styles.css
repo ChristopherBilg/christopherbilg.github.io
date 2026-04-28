@@ -708,8 +708,8 @@ code, pre, .mono { font-family: var(--mono); }
   transition: border-color 100ms ease, background 100ms ease;
 }
 
-.omnibar-result-card:hover,
-.omnibar-result-card.is-highlighted {
+.omnibar-result-card:hover:not(.omnibar-result-success):not(.omnibar-result-error),
+.omnibar-result-card.is-highlighted:not(.omnibar-result-success):not(.omnibar-result-error) {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
