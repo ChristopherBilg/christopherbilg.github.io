@@ -204,7 +204,12 @@ function registerActions() {
       description: 'Reassign the pilot of a Scheduled flight.',
       params: {
         flightId:   { type: 'string', description: 'tail_number of the Flight' },
-        newPilotId: { type: 'string', ref: 'Pilot', description: 'pilot_id of the replacement pilot' },
+        newPilotId: {
+          type: 'string',
+          ref: 'Pilot',
+          description: 'pilot_id of the replacement pilot',
+          filter: (pilot, flight) => pilot.pilot_id !== flight.pilot_id,
+        },
       },
       availableWhen: (flight) => flight.status === 'Scheduled',
       validate: (flight, params, ont) => {
@@ -230,7 +235,13 @@ function registerActions() {
       description: 'Push back the departure time of a Scheduled flight.',
       params: {
         flightId: { type: 'string', description: 'tail_number of the Flight' },
-        minutes:  { type: 'number', description: 'minutes to add to departure_time' },
+        minutes:  {
+          type: 'number',
+          description: 'minutes to add to departure_time',
+          placeholder: 'Minutes',
+          min: 1,
+          default: 30,
+        },
       },
       availableWhen: (flight) => flight.status === 'Scheduled',
       validate: (flight, params) => {

@@ -27,8 +27,9 @@ function buildRefOption(obj) {
   return `<option value="${escapeHtml(value)}">${escapeHtml(label)} (${escapeHtml(value)})</option>`;
 }
 
-function buildInputHtml(name, paramSpec, ontology, getContext) {
-  const placeholder = paramSpec.description ? `placeholder="${escapeHtml(paramSpec.description)}"` : '';
+function buildInputHtml(name, paramSpec, ontology, contextObj, getContext) {
+  const placeholderText = paramSpec.placeholder ?? paramSpec.description;
+  const placeholder = placeholderText ? `placeholder="${escapeHtml(placeholderText)}"` : '';
   const required = paramSpec.optional ? '' : 'required';
 
   if (paramSpec.ref) {
@@ -36,7 +37,10 @@ function buildInputHtml(name, paramSpec, ontology, getContext) {
       console.warn(`[ActionForm] unknown ref target "${paramSpec.ref}" — falling back to text input`);
       return `<input type="text" data-param="${escapeHtml(name)}" placeholder="${escapeHtml(paramSpec.ref)} (unknown type — falling back to text)" ${required} />`;
     }
-    const objs = ontology.all(paramSpec.ref, getContext());
+    const all = ontology.all(paramSpec.ref, getContext());
+    const objs = typeof paramSpec.filter === 'function'
+      ? all.filter((o) => paramSpec.filter(o, contextObj))
+      : all;
     const options = objs.map((o) => buildRefOption(o)).join('');
     return `<select data-param="${escapeHtml(name)}" ${required}>${options}</select>`;
   }
@@ -49,7 +53,9 @@ function buildInputHtml(name, paramSpec, ontology, getContext) {
   }
 
   if (paramSpec.type === 'number') {
-    return `<input type="number" data-param="${escapeHtml(name)}" ${placeholder} ${required} style="width:120px" />`;
+    const min = paramSpec.min != null ? `min="${escapeHtml(paramSpec.min)}"` : '';
+    const value = paramSpec.default != null ? `value="${escapeHtml(paramSpec.default)}"` : '';
+    return `<input type="number" data-param="${escapeHtml(name)}" ${placeholder} ${min} ${value} ${required} style="width:120px" />`;
   }
 
   return `<input type="text" data-param="${escapeHtml(name)}" ${placeholder} ${required} />`;
@@ -64,7 +70,7 @@ export function renderActionForm(action, contextObj, $container, deps) {
 
   const inputsHtml = Object.entries(action.params || {})
     .filter(([name]) => name !== action.idParam)
-    .map(([name, spec]) => buildInputHtml(name, spec, ontology, getContext))
+    .map(([name, spec]) => buildInputHtml(name, spec, ontology, contextObj, getContext))
     .join('');
 
   const $row = document.createElement('div');
