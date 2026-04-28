@@ -6,6 +6,7 @@ import { QueryBuilder } from './QueryBuilder.js';
 import { SecurityProvider } from './SecurityProvider.js';
 import { BranchManager } from './BranchManager.js';
 import { CRDTClock, crdtCompare } from './CRDTClock.js';
+import { JSONAdapter } from './JSONAdapter.js';
 import { LocalState } from '../store/LocalState.js';
 
 export class Ontology {
@@ -23,24 +24,22 @@ export class Ontology {
   }
 
   defineObject(name, config) {
-    this.objectTypes.set(name, config);
+    const adapter = config.adapter || 'json';
+    this.objectTypes.set(name, { ...config, adapter });
+  }
+
+  _makeAdapter(typeName, config) {
+    if (config.adapter === 'json') return new JSONAdapter(typeName, config, this);
+    throw new Error(`Unknown adapter type "${config.adapter}" for ${typeName}`);
   }
 
   async load() {
     const jobs = [];
+    this.adapters = new Map();
     for (const [name, config] of this.objectTypes) {
-      jobs.push(
-        fetch(config.backingData)
-          .then((res) => {
-            if (!res.ok) throw new Error(`Failed to load ${config.backingData}: ${res.status}`);
-            return res.json();
-          })
-          .then((rows) => {
-            for (const row of rows) {
-              this.cache.set(`${name}:${row[config.pk]}`, row);
-            }
-          }),
-      );
+      const adapter = this._makeAdapter(name, config);
+      this.adapters.set(name, adapter);
+      jobs.push(adapter.load());
     }
     await Promise.all(jobs);
     this.loaded = true;
