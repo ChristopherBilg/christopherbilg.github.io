@@ -49,8 +49,11 @@ function cardForItem(type, item) {
 
 export class Omnibar {
   constructor({ agent, ontology, onSelect, getContext }) {
+    // ontology is accepted for API symmetry with other views and to leave room
+    // for future fuzzy object search (B2 follow-up); not stored, since v1
+    // routes everything through agent.ask.
+    void ontology;
     this.agent = agent;
-    this.ontology = ontology;
     this.onSelect = onSelect || (() => {});
     this.getContext = getContext || (() => null);
     this._root = document.getElementById('omnibar-root');
@@ -94,7 +97,9 @@ export class Omnibar {
       this._cancelCloseTimer();
       this._debouncedInput();
     });
-    this._input.addEventListener('keydown', this._boundDocKeydown);
+    // Capture key events on the document so Escape/Arrow/Enter still work
+    // when focus moves off the input (e.g., to a result card or chip).
+    document.addEventListener('keydown', this._boundDocKeydown, true);
 
     this._renderEmptyState();
     this._input.focus();
@@ -102,6 +107,7 @@ export class Omnibar {
 
   close() {
     if (!this._modal) return;
+    document.removeEventListener('keydown', this._boundDocKeydown, true);
     this._cancelCloseTimer();
     this._modal = null;
     this._input = null;
@@ -151,7 +157,10 @@ export class Omnibar {
   _cycleHighlight(delta) {
     const cards = this._results.querySelectorAll('.omnibar-result-card');
     if (!cards.length) return;
-    const next = ((this._highlightIdx + delta) + cards.length) % cards.length;
+    // From uninitialized (-1), ArrowDown should land on 0 and ArrowUp on
+    // the last card; the modular formula otherwise lands one off.
+    const start = this._highlightIdx === -1 ? (delta > 0 ? -1 : 0) : this._highlightIdx;
+    const next = ((start + delta) + cards.length) % cards.length;
     cards.forEach((c, i) => c.classList.toggle('is-highlighted', i === next));
     this._highlightIdx = next;
   }
@@ -259,8 +268,8 @@ export class Omnibar {
       el.addEventListener('click', () => {
         const t = el.dataset.type;
         const id = el.dataset.pk;
-        this.close();
         this.onSelect({ type: t, id });
+        this.close();
       });
     });
   }
