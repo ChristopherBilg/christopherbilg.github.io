@@ -1,3 +1,5 @@
+import { DuckDBProvider } from './DuckDBProvider.js';
+
 const DEFAULT_MAX_DEPTH = 8;
 
 export class QueryBuilder {
@@ -6,10 +8,18 @@ export class QueryBuilder {
     this._steps = [];
     this._maxDepth = DEFAULT_MAX_DEPTH;
     this._context = null;
+    this._fromType = null;
   }
 
   from(typeName) {
+    this._fromType = typeName;
     this._steps.push({ kind: 'from', type: typeName });
+    return this;
+  }
+
+  sql(text, params = []) {
+    if (!this._fromType) throw new Error('.sql() requires a preceding .from(typeName)');
+    this._steps.push({ kind: 'sql', text, params });
     return this;
   }
 
@@ -39,7 +49,7 @@ export class QueryBuilder {
     return this;
   }
 
-  collect() {
+  async collect() {
     let frontier = [];
     let traversals = 0;
 
@@ -48,6 +58,13 @@ export class QueryBuilder {
         frontier = this.ontology.all(step.type, this._context);
       } else if (step.kind === 'startingFrom') {
         frontier = step.objects.slice();
+      } else if (step.kind === 'sql') {
+        const provider = DuckDBProvider.shared();
+        const rows = await provider.query(step.text, step.params);
+        const pk = this.ontology.objectTypes.get(this._fromType).pk;
+        frontier = rows
+          .map((r) => this.ontology.get(this._fromType, r[pk], this._context))
+          .filter(Boolean);
       } else if (step.kind === 'traverse') {
         traversals++;
         if (traversals > this._maxDepth) {
@@ -76,14 +93,15 @@ export class QueryBuilder {
     return frontier;
   }
 
-  count() {
-    return this.collect().length;
+  async count() {
+    return (await this.collect()).length;
   }
 
   describe() {
     return this._steps.map((s) => {
       if (s.kind === 'from') return `from(${s.type})`;
       if (s.kind === 'startingFrom') return `startingFrom([${s.objects.length}])`;
+      if (s.kind === 'sql') return `sql(…)`;
       if (s.kind === 'traverse') return `traverse(${s.linkName})`;
       if (s.kind === 'where') return 'where(…)';
       return s.kind;

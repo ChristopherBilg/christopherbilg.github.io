@@ -514,9 +514,9 @@ function renderIntegrity() {
     .join('');
 }
 
-function askAgent(prompt) {
+async function askAgent(prompt) {
   if (!agent) return;
-  const result = agent.ask(prompt);
+  const result = await agent.ask(prompt);
   state.aipResult = { prompt, result };
   renderAip();
 }
