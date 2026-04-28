@@ -5,6 +5,7 @@ import { ConfigProvider } from './config/ConfigProvider.js';
 import { SecurityProvider } from './core/SecurityProvider.js';
 import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
+import { GraphView } from './views/GraphView.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -12,9 +13,22 @@ let agent = null;
 let config = null;
 
 function setupOntology() {
-  ontology.defineObject('Airport', { backingData: config.resolveDataSource('Airport'), pk: 'code' });
-  ontology.defineObject('Pilot',   { backingData: config.resolveDataSource('Pilot'),   pk: 'pilot_id' });
-  ontology.defineObject('Flight',  { backingData: config.resolveDataSource('Flight'),  pk: 'tail_number' });
+  const adapterFor = (typeName) => config.resolveAdapter(typeName);
+  ontology.defineObject('Airport', {
+    adapter: adapterFor('Airport'),
+    backingData: config.resolveDataSource('Airport'),
+    pk: 'code',
+  });
+  ontology.defineObject('Pilot', {
+    adapter: adapterFor('Pilot'),
+    backingData: config.resolveDataSource('Pilot'),
+    pk: 'pilot_id',
+  });
+  ontology.defineObject('Flight', {
+    adapter: adapterFor('Flight'),
+    backingData: config.resolveDataSource('Flight'),
+    pk: 'tail_number',
+  });
 
   ontology.links.define('flight_pilot',       { source: 'Flight', target: 'Pilot',   fk: 'pilot_id' });
   ontology.links.define('flight_origin',      { source: 'Flight', target: 'Airport', fk: 'origin' });
@@ -279,7 +293,7 @@ const TIME_PRESETS = [
 ];
 
 const state = {
-  selectedFlightId: null,
+  selection: null,
   lastError: null,
   context: null,
   aipResult: null,
@@ -289,7 +303,8 @@ const state = {
 
 let integrityWorker = null;
 
-const $flightList = document.getElementById('flight-list');
+const $graphCanvas = document.getElementById('graph-canvas');
+let graphView = null;
 const $detail = document.getElementById('detail');
 const $log = document.getElementById('log');
 const $manifestBadge = document.getElementById('manifest-badge');
@@ -501,9 +516,9 @@ function renderIntegrity() {
     .join('');
 }
 
-function askAgent(prompt) {
+async function askAgent(prompt) {
   if (!agent) return;
-  const result = agent.ask(prompt);
+  const result = await agent.ask(prompt);
   state.aipResult = { prompt, result };
   renderAip();
 }
@@ -590,50 +605,20 @@ function formatDate(iso) {
   return d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, 'Z');
 }
 
-function renderFlightList() {
-  const flights = ontology.all('Flight', state.context);
-  flights.sort((a, b) => a.tail_number.localeCompare(b.tail_number));
-
-  if (!flights.length) {
-    $flightList.innerHTML = '<div class="hint">No flights existed at this point in time.</div>';
+function renderDetail() {
+  if (!state.selection) {
+    $detail.innerHTML = '<div class="empty">Select a flight, pilot, or airport to see its merged state, links, and available actions.</div>';
     return;
   }
-
-  $flightList.innerHTML = flights
-    .map((f) => {
-      const selected = f.id === state.selectedFlightId ? ' selected' : '';
-      const edited = f.hasEdits() ? '<span class="edit-flag">kinetic</span>' : '';
-      return `
-        <div class="card${selected}" data-tail="${escapeHtml(f.id)}">
-          <div class="card-head">
-            <span class="tail">${escapeHtml(f.tail_number)}</span>
-            <span class="status status-${escapeHtml(f.status)}">${escapeHtml(f.status)}</span>
-          </div>
-          <div class="card-head">
-            <span class="route">${escapeHtml(f.origin)} → ${escapeHtml(f.destination)}</span>
-            ${edited}
-          </div>
-        </div>
-      `;
-    })
-    .join('');
-
-  $flightList.querySelectorAll('.card').forEach((el) => {
-    el.addEventListener('click', () => {
-      state.selectedFlightId = el.dataset.tail;
-      state.lastError = null;
-      render();
-    });
-  });
+  const { type, id } = state.selection;
+  if (type === 'Flight')  return renderFlightDetail(id);
+  if (type === 'Pilot')   return renderPilotDetail(id);
+  if (type === 'Airport') return renderAirportDetail(id);
+  $detail.innerHTML = `<div class="empty">Unknown type: ${escapeHtml(type)}</div>`;
 }
 
-function renderDetail() {
-  if (!state.selectedFlightId) {
-    $detail.innerHTML = '<div class="empty">Select a flight to see its merged state, links, and available actions.</div>';
-    return;
-  }
-
-  const flight = ontology.get('Flight', state.selectedFlightId, state.context);
+function renderFlightDetail(id) {
+  const flight = ontology.get('Flight', id, state.context);
   if (!flight) {
     $detail.innerHTML = '<div class="empty">Selected flight does not exist at this point in time.</div>';
     return;
@@ -739,6 +724,121 @@ function renderDetail() {
       }
     });
   });
+}
+
+function renderPilotDetail(id) {
+  const pilot = ontology.get('Pilot', id, state.context);
+  if (!pilot) {
+    $detail.innerHTML = '<div class="empty">Selected pilot does not exist at this point in time.</div>';
+    return;
+  }
+  const flights = pilot.links('pilot_flights') || [];
+  const computedNames = ontology.computed.computedNames('Pilot');
+  const computedHtml = computedNames.length
+    ? computedNames.map((name) => {
+        let v;
+        try { v = pilot[name]; } catch (e) { v = `<error: ${e.message}>`; }
+        return `<dt>${escapeHtml(name)}</dt><dd>${escapeHtml(formatComputedValue(v))}</dd>`;
+      }).join('')
+    : '<dt class="hint" style="grid-column:1/-1">no computed properties</dt>';
+
+  $detail.innerHTML = `
+    <div class="detail">
+      <h3>${escapeHtml(pilot.name)} <span class="hint">(${escapeHtml(pilot.pilot_id)})</span></h3>
+      <div class="sub">Pilot · created ${escapeHtml(formatDate(pilot.created_at))}</div>
+
+      <div class="detail-section">
+        <h4>Merged state</h4>
+        <dl class="kv">
+          <dt>pilot_id</dt>      <dd>${escapeHtml(pilot.pilot_id)}</dd>
+          <dt>name</dt>          <dd>${escapeHtml(pilot.name)}</dd>
+          <dt>license_level</dt> <dd>${escapeHtml(pilot.license_level)}</dd>
+          <dt>flight_hours</dt>  <dd>${escapeHtml(String(pilot.flight_hours))}</dd>
+        </dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Computed</h4>
+        <dl class="kv">${computedHtml}</dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Flights (${flights.length})</h4>
+        ${flights.length
+          ? flights.slice(0, 20).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_pilot</div>
+                  ${escapeHtml(f.tail_number)} <span class="hint">(${escapeHtml(f.origin)} → ${escapeHtml(f.destination)} · ${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (flights.length > 20 ? `<div class="hint">… and ${flights.length - 20} more</div>` : '')
+          : '<div class="hint">No flights linked to this pilot.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Actions</h4>
+        <div class="hint">No actions defined for Pilot.</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderAirportDetail(id) {
+  const airport = ontology.get('Airport', id, state.context);
+  if (!airport) {
+    $detail.innerHTML = '<div class="empty">Selected airport does not exist at this point in time.</div>';
+    return;
+  }
+  const departures = ontology.links.findByProperty('Flight', 'origin', id, state.context);
+  const arrivals   = ontology.links.findByProperty('Flight', 'destination', id, state.context);
+
+  $detail.innerHTML = `
+    <div class="detail">
+      <h3>${escapeHtml(airport.name)} <span class="hint">(${escapeHtml(airport.code)})</span></h3>
+      <div class="sub">Airport · ${escapeHtml(airport.city)}, ${escapeHtml(airport.country)}</div>
+
+      <div class="detail-section">
+        <h4>Merged state</h4>
+        <dl class="kv">
+          <dt>code</dt>    <dd>${escapeHtml(airport.code)}</dd>
+          <dt>name</dt>    <dd>${escapeHtml(airport.name)}</dd>
+          <dt>city</dt>    <dd>${escapeHtml(airport.city)}</dd>
+          <dt>country</dt> <dd>${escapeHtml(airport.country)}</dd>
+        </dl>
+      </div>
+
+      <div class="detail-section">
+        <h4>Departures (${departures.length})</h4>
+        ${departures.length
+          ? departures.slice(0, 10).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_origin</div>
+                  ${escapeHtml(f.tail_number)} → ${escapeHtml(f.destination)} <span class="hint">(${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (departures.length > 10 ? `<div class="hint">… and ${departures.length - 10} more</div>` : '')
+          : '<div class="hint">No departures.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Arrivals (${arrivals.length})</h4>
+        ${arrivals.length
+          ? arrivals.slice(0, 10).map((f) => `
+              <div class="link-row">
+                <div>
+                  <div class="type">flight_destination</div>
+                  ${escapeHtml(f.tail_number)} ← ${escapeHtml(f.origin)} <span class="hint">(${escapeHtml(f.status)})</span>
+                </div>
+              </div>`).join('') + (arrivals.length > 10 ? `<div class="hint">… and ${arrivals.length - 10} more</div>` : '')
+          : '<div class="hint">No arrivals.</div>'}
+      </div>
+
+      <div class="detail-section">
+        <h4>Actions</h4>
+        <div class="hint">No actions defined for Airport.</div>
+      </div>
+    </div>
+  `;
 }
 
 function renderActionRow(flight, { name }, pilots) {
@@ -940,7 +1040,6 @@ function renderTxBadge() {
 function render() {
   renderTxBadge();
   renderCRDTBadge();
-  renderFlightList();
   renderDetail();
   renderLog();
   renderAip();
@@ -979,7 +1078,34 @@ ontology.on('undo', invalidateComputedFor);
     ontology.emit('action', null);
   });
   startIntegrityWorker();
-  await ontology.load();
+  try {
+    await ontology.load();
+  } catch (err) {
+    const msg = String(err).toLowerCase();
+    if (msg.includes('duckdb') || msg.includes('read_json') || msg.includes('wasm')) {
+      console.warn('[duckdb] init failed; falling back to JSONAdapter for Flight:', err.message);
+      ontology.defineObject('Flight', {
+        adapter: 'json',
+        backingData: './data/flights.json',
+        pk: 'tail_number',
+      });
+      for (const key of Array.from(ontology.cache.keys())) {
+        if (key.startsWith('Flight:')) ontology.cache.delete(key);
+      }
+      await ontology.load();
+    } else {
+      throw err;
+    }
+  }
+  graphView = new GraphView($graphCanvas, ontology, {
+    onSelect: ({ type, id }) => {
+      state.selection = { type, id };
+      state.lastError = null;
+      render();
+    },
+    getContext: () => state.context,
+  });
+  graphView.mount();
   agent = new Agent(ontology, actions);
   renderAipExamples();
   renderAip();

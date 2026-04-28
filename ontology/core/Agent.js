@@ -87,16 +87,17 @@ export class Agent {
         name: 'pilots-flying-to',
         pattern: /^pilots?\s+(?:flying\s+)?to\s+([A-Z]+)$/i,
         kind: 'read',
-        run: (m) => {
+        run: async (m) => {
           const code = m[1].toUpperCase();
           const q = this.ontology.query()
             .from('Flight')
             .where((f) => f.destination === code && f.status !== 'Cancelled')
             .traverse('flight_pilot');
+          const pilots = await q.collect();
           return {
             query: q.describe(),
             type: 'Pilot',
-            items: q.collect().map((p) => ({
+            items: pilots.map((p) => ({
               pilot_id: p.pilot_id,
               name: p.name,
               experience_tier: p.experience_tier,
@@ -109,15 +110,16 @@ export class Agent {
         name: 'flights-from',
         pattern: /^flights?\s+from\s+([A-Z]+)$/i,
         kind: 'read',
-        run: (m) => {
+        run: async (m) => {
           const code = m[1].toUpperCase();
           const q = this.ontology.query()
             .from('Flight')
             .where((f) => f.origin === code);
+          const flights = await q.collect();
           return {
             query: q.describe(),
             type: 'Flight',
-            items: q.collect().map((f) => ({
+            items: flights.map((f) => ({
               tail_number: f.tail_number,
               destination: f.destination,
               status: f.status,
@@ -131,17 +133,18 @@ export class Agent {
         name: 'destinations-of',
         pattern: /^destinations?\s+(?:of|for)\s+(P\d+)$/i,
         kind: 'read',
-        run: (m) => {
+        run: async (m) => {
           const pilotId = m[1].toUpperCase();
           const q = this.ontology.query()
             .from('Pilot')
             .where((p) => p.pilot_id === pilotId)
             .traverse('pilot_flights')
             .traverse('flight_destination');
+          const airports = await q.collect();
           return {
             query: q.describe(),
             type: 'Airport',
-            items: q.collect().map((a) => ({ code: a.code, name: a.name, city: a.city })),
+            items: airports.map((a) => ({ code: a.code, name: a.name, city: a.city })),
           };
         },
         example: 'destinations of P001',
@@ -149,7 +152,7 @@ export class Agent {
     ];
   }
 
-  ask(prompt) {
+  async ask(prompt) {
     const text = String(prompt || '').trim();
     if (!text) return { error: 'Empty prompt' };
 
@@ -158,7 +161,8 @@ export class Agent {
       if (!m) continue;
       try {
         if (intent.kind === 'read') {
-          return { intent: intent.name, kind: 'read', result: intent.run(m) };
+          const result = await intent.run(m);
+          return { intent: intent.name, kind: 'read', result };
         }
         const params = intent.toParams(m);
         const cs = this.actions.dispatch(intent.action, params);
