@@ -6,6 +6,7 @@ import { SecurityProvider } from './core/SecurityProvider.js';
 import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
 import { GraphView } from './views/GraphView.js';
+import { Omnibar } from './views/Omnibar.js';
 import { renderActionForm } from './views/ActionForm.js';
 
 const ontology = new Ontology();
@@ -306,6 +307,7 @@ let integrityWorker = null;
 
 const $graphCanvas = document.getElementById('graph-canvas');
 let graphView = null;
+let omnibar = null;
 const $detail = document.getElementById('detail');
 const $log = document.getElementById('log');
 const $manifestBadge = document.getElementById('manifest-badge');
@@ -1068,6 +1070,16 @@ ontology.on('undo', invalidateComputedFor);
   });
   graphView.mount();
   agent = new Agent(ontology, actions);
+  omnibar = new Omnibar({
+    agent,
+    ontology,
+    onSelect: ({ type, id }) => {
+      state.selection = { type, id };
+      state.lastError = null;
+      render();
+    },
+    getContext: () => state.context,
+  });
   renderAipExamples();
   renderAip();
   renderIntegrity();
@@ -1085,3 +1097,10 @@ window.query = () => ontology.query();
 window.security = ontology.security;
 window.branches = ontology.branches;
 window.clock = ontology.clock;
+
+window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    if (omnibar) omnibar.open();
+  }
+});

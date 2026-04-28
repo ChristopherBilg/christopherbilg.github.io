@@ -647,3 +647,129 @@ code, pre, .mono { font-family: var(--mono); }
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* --- Omnibar (Cmd+K) --- */
+
+.omnibar-root[hidden] { display: none; }
+
+.omnibar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 18, 28, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  z-index: 10000;
+}
+
+.omnibar-modal {
+  width: min(640px, 90vw);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(15, 18, 28, 0.25);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 70vh;
+  overflow: hidden;
+}
+
+.omnibar-input {
+  font-size: 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+}
+
+.omnibar-input:focus { border-color: var(--accent); }
+
+.omnibar-results {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 50vh;
+}
+
+.omnibar-result-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: border-color 100ms ease, background 100ms ease;
+}
+
+.omnibar-result-card:hover,
+.omnibar-result-card.is-highlighted {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.omnibar-result-success { border-color: #bbf0d0; background: #ecfdf5; }
+.omnibar-result-error   { border-color: #f7c7c7; background: #fef2f2; }
+
+.omnibar-result-head {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.omnibar-type-badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.omnibar-headline { font-size: 14px; font-weight: 600; }
+.omnibar-subline  { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+
+.omnibar-empty {
+  padding: 12px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.omnibar-empty-label { color: var(--muted); font-size: 12px; }
+
+.omnibar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.omnibar-chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  color: var(--text);
+}
+
+.omnibar-chip:hover { border-color: var(--accent); }
+
+.omnibar-hint {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
