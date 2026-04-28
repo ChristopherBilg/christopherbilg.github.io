@@ -21,7 +21,7 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
-function buildRefOption(obj, typeName) {
+function buildRefOption(obj) {
   const label = obj.name ?? obj.code ?? obj.id;
   const value = obj.id;
   return `<option value="${escapeHtml(value)}">${escapeHtml(label)} (${escapeHtml(value)})</option>`;
@@ -37,7 +37,7 @@ function buildInputHtml(name, paramSpec, ontology, getContext) {
       return `<input type="text" data-param="${escapeHtml(name)}" placeholder="${escapeHtml(paramSpec.ref)} (unknown type — falling back to text)" ${required} />`;
     }
     const objs = ontology.all(paramSpec.ref, getContext());
-    const options = objs.map((o) => buildRefOption(o, paramSpec.ref)).join('');
+    const options = objs.map((o) => buildRefOption(o)).join('');
     return `<select data-param="${escapeHtml(name)}" ${required}>${options}</select>`;
   }
 
