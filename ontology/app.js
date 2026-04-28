@@ -638,11 +638,11 @@ function renderFlightDetail(id) {
       }).join('')
     : '<dt class="hint" style="grid-column:1/-1">no computed properties</dt>';
 
+  const available = isReadOnly() ? [] : actions.availableFor(flight);
   let actionsHtml;
   if (isReadOnly()) {
     actionsHtml = '<div class="hint">Time-travel view is read-only. Click <strong>Now</strong> to re-enable actions.</div>';
   } else {
-    const available = actions.availableFor(flight);
     actionsHtml = available.length
       ? '<div data-actions-slot="true"></div>'
       : '<div class="hint">No actions available in current state.</div>';
@@ -706,10 +706,9 @@ function renderFlightDetail(id) {
     </div>
   `;
 
-  if (!isReadOnly()) {
+  if (!isReadOnly() && available.length) {
     const $slot = $detail.querySelector('[data-actions-slot]');
     if ($slot) {
-      const available = actions.availableFor(flight);
       const deps = {
         ontology,
         actions,
@@ -718,7 +717,9 @@ function renderFlightDetail(id) {
         getContext: () => state.context,
       };
       for (const a of available) {
-        renderActionForm(a, flight, $slot, deps);
+        // ActionEngine.availableFor returns { name, spec }; flatten so
+        // ActionForm can read params/idParam directly off the entry.
+        renderActionForm({ name: a.name, ...a.spec }, flight, $slot, deps);
       }
     }
   }
