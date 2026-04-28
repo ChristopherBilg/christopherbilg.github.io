@@ -243,8 +243,10 @@ Single module owning everything graph-related.
 **Constructor:**
 
 ```js
-new GraphView(canvasEl, ontology, { onSelect })
+new GraphView(canvasEl, ontology, { onSelect, getContext })
 ```
+
+`getContext` is a function the view calls at every `refresh()` to fetch the current time-travel context (`state.context` in `app.js`). Passing a callback rather than a value means the view stays decoupled from `app.js`'s state shape.
 
 **Lifecycle:**
 
@@ -353,7 +355,7 @@ At ~5,300 nodes / ~15k edges, `force-graph` will animate the layout for a few se
 
 **Failure mode:** CDN unavailable, browser doesn't support required Wasm features, or `flights.parquet` 404s.
 
-**Off-ramp:** `DuckDBAdapter.load()` catches init failure and falls back to `JSONAdapter` against `data/flights.json` (which is kept around for exactly this reason). A console warning surfaces; the UI's `manifest-badge` shows `flight·json-fallback`. The `.sql()` method becomes a no-op that throws a clear "DuckDB unavailable" error rather than silently returning stale results.
+**Off-ramp:** `DuckDBAdapter.load()` catches init failure and falls back to `JSONAdapter` against `data/flights.json` (which is kept around for exactly this reason). A `console.warn('[duckdb] init failed; falling back to JSON adapter')` surfaces. The `.sql()` method, after a fallback, throws a clear "DuckDB unavailable" error rather than silently returning stale results. We do not promise a UI badge for the fallback state in v1 — the console signal is the v1 surface; richer fallback UX is a stretch.
 
 **Rollback to remove DuckDB entirely:** delete `core/DuckDBAdapter.js` + `core/DuckDBProvider.js`, change `Flight` definition back to `adapter: 'json'`, drop `.sql()` from `QueryBuilder`. Other adapters and the graph view continue working. **The Adapter abstraction is the rollback story** — that's why we built it.
 
@@ -405,7 +407,7 @@ The project has no automated test suite; verification is manual via UI and conso
 **Adapter pattern wiring:**
 - `ontology.objectTypes.get('Flight').adapter === 'duckdb'`.
 - `ontology.objectTypes.get('Pilot').adapter` is `'json'` (or undefined defaulting to json).
-- Switch env to `dev` (forces JSON for fast reload) → page reloads with `flight·json` in `manifest-badge` → all other behavior identical.
+- Switch env to `dev` (forces JSON for fast reload) → page reloads → `ontology.objectTypes.get('Flight').adapter === 'json'` → all other UI behavior identical.
 
 **`.sql()` escape hatch:**
 ```js
