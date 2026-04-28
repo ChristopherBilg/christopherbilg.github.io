@@ -5,6 +5,7 @@ import { ConfigProvider } from './config/ConfigProvider.js';
 import { SecurityProvider } from './core/SecurityProvider.js';
 import { crdtCompare } from './core/CRDTClock.js';
 import { LocalState } from './store/LocalState.js';
+import { GraphView } from './views/GraphView.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -302,7 +303,8 @@ const state = {
 
 let integrityWorker = null;
 
-const $flightList = document.getElementById('flight-list');
+const $graphCanvas = document.getElementById('graph-canvas');
+let graphView = null;
 const $detail = document.getElementById('detail');
 const $log = document.getElementById('log');
 const $manifestBadge = document.getElementById('manifest-badge');
@@ -601,44 +603,6 @@ function formatDate(iso) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toISOString().replace('T', ' ').replace(/\.\d+Z$/, 'Z');
-}
-
-function renderFlightList() {
-  const flights = ontology.all('Flight', state.context);
-  flights.sort((a, b) => a.tail_number.localeCompare(b.tail_number));
-
-  if (!flights.length) {
-    $flightList.innerHTML = '<div class="hint">No flights existed at this point in time.</div>';
-    return;
-  }
-
-  const selectedId = state.selection?.type === 'Flight' ? state.selection.id : null;
-  $flightList.innerHTML = flights
-    .map((f) => {
-      const selected = f.id === selectedId ? ' selected' : '';
-      const edited = f.hasEdits() ? '<span class="edit-flag">kinetic</span>' : '';
-      return `
-        <div class="card${selected}" data-tail="${escapeHtml(f.id)}">
-          <div class="card-head">
-            <span class="tail">${escapeHtml(f.tail_number)}</span>
-            <span class="status status-${escapeHtml(f.status)}">${escapeHtml(f.status)}</span>
-          </div>
-          <div class="card-head">
-            <span class="route">${escapeHtml(f.origin)} → ${escapeHtml(f.destination)}</span>
-            ${edited}
-          </div>
-        </div>
-      `;
-    })
-    .join('');
-
-  $flightList.querySelectorAll('.card').forEach((el) => {
-    el.addEventListener('click', () => {
-      state.selection = { type: 'Flight', id: el.dataset.tail };
-      state.lastError = null;
-      render();
-    });
-  });
 }
 
 function renderDetail() {
@@ -1076,7 +1040,6 @@ function renderTxBadge() {
 function render() {
   renderTxBadge();
   renderCRDTBadge();
-  renderFlightList();
   renderDetail();
   renderLog();
   renderAip();
@@ -1134,6 +1097,15 @@ ontology.on('undo', invalidateComputedFor);
       throw err;
     }
   }
+  graphView = new GraphView($graphCanvas, ontology, {
+    onSelect: ({ type, id }) => {
+      state.selection = { type, id };
+      state.lastError = null;
+      render();
+    },
+    getContext: () => state.context,
+  });
+  graphView.mount();
   agent = new Agent(ontology, actions);
   renderAipExamples();
   renderAip();

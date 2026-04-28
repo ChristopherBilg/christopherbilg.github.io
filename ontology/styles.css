@@ -180,13 +180,28 @@ code, pre, .mono { font-family: var(--mono); }
 
 .layout {
   display: grid;
-  grid-template-columns: 1.2fr 1.4fr 1fr;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr) 320px;
   gap: 16px;
   padding: 16px;
 }
 
 @media (max-width: 1100px) {
   .layout { grid-template-columns: 1fr; }
+}
+
+.panel-graph {
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+}
+
+#graph-canvas {
+  flex: 1;
+  min-height: 540px;
+  background: #fafbfc;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  overflow: hidden;
 }
 
 .panel {
