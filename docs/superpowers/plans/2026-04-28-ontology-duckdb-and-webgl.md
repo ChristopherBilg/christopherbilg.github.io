@@ -4,7 +4,7 @@
 
 **Spec:** [`docs/superpowers/specs/2026-04-28-ontology-duckdb-and-webgl-design.md`](../specs/2026-04-28-ontology-duckdb-and-webgl-design.md)
 
-**Goal:** Add a DuckDB-Wasm + Parquet storage adapter for `Flight` and a `force-graph` WebGL link-analysis view that replaces the flight-list panel, while preserving every existing pattern in `ontology/` (ChangeSets, branching, time travel, computed properties, security, integrity worker, CRDT clock, AIP stub).
+**Goal:** Add a DuckDB-Wasm OLAP storage adapter for `Flight` (sourced from the same JSON file `JSONAdapter` already serves, via `read_json_auto`) and a `force-graph` WebGL link-analysis view that replaces the flight-list panel, while preserving every existing pattern in `ontology/` (ChangeSets, branching, time travel, computed properties, security, integrity worker, CRDT clock, AIP stub).
 
 **Architecture:** Introduce a `BackingAdapter` interface with two implementations (`JSONAdapter`, `DuckDBAdapter`); both populate the same `Ontology.cache` Map so every existing read path is unchanged. Add a `.sql()` escape hatch on `QueryBuilder` that routes results back through `Ontology.get()` so security/temporal/proxy filtering still applies. Replace the flight-list panel with a `force-graph` 2D canvas in `views/GraphView.js`; click-to-select drives the existing detail panel via a generalized `state.selection: { type, id }`.
 
@@ -12,15 +12,16 @@
 - Vanilla ES Modules (no bundler, no framework — same as existing code)
 - `@duckdb/duckdb-wasm` from CDN (pinned version), main thread
 - `force-graph` (2D) from CDN (pinned version)
-- Node + `duckdb` (native binding, devDep only) for build-time Parquet generation
+- Pure Node (built-ins only — no `package.json`, no `node_modules`) for the synthetic data generator
 - No tests framework — verification is browser console and visual inspection, mirroring the project's existing pattern
+
+**No-NPM / no-Parquet decision:** During Task 2 execution we revisited the original "use the Node `duckdb` binding to bake a Parquet artifact" approach. The site is a static GitHub Pages deploy; introducing `package.json` for a single build-time dep was off-pattern. DuckDB-Wasm reads JSON natively via `read_json_auto()`, so the OLAP demo lands just as well from the same JSON file the `JSONAdapter` already serves. We dropped the Parquet build step and the `duckdb` Node binding; `tools/generate-data.mjs` is now a single zero-dep Node script. Trade-off: payload is ~3× larger for `flights.json` (~1.3 MB vs ~150 KB Parquet), which gzip-compresses well and is acceptable for a demo. **Read every Task 2 / Task 4 / Task 9 step below with that revision in mind** — the wording was updated to match.
 
 **Verification model:** This project has no automated test harness. Each task uses *verification-driven development* — write the verification first (a console snippet or visual acceptance check), confirm the feature is missing, implement, confirm verification passes, commit. The TDD principle adapted to a no-harness browser project.
 
-**Library version pins** (use the latest stable at implementation time; record actual versions in `tools/README.md`):
+**Library version pins** (record actual versions in `tools/README.md`):
 - `@duckdb/duckdb-wasm`: `^1.29.0` (CDN: `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm`)
 - `force-graph`: `^1.43.0` (CDN: `https://esm.sh/force-graph@1.43.0`)
-- Node `duckdb`: `^1.1.0` (devDependency, used only by `tools/generate-data.mjs`)
 
 ---
 
@@ -187,67 +188,34 @@ layer that the upcoming DuckDBAdapter will plug into."
 
 ## Task 2: Synthetic data generator + new dataset
 
-**Goal:** Generate a deterministic ~5,000 Flight / 200 Pilot / 100 Airport dataset, written as both JSON (for `dev` env / fallback) and Parquet (for `staging`/`prod` via DuckDB). The generator runs offline (Node), uses `duckdb` (native binding) for Parquet emission, and commits its outputs to the repo.
+**Goal:** Generate a deterministic ~5,000 Flight / 200 Pilot / 100 Airport dataset as JSON (only). The generator is pure Node (built-ins only) — no `package.json`, no `node_modules`, no Parquet step. The same JSON files back both adapters: `JSONAdapter` `fetch`es them; `DuckDBAdapter` (Task 4) registers them in DuckDB-Wasm's VFS and queries via `read_json_auto`.
 
 **Files:**
-- Create: `package.json`
-- Create: `.gitignore` (or modify if exists)
 - Create: `tools/generate-data.mjs`
 - Create: `tools/README.md`
 - Modify: `ontology/data/airports.json` (regenerated, 100 rows)
 - Modify: `ontology/data/pilots.json` (regenerated, 200 rows)
 - Modify: `ontology/data/flights.json` (regenerated, 5000 rows)
-- Create: `ontology/data/flights.parquet` (5000 rows, binary, committed)
 
 **Acceptance Criteria:**
-- [ ] `npm install` succeeds (devDependency: `duckdb@^1.1.0`)
-- [ ] `npm run gen-data` succeeds and emits all four data files
-- [ ] Re-running `npm run gen-data` produces byte-identical output (deterministic)
+- [ ] `node tools/generate-data.mjs` succeeds with zero install / zero deps
+- [ ] Re-running it produces byte-identical output (deterministic — verifiable via `md5sum`)
 - [ ] Status mix in flights: roughly 60% Scheduled / 15% InAir / 20% Landed / 5% Cancelled (within ±2%)
 - [ ] All Pilot/Origin/Destination FKs reference real ids (zero orphans on a clean dataset)
 - [ ] `flight_hours` distribution covers all three `experience_tier` buckets (`<3000`, `3000–8000`, `>=8000`) with at least 20 pilots in each
-- [ ] `node_modules/` is git-ignored
-- [ ] All four data files commit cleanly
+- [ ] No `package.json`, no `.gitignore`, no `node_modules/` introduced
 
 **Verify:**
 ```bash
-npm install
-npm run gen-data
-ls -lh ontology/data/airports.json ontology/data/pilots.json ontology/data/flights.json ontology/data/flights.parquet
-node -e "const r = require('./ontology/data/flights.json'); console.log('flights:', r.length); const c = {}; r.forEach(f => c[f.status] = (c[f.status]||0)+1); console.log(c);"
+node tools/generate-data.mjs
+ls -lh ontology/data/airports.json ontology/data/pilots.json ontology/data/flights.json
+md5sum ontology/data/*.json && node tools/generate-data.mjs >/dev/null && md5sum ontology/data/*.json   # determinism
 ```
-Expected: `flights: 5000`, status counts within target ranges.
+Expected: `flights: 5000`, status counts within target ranges, both md5 runs match line-for-line.
 
 **Steps:**
 
-- [ ] **Step 1: Initialize `package.json` and `.gitignore`**
-
-Create `/workspaces/christopherbilg.github.io/package.json`:
-
-```json
-{
-  "name": "christopherbilg-github-io",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "gen-data": "node tools/generate-data.mjs"
-  },
-  "devDependencies": {
-    "duckdb": "^1.1.0"
-  }
-}
-```
-
-Add to `/workspaces/christopherbilg.github.io/.gitignore` (create if absent; if it exists, add the missing lines):
-
-```
-node_modules/
-package-lock.json
-```
-
-(Pinning is via `^` ranges; commit just `package.json`. The lock file would be useful for reproducibility but is excluded for a small static project to keep diffs clean. If the project later wants reproducibility, drop `package-lock.json` from `.gitignore`.)
-
-- [ ] **Step 2: Write `tools/generate-data.mjs`**
+- [ ] **Step 1: Write `tools/generate-data.mjs`**
 
 Create `/workspaces/christopherbilg.github.io/tools/generate-data.mjs`:
 
@@ -255,7 +223,6 @@ Create `/workspaces/christopherbilg.github.io/tools/generate-data.mjs`:
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import duckdb from 'duckdb';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dirname, '../ontology/data');
@@ -403,82 +370,61 @@ for (let i = 0; i < 5000; i++) {
 }
 writeFileSync(`${DATA_DIR}/flights.json`, JSON.stringify(flights, null, 2));
 
-// --- Parquet via DuckDB ---
-const dbPath = `${DATA_DIR}/.tmp.duckdb`;
-const db = new duckdb.Database(':memory:');
-const con = db.connect();
-const parquetPath = `${DATA_DIR}/flights.parquet`.replace(/\\/g, '/');
-const flightsJsonPath = `${DATA_DIR}/flights.json`.replace(/\\/g, '/');
-
-await new Promise((res, rej) => {
-  con.exec(
-    `COPY (SELECT * FROM read_json_auto('${flightsJsonPath}')) TO '${parquetPath}' (FORMAT PARQUET);`,
-    (err) => err ? rej(err) : res()
-  );
-});
-db.close();
-
 console.log('Wrote:');
 console.log('  airports.json:', airports.length);
-console.log('  pilots.json:', pilots.length);
+console.log('  pilots.json:',  pilots.length);
 console.log('  flights.json:', flights.length);
-console.log('  flights.parquet (DuckDB-emitted)');
 ```
 
-- [ ] **Step 3: Write `tools/README.md`**
+- [ ] **Step 2: Write `tools/README.md`**
 
 Create `/workspaces/christopherbilg.github.io/tools/README.md`:
 
 ```markdown
 # tools/
 
-Build-time helpers for the `ontology/` static-file project. These do **not** run at page load — they exist solely to produce committed artifacts (`data/*.json`, `data/flights.parquet`).
+Build-time helpers for the `ontology/` static-file project. These do **not** run at page load — they exist solely to produce committed JSON artifacts in `ontology/data/`.
 
 ## generate-data.mjs
 
-Deterministic synthetic dataset generator. Re-runs produce byte-identical output.
+Deterministic synthetic dataset generator written in pure Node (no dependencies, no `package.json`, no `node_modules`). Re-runs produce byte-identical output.
 
-```bash
-npm install
-npm run gen-data
-```
+\`\`\`bash
+node tools/generate-data.mjs
+\`\`\`
 
 Outputs:
 - `ontology/data/airports.json` — 100 rows
-- `ontology/data/pilots.json` — 200 rows
-- `ontology/data/flights.json` — 5000 rows
-- `ontology/data/flights.parquet` — 5000 rows, written via DuckDB
+- `ontology/data/pilots.json`   — 200 rows
+- `ontology/data/flights.json`  — 5000 rows
+
+The same JSON files back both adapters: `JSONAdapter` `fetch`es them directly, and `DuckDBAdapter` registers them in the in-browser DuckDB-Wasm virtual FS and queries them via `read_json_auto`. No Parquet step — the demo's value is the OLAP engine in the browser, not the storage format, and JSON keeps the site genuinely static.
 
 ## Pinned library versions
 
-Recorded here so `tools/README.md` is the single place to update them.
-
-| Library | Version | Purpose |
-|---|---|---|
-| `duckdb` (Node native) | `^1.1.0` | Parquet emission in `generate-data.mjs` |
-| `@duckdb/duckdb-wasm` (CDN) | `^1.29.0` | Browser-side OLAP engine |
-| `force-graph` (CDN) | `^1.43.0` | 2D WebGL link analysis view |
-
-When updating, run `npm run gen-data` and verify the existing app still loads.
+| Library                       | Version    | Purpose                              |
+|-------------------------------|------------|--------------------------------------|
+| `@duckdb/duckdb-wasm` (CDN)   | `^1.29.0`  | Browser-side OLAP engine             |
+| `force-graph` (CDN)           | `^1.43.0`  | 2D WebGL link analysis view          |
 ```
 
-- [ ] **Step 4: Install dependencies and run the generator**
+- [ ] **Step 3: Run the generator**
 
 ```bash
 cd /workspaces/christopherbilg.github.io
-npm install
-npm run gen-data
+node tools/generate-data.mjs
 ```
 
-Expected: install succeeds; generator prints `Wrote: airports.json: 100 / pilots.json: 200 / flights.json: 5000 / flights.parquet (DuckDB-emitted)`.
+Expected: `Wrote: airports.json: 100 / pilots.json: 200 / flights.json: 5000`.
 
-- [ ] **Step 5: Verify dataset shape**
+- [ ] **Step 4: Verify dataset shape and determinism**
 
 ```bash
-node -e "
-const a = require('./ontology/data/airports.json');
-const p = require('./ontology/data/pilots.json');
-const f = require('./ontology/data/flights.json');
+node --input-type=module -e "
+import { readFileSync } from 'node:fs';
+const a = JSON.parse(readFileSync('ontology/data/airports.json'));
+const p = JSON.parse(readFileSync('ontology/data/pilots.json'));
+const f = JSON.parse(readFileSync('ontology/data/flights.json'));
 console.log('airports:', a.length, '/ pilots:', p.length, '/ flights:', f.length);
 const status = {}; f.forEach(x => status[x.status] = (status[x.status]||0)+1);
 console.log('status:', status);
@@ -494,36 +440,38 @@ const pids = new Set(p.map(x => x.pilot_id));
 const orphans = f.filter(x => !codes.has(x.origin) || !codes.has(x.destination) || !pids.has(x.pilot_id));
 console.log('orphan FKs:', orphans.length);
 "
+
+md5sum ontology/data/*.json && node tools/generate-data.mjs >/dev/null && md5sum ontology/data/*.json
 ```
 
-Expected: 100 / 200 / 5000; status counts within target distribution; tiers each ≥ 20; orphan FKs = 0.
+Expected: 100 / 200 / 5000; status counts within target distribution; tiers each ≥ 20; orphan FKs = 0; both md5sum runs match.
 
-- [ ] **Step 6: Verify the existing UI still loads with the larger dataset**
+- [ ] **Step 5: Verify the existing UI still loads with the larger dataset**
 
-Open `ontology/index.html` (browser or local server). Existing flight-list now scrolls through 5000 cards. Click one — detail panel still works. AIP intent `pilots to LAX` still returns sensible results. **This is the regression check that the JSON adapter (Task 1) handles the bigger dataset.**
+Open `ontology/index.html` (via local HTTP server). Existing flight-list now scrolls through 5000 cards. Click one — detail panel still works. AIP intent `pilots to LAX` still returns sensible results. **This is the regression check that the JSON adapter (Task 1) handles the bigger dataset.**
 
 If the page is sluggish, that's expected for a 5000-card DOM list — Task 8 deletes that list.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add package.json .gitignore tools/generate-data.mjs tools/README.md \
-  ontology/data/airports.json ontology/data/pilots.json ontology/data/flights.json ontology/data/flights.parquet
+git add tools/generate-data.mjs tools/README.md \
+  ontology/data/airports.json ontology/data/pilots.json ontology/data/flights.json
 git commit -m "feat(ontology): Generate synthetic mid-scale dataset (5k flights)
 
-Add tools/generate-data.mjs deterministic generator producing
-100 airports / 200 pilots / 5000 flights as both JSON and Parquet.
-Status distribution roughly 60/15/20/5 (Scheduled/InAir/Landed/
-Cancelled); pilot flight_hours covers all three computed-property
-tiers; zero orphan FKs on a clean dataset. Parquet emitted via
-DuckDB native binding (devDependency)."
+Zero-dep Node script (no package.json) that emits a deterministic
+100/200/5000 airport/pilot/flight JSON dataset. Status distribution
+roughly 60/15/20/5; pilot flight_hours covers all three tiers; zero
+orphan FKs on a clean dataset. The DuckDBAdapter (Task 4) reads the
+same flights.json via read_json_auto in DuckDB-Wasm, so no Parquet
+build step is needed and the site stays NPM-free."
 ```
 
 ---
 
 ## Task 3: `DuckDBProvider` singleton
 
-**Goal:** Singleton owning the DuckDB-Wasm instance. Provides `init()` (idempotent, safe to await in parallel), `registerParquet(name, url)`, and `query(sql, params)`. Pure infrastructure; no integration with `Ontology` yet.
+**Goal:** Singleton owning the DuckDB-Wasm instance. Provides `init()` (idempotent, safe to await in parallel), `registerJSON(name, url)`, and `query(sql, params)`. Pure infrastructure; no integration with `Ontology` yet. (We register the *same* JSON file the JSONAdapter uses, then expose it as a SQL view via DuckDB's `read_json_auto` — no Parquet involved.)
 
 **Files:**
 - Create: `ontology/core/DuckDBProvider.js`
@@ -531,7 +479,7 @@ DuckDB native binding (devDependency)."
 **Acceptance Criteria:**
 - [ ] `DuckDBProvider.shared()` returns the same instance across calls
 - [ ] `await provider.init()` resolves once; concurrent `init()` calls share one bootstrap
-- [ ] `await provider.registerParquet('flights', './data/flights.parquet')` creates a queryable view
+- [ ] `await provider.registerJSON('flights', './data/flights.json')` creates a queryable view via `read_json_auto`
 - [ ] `await provider.query('SELECT COUNT(*) AS n FROM flights')` returns `[{ n: 5000 }]` (or similar — DuckDB returns BigInt for COUNT; the query method coerces to plain numbers)
 - [ ] `await provider.query('SELECT * FROM flights WHERE status = ?', ['Scheduled'])` returns Scheduled flights — proves parameter binding works
 - [ ] No SQL string interpolation anywhere — all dynamic values flow through `params`
@@ -541,7 +489,7 @@ DuckDB native binding (devDependency)."
 const { DuckDBProvider } = await import('./core/DuckDBProvider.js');
 const p = DuckDBProvider.shared();
 await p.init();
-await p.registerParquet('flights', './data/flights.parquet');
+await p.registerJSON('flights', './data/flights.json');
 const total = await p.query('SELECT COUNT(*) AS n FROM flights');
 console.log('total:', total[0].n); // 5000
 const sched = await p.query("SELECT * FROM flights WHERE status = ? LIMIT 3", ['Scheduled']);
@@ -593,7 +541,7 @@ export class DuckDBProvider {
     return this._initPromise;
   }
 
-  async registerParquet(name, url) {
+  async registerJSON(name, url) {
     await this.init();
     if (this._registered.has(name)) return;
     // Resolve the URL relative to the page so the worker fetch can find it.
@@ -601,10 +549,10 @@ export class DuckDBProvider {
     const res = await fetch(absoluteUrl);
     if (!res.ok) throw new Error(`Failed to fetch ${absoluteUrl}: ${res.status}`);
     const buf = new Uint8Array(await res.arrayBuffer());
-    const vfsName = `${name}.parquet`;
+    const vfsName = `${name}.json`;
     await this._db.registerFileBuffer(vfsName, buf);
     await this._conn.query(
-      `CREATE OR REPLACE VIEW ${name} AS SELECT * FROM read_parquet('${vfsName}')`,
+      `CREATE OR REPLACE VIEW ${name} AS SELECT * FROM read_json_auto('${vfsName}')`,
     );
     this._registered.add(name);
     console.info(`[duckdb] registered ${name} (${buf.byteLength} bytes)`);
@@ -643,7 +591,7 @@ export class DuckDBProvider {
 Key points to call out:
 - `import(DUCKDB_CDN)` is a *dynamic import* of an ESM module from jsDelivr's `+esm` endpoint. The version is pinned in the URL.
 - `init()` uses a stored promise to dedupe concurrent calls — multiple adapters can `await provider.init()` in parallel without racing.
-- `registerParquet` fetches the file, registers it in DuckDB's virtual FS by name, creates a `VIEW` so the table-name in queries matches the registered name. Only the `name` parameter goes into the SQL string — it's a controlled identifier from our own code, never user input. (If we ever take user input here, this becomes a SQL injection vector; for v1 it's safe.)
+- `registerJSON` fetches the file, registers it in DuckDB's virtual FS by name, creates a `VIEW` over `read_json_auto` so the table-name in queries matches the registered name. Only the `name` parameter goes into the SQL string — it's a controlled identifier from our own code, never user input. (If we ever take user input here, this becomes a SQL injection vector; for v1 it's safe.)
 - `query()` uses prepared statements when params are passed. Never interpolates.
 - `_toPlainRows` flattens Apache Arrow output to plain JS objects and coerces `bigint` (returned for COUNT etc.) to `number`.
 
@@ -659,8 +607,9 @@ If you see CORS errors loading the CDN bundle, check that you're serving the pag
 git add ontology/core/DuckDBProvider.js
 git commit -m "feat(ontology): Add DuckDBProvider singleton
 
-Browser-side DuckDB-Wasm wrapper with idempotent init, parquet
-registration via virtual FS, and parameterized query execution.
+Browser-side DuckDB-Wasm wrapper with idempotent init, JSON file
+registration via virtual FS (read_json_auto), and parameterized
+query execution.
 Loaded from pinned jsDelivr CDN. No integration with Ontology
 yet — that comes in the next task."
 ```
@@ -675,8 +624,8 @@ yet — that comes in the next task."
 - Create: `ontology/core/DuckDBAdapter.js`
 - Modify: `ontology/core/Ontology.js` (`_makeAdapter` recognizes `'duckdb'`)
 - Modify: `ontology/env/dev/manifest.json` (Flight stays json)
-- Modify: `ontology/env/staging/manifest.json` (Flight → duckdb, dataSource → flights.parquet)
-- Modify: `ontology/env/prod/manifest.json` (Flight → duckdb, dataSource → flights.parquet)
+- Modify: `ontology/env/staging/manifest.json` (Flight → duckdb, dataSource → flights.json)
+- Modify: `ontology/env/prod/manifest.json` (Flight → duckdb, dataSource → flights.json)
 - Modify: `ontology/app.js` (read adapter type from manifest; fallback path on init failure)
 - Modify: `ontology/config/ConfigProvider.js` (expose adapter selection per type)
 
@@ -748,7 +697,7 @@ Modify `/workspaces/christopherbilg.github.io/ontology/env/staging/manifest.json
   "dataSources": {
     "Airport": "./data/airports.json",
     "Pilot":   "./data/pilots.json",
-    "Flight":  "./data/flights.parquet"
+    "Flight":  "./data/flights.json"
   }
 }
 ```
@@ -773,7 +722,7 @@ Modify `/workspaces/christopherbilg.github.io/ontology/env/prod/manifest.json`:
   "dataSources": {
     "Airport": "./data/airports.json",
     "Pilot":   "./data/pilots.json",
-    "Flight":  "./data/flights.parquet"
+    "Flight":  "./data/flights.json"
   }
 }
 ```
@@ -807,7 +756,7 @@ export class DuckDBAdapter extends BackingAdapter {
   async load() {
     const provider = DuckDBProvider.shared();
     await provider.init();
-    await provider.registerParquet(this.tableName, this.config.backingData);
+    await provider.registerJSON(this.tableName, this.config.backingData);
     const rows = await provider.query(`SELECT * FROM ${this.tableName}`);
     for (const row of rows) {
       this.ontology.cache.set(`${this.typeName}:${row[this.config.pk]}`, row);
@@ -873,7 +822,7 @@ Now wrap the `await ontology.load()` call in `main()` with a fallback that demot
 try {
   await ontology.load();
 } catch (err) {
-  if (String(err).toLowerCase().includes('duckdb') || String(err).toLowerCase().includes('parquet')) {
+  if (String(err).toLowerCase().includes('duckdb') || String(err).toLowerCase().includes('read_json')) {
     console.warn('[duckdb] init failed; falling back to JSON adapter:', err.message);
     // Force re-define Flight as JSON adapter against the JSON file (always shipped).
     ontology.defineObject('Flight', {
@@ -923,11 +872,11 @@ git add ontology/core/DuckDBAdapter.js ontology/core/Ontology.js \
   ontology/env/dev/manifest.json ontology/env/staging/manifest.json ontology/env/prod/manifest.json
 git commit -m "feat(ontology): Add DuckDBAdapter and wire Flight in staging/prod
 
-Flight rows in staging and prod now load from flights.parquet via
-DuckDB-Wasm, populating the same Ontology.cache that powers every
-existing read path. Dev keeps Flight on JSONAdapter for fast
-iteration. If DuckDB init fails (CDN unavailable, browser feature
-gap), the app falls back to JSON adapter and logs a warning."
+Flight rows in staging and prod now load from flights.json via
+DuckDB-Wasm read_json_auto, populating the same Ontology.cache that
+powers every existing read path. Dev keeps Flight on JSONAdapter
+for fast iteration. If DuckDB init fails (CDN unavailable, browser
+feature gap), the app falls back to JSONAdapter and logs a warning."
 ```
 
 ---
@@ -943,7 +892,7 @@ gap), the app falls back to JSON adapter and logs a warning."
 - [ ] `await query().from('Flight').sql("SELECT * FROM flights WHERE status = ?", ['Scheduled']).collect()` returns proxied flight objects
 - [ ] Each returned object has `.hasEdits()` (proves it's a proxy)
 - [ ] Without a preceding `.from()`, `.sql()` throws `".sql() requires a preceding .from(typeName)"`
-- [ ] If a Flight matched by SQL has been edited via `delayFlight`, the returned proxy shows the *edited* `departure_time`, not the parquet base
+- [ ] If a Flight matched by SQL has been edited via `delayFlight`, the returned proxy shows the *edited* `departure_time`, not the underlying JSON value
 - [ ] If the role is `viewer` (which hides Cancelled flights), a SQL query that would otherwise return Cancelled flights returns them filtered out
 - [ ] If the time-travel slider is set to before a flight's `created_at`, that flight is filtered out of SQL results too — even though DuckDB returned it
 
@@ -1813,8 +1762,8 @@ Replace the existing line:
 with:
 
 ```html
-<li><strong>Adapter</strong> — <code>BackingAdapter</code> defines a small interface (<code>load()</code>, <code>getRow()</code>, <code>allRows()</code>); <code>JSONAdapter</code> fetches static JSON, <code>DuckDBAdapter</code> hydrates from a Parquet file via DuckDB-Wasm. Both populate <code>Ontology.cache</code>, so every read path (<code>ObjectProxy</code>, computed properties, integrity scan) is unaware of the source. Per-environment selection lives in <code>env/{env}/manifest.json</code> under <code>adapters</code>; <code>dev</code> uses JSON for fast iteration, <code>staging</code> and <code>prod</code> push <code>Flight</code> through DuckDB. Try <code>ontology.objectTypes.get('Flight').adapter</code>.</li>
-<li><strong>OLAP escape hatch</strong> — <code>QueryBuilder.sql(text, params)</code> runs raw parameterized SQL against DuckDB; results route through <code>Ontology.get(type, pk)</code> so the kinetic-edit overlay, security read filter, and time-travel context all still apply. Try <code>await query().from('Flight').sql("SELECT * FROM flights WHERE status = ?", ['Scheduled']).collect()</code>.</li>
+<li><strong>Adapter</strong> — <code>BackingAdapter</code> defines a small interface (<code>load()</code>, <code>getRow()</code>, <code>allRows()</code>); <code>JSONAdapter</code> fetches static JSON, <code>DuckDBAdapter</code> registers the same JSON in DuckDB-Wasm's virtual FS and queries it via <code>read_json_auto</code>. Both populate <code>Ontology.cache</code>, so every read path (<code>ObjectProxy</code>, computed properties, integrity scan) is unaware of the source. Per-environment selection lives in <code>env/{env}/manifest.json</code> under <code>adapters</code>; <code>dev</code> uses JSON for fast iteration, <code>staging</code> and <code>prod</code> push <code>Flight</code> through DuckDB. Try <code>ontology.objectTypes.get('Flight').adapter</code>.</li>
+<li><strong>OLAP escape hatch</strong> — <code>QueryBuilder.sql(text, params)</code> runs raw parameterized SQL against DuckDB-Wasm; results route through <code>Ontology.get(type, pk)</code> so the kinetic-edit overlay, security read filter, and time-travel context all still apply. Try <code>await query().from('Flight').sql("SELECT * FROM flights WHERE status = ?", ['Scheduled']).collect()</code>.</li>
 ```
 
 Then add this new bullet (place it after the integrity-worker bullet for narrative flow, or near the existing CRDT bullet — both are fine):
@@ -1879,6 +1828,6 @@ After writing this plan, here's the spec-coverage check:
 | §6 Phase B verification | Task 9 step 2 |
 | §7 Documentation surface | Task 9 step 3 (footer); Task 2 step 3 (tools/README) |
 
-No gaps identified. No placeholders or "implement later" markers. Type/method names checked across tasks: `BackingAdapter.load/getRow/allRows/getSchema`, `DuckDBProvider.shared/init/registerParquet/query`, `GraphView.constructor(canvasEl, ontology, { onSelect, getContext })`, `state.selection: { type, id }` — all consistent.
+No gaps identified. No placeholders or "implement later" markers. Type/method names checked across tasks: `BackingAdapter.load/getRow/allRows/getSchema`, `DuckDBProvider.shared/init/registerJSON/query`, `GraphView.constructor(canvasEl, ontology, { onSelect, getContext })`, `state.selection: { type, id }` — all consistent.
 
 The plan is approximately 9 tasks ≈ 9 commits, fits the day budget, and each task is independently verifiable and committable.
