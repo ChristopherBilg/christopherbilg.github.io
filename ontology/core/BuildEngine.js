@@ -23,6 +23,7 @@
 import { DuckDBProvider } from './DuckDBProvider.js';
 import { BuildCatalog } from './BuildCatalog.js';
 import { hashDataset, hashCombined } from './Fingerprint.js';
+import { validateLineageReferences } from './Transform.js';
 
 export class BuildEngine {
   constructor(ontology) {
@@ -32,6 +33,7 @@ export class BuildEngine {
     this._worker = null;
     this._pendingByTransform = new Map(); // transformName -> { resolve, reject, timer }
     this._inFlight = null;               // serialize concurrent build() calls
+    this._lineageValidated = new Set();
     this._wireEventInvalidation();
   }
 
@@ -114,6 +116,13 @@ export class BuildEngine {
   async _buildInternal(transformName, context) {
     const spec = this.ontology.transforms.get(transformName);
     if (!spec) throw new Error(`Unknown transform "${transformName}"`);
+
+    // Validate column-level lineage references once per transform (lazy: datasets
+    // must be loaded before columns are known).
+    if (!this._lineageValidated.has(transformName)) {
+      validateLineageReferences(spec, this.ontology.datasets);
+      this._lineageValidated.add(transformName);
+    }
 
     // Build any upstream derived inputs first. Call _buildInternal directly
     // (not build()) because we are already inside the serialization lock;

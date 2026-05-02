@@ -56,6 +56,11 @@ function setupOntology() {
       WHERE status != 'Cancelled'
       GROUP BY origin
     `,
+    lineage: {
+      origin:       ['Flight.origin'],
+      avg_delay:    ['Flight.delay_minutes', 'Flight.status'],
+      flight_count: ['Flight.status'],
+    },
   });
 
   // Bind an object type to the derived dataset so the existing graph view,
@@ -86,6 +91,10 @@ function setupOntology() {
         rows.push({ pilot_id, scheduled_flights });
       }
       return rows;
+    },
+    lineage: {
+      pilot_id:          ['Flight.pilot_id'],
+      scheduled_flights: ['Flight.pilot_id', 'Flight.status'],
     },
   });
 

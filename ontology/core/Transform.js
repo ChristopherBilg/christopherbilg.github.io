@@ -59,3 +59,34 @@ export function validateTransformSpec(spec, { datasets, transforms }) {
 
   return spec;
 }
+
+// Validate column-level lineage against actual dataset columns. Call this
+// lazily (e.g., from BuildEngine before the first build of this transform),
+// because raw datasets only have known columns after they've loaded.
+export function validateLineageReferences(spec, datasets) {
+  if (!spec.lineage) return;
+  const inputSet = new Set(spec.inputs);
+  for (const [outCol, refs] of Object.entries(spec.lineage)) {
+    if (!Array.isArray(refs)) {
+      throw new Error(`Transform "${spec.name}" lineage[${outCol}] must be an array of "Dataset.col" strings`);
+    }
+    for (const ref of refs) {
+      const m = /^([A-Za-z0-9_]+)\.([A-Za-z0-9_]+)$/.exec(String(ref || ''));
+      if (!m) {
+        throw new Error(`Transform "${spec.name}" lineage[${outCol}] = "${ref}" is not a valid Dataset.col reference`);
+      }
+      const [, dsName, colName] = m;
+      if (!inputSet.has(dsName)) {
+        throw new Error(`Transform "${spec.name}" lineage[${outCol}] references "${dsName}" which is not an input`);
+      }
+      const ds = datasets.get(dsName);
+      if (!ds) {
+        throw new Error(`Transform "${spec.name}" lineage[${outCol}] references unknown dataset "${dsName}"`);
+      }
+      const sample = ds.rows()[0];
+      if (sample && !(colName in sample)) {
+        throw new Error(`Transform "${spec.name}" lineage[${outCol}] references "${dsName}.${colName}" which is not a column`);
+      }
+    }
+  }
+}
