@@ -68,12 +68,15 @@ export class BuildEngine {
   // the in-memory rows for a non-active branch are harmless.
   async _purgeBranch(branch) {
     if (!branch || branch === 'main') return;
+    // Wait for any in-flight build to settle so we don't race against a build
+    // that might append a catalog record after we clear the keys.
+    if (this._inFlight) {
+      try { await this._inFlight; } catch { /* ignore prior failure */ }
+    }
+    // Delegate catalog teardown to the public purge API.
+    this.catalog.purge(branch);
     const provider = DuckDBProvider.shared();
-    for (const [tName, spec] of this.ontology.transforms) {
-      // Clear catalog records and stale-hint for this branch.
-      const key = `${tName}::${branch}`;
-      this.catalog._records.delete(key);
-      this.catalog._staleHints.delete(key);
+    for (const [, spec] of this.ontology.transforms) {
       // Drop SQL artifact table if it exists.
       if (spec.kind === 'sql') {
         try {
@@ -86,21 +89,21 @@ export class BuildEngine {
   }
 
   // Build every registered transform once, in topo order.
-  async buildAll() {
+  async buildAll(context = null) {
     const topo = this.ontology.lineage.topo();
     for (const datasetName of topo) {
       const transformName = this._transformProducing(datasetName);
-      if (transformName) await this.build(transformName);
+      if (transformName) await this.build(transformName, context);
     }
   }
 
   // Serialize concurrent build() calls so they don't race on the shared
   // DuckDB connection or the single JS worker.
-  async build(transformName) {
+  async build(transformName, context = null) {
     while (this._inFlight) {
       try { await this._inFlight; } catch { /* prior build's error doesn't block this one */ }
     }
-    this._inFlight = this._buildInternal(transformName);
+    this._inFlight = this._buildInternal(transformName, context);
     try {
       return await this._inFlight;
     } finally {
@@ -108,7 +111,7 @@ export class BuildEngine {
     }
   }
 
-  async _buildInternal(transformName) {
+  async _buildInternal(transformName, context) {
     const spec = this.ontology.transforms.get(transformName);
     if (!spec) throw new Error(`Unknown transform "${transformName}"`);
 
@@ -118,7 +121,7 @@ export class BuildEngine {
     for (const inp of spec.inputs) {
       const inputDs = this.ontology.datasets.get(inp);
       if (inputDs && inputDs.source.kind === 'derived') {
-        await this._buildInternal(inputDs.source.transform);
+        await this._buildInternal(inputDs.source.transform, context);
       }
     }
 
@@ -128,8 +131,11 @@ export class BuildEngine {
 
     console.info(`[build] ${transformName} on branch=${branch}`);
 
+    // ── Emit build:start so UI can show 'building' state ─────────────────
+    this.ontology.emit('build:start', { transform: transformName, branch });
+
     // ── Fingerprint inputs ────────────────────────────────────────────────
-    const inputRows = await this._resolveInputs(spec, branch);
+    const inputRows = await this._resolveInputs(spec, branch, context);
     const perInput = {};
     for (const [name, rows] of Object.entries(inputRows)) {
       const ds = this.ontology.datasets.get(name);
@@ -152,6 +158,8 @@ export class BuildEngine {
         fingerprint: { inputs: perInput, combined },
         rowCount: last.rowCount,
         error: null,
+        asOfTx: context?.asOfTx ?? null,
+        asOfValid: context?.asOfValid ?? null,
       };
       this.catalog.appendRecord(record);
       this.catalog.setStaleHint(transformName, branch, false);
@@ -184,6 +192,8 @@ export class BuildEngine {
         fingerprint: { inputs: perInput, combined },
         rowCount: rows.length,
         error: null,
+        asOfTx: context?.asOfTx ?? null,
+        asOfValid: context?.asOfValid ?? null,
       };
       this.catalog.appendRecord(record);
       this.catalog.setStaleHint(transformName, branch, false);
@@ -191,18 +201,21 @@ export class BuildEngine {
       this.ontology.emit('build', record);
       return record;
     } catch (err) {
+      const finishedAt = new Date().toISOString();
       const record = {
         id,
         transform: transformName,
         branch,
         startedAt,
-        finishedAt: new Date().toISOString(),
-        durationMs: 0,
+        finishedAt,
+        durationMs: new Date(finishedAt) - new Date(startedAt),
         status: 'failed',
         skippedReason: null,
         fingerprint: { inputs: perInput, combined },
         rowCount: 0,
         error: err.message,
+        asOfTx: context?.asOfTx ?? null,
+        asOfValid: context?.asOfValid ?? null,
       };
       this.catalog.appendRecord(record);
       // Do NOT clear the stale hint; do NOT invalidate downstream.
@@ -214,13 +227,13 @@ export class BuildEngine {
   // Resolve all inputs for a transform into plain row arrays.
   // For raw datasets: uses ontology.all() so kinetic edits and bi-temporal
   // context flow through. For derived inputs: uses Dataset.rows() directly.
-  async _resolveInputs(spec, _branch) {
+  async _resolveInputs(spec, _branch, context) {
     const out = {};
     for (const inp of spec.inputs) {
       const ds = this.ontology.datasets.get(inp);
       if (ds.source.kind === 'raw') {
         // ontology.all() returns ObjectProxy instances; snapshot to plain rows.
-        const objs = this.ontology.all(inp);
+        const objs = this.ontology.all(inp, context);
         out[inp] = objs.map((o) => (o.snapshot ? o.snapshot() : { ...o }));
       } else {
         out[inp] = ds.rows();

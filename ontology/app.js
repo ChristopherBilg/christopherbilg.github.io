@@ -411,7 +411,7 @@ $buildBtn?.addEventListener('click', async () => {
   $buildBtn.disabled = true;
   $buildBtn.textContent = 'Building…';
   try {
-    await buildEngine.buildAll();
+    await buildEngine.buildAll(state.context);
     notify('Build complete', 'info');
   } catch (err) {
     console.error('[build] failed:', err);
@@ -707,6 +707,7 @@ function renderDetail() {
       transform: sel.transform,
       catalog: buildEngine.catalog,
       branchList: ontology.branches.list(),
+      asOfTx: state.context?.asOfTx || null,
     });
     return;
   }
@@ -1200,7 +1201,7 @@ ontology.on('build:failed',  () => { if (state.selection?.kind === 'dataset') re
   lineagePanel.mount();
 
   document.getElementById('lineage-build-all-stale')
-    .addEventListener('click', buildAllStaleHandler(buildEngine, ontology));
+    .addEventListener('click', buildAllStaleHandler(buildEngine, ontology, () => state.context));
 
   Object.assign(globalThis, { lineagePanel });
 

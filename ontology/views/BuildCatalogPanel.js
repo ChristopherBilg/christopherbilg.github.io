@@ -4,10 +4,13 @@
 const STATUS_LABEL = { ok: 'ok', skipped: 'skipped', failed: 'failed', building: 'building' };
 const STATUS_COLOR = { ok: '#15803d', skipped: '#6b7280', failed: '#b91c1c', building: '#2563eb' };
 
-export function renderBuildCatalogPanel(container, { dataset, transform, catalog, branchList }) {
+export function renderBuildCatalogPanel(container, { dataset, transform, catalog, branchList, asOfTx = null }) {
   const records = [];
   for (const branch of branchList) {
-    for (const r of catalog.history(transform, branch)) records.push(r);
+    for (const r of catalog.history(transform, branch)) {
+      if (asOfTx && r.startedAt > asOfTx) continue;
+      records.push(r);
+    }
   }
   records.sort((a, b) => (a.startedAt < b.startedAt ? 1 : -1));
 

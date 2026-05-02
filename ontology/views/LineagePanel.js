@@ -24,6 +24,7 @@ export class LineagePanel {
     this.expanded = false;
     this._fg = null;
     this._mounted = false;
+    this._building = new Set();
   }
 
   mount() {
@@ -35,9 +36,13 @@ export class LineagePanel {
     ont.on('loaded',         () => this.refresh());
     ont.on('action',         () => this.refresh());
     ont.on('undo',           () => this.refresh());
-    ont.on('build',          () => this.refresh());
-    ont.on('build:skipped',  () => this.refresh());
-    ont.on('build:failed',   () => this.refresh());
+    ont.on('build:start',    ({ transform, branch }) => {
+      this._building.add(`${transform}::${branch}`);
+      this.refresh();
+    });
+    ont.on('build',         (r) => { this._building.delete(`${r.transform}::${r.branch}`); this.refresh(); });
+    ont.on('build:skipped', (r) => { this._building.delete(`${r.transform}::${r.branch}`); this.refresh(); });
+    ont.on('build:failed',  (r) => { this._building.delete(`${r.transform}::${r.branch}`); this.refresh(); });
     ont.branches?.onChange?.(() => this.refresh());
 
     this.refresh();
@@ -110,6 +115,7 @@ export class LineagePanel {
   _stateOf(name, ds, transformName, branch) {
     if (ds.source.kind === 'raw') return 'fresh';
     if (!transformName) return 'never-built';
+    if (this._building.has(`${transformName}::${branch}`)) return 'building';
     const latest = this.buildEngine.catalog.latest(transformName, branch);
     if (!latest) {
       // Branch read-through: if the parent branch (main) has a build, mark inherited.
@@ -130,15 +136,16 @@ export class LineagePanel {
   }
 }
 
-export function buildAllStaleHandler(buildEngine, ontology) {
+export function buildAllStaleHandler(buildEngine, ontology, getContext) {
   return async () => {
     const branch = ontology.branches.currentBranch;
+    const context = getContext ? getContext() : null;
     const txs = [];
     for (const [tName] of ontology.transforms) {
       if (buildEngine.catalog.getStaleHint(tName, branch)) txs.push(tName);
     }
     for (const tName of txs) {
-      try { await buildEngine.build(tName); } catch (e) { console.error(e); }
+      try { await buildEngine.build(tName, context); } catch (e) { console.error(e); }
     }
   };
 }

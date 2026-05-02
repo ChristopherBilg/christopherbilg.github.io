@@ -58,4 +58,15 @@ export class BuildCatalog {
       if (tx) this.setStaleHint(tx, branch, true);
     }
   }
+
+  // Remove all records and stale hints for the given branch.
+  purge(branch) {
+    const suffix = `::${branch}`;
+    for (const key of [...this._records.keys()]) {
+      if (key.endsWith(suffix)) this._records.delete(key);
+    }
+    for (const key of [...this._staleHints.keys()]) {
+      if (key.endsWith(suffix)) this._staleHints.delete(key);
+    }
+  }
 }
