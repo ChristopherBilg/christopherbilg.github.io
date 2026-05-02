@@ -145,6 +145,12 @@ export class Ontology {
     (this.listeners.get(event) || []).forEach((cb) => cb(payload));
   }
 
+  transformsByOutput() {
+    const m = new Map();
+    for (const [name, spec] of this.transforms) m.set(spec.output, name);
+    return m;
+  }
+
   getSchema() {
     const objects = {};
     for (const [name, config] of this.objectTypes) {

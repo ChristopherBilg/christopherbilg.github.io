@@ -37,6 +37,7 @@ export function validateTransformSpec(spec, { datasets, transforms }) {
   }
 
   if (!pk || typeof pk !== 'string') throw new Error(`Transform "${name}" pk is required`);
+  ensureIdent('Transform pk', pk);
 
   if (kind !== 'sql' && kind !== 'js') {
     throw new Error(`Transform "${name}" kind must be 'sql' or 'js' (got "${kind}")`);

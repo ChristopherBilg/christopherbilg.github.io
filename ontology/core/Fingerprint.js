@@ -27,6 +27,9 @@ function rowToken(row) {
 export function hashDataset(rows, pk) {
   if (!Array.isArray(rows)) throw new Error('hashDataset: rows must be an array');
   if (!pk) throw new Error('hashDataset: pk is required');
+  // pk values are stringified for stable cross-type comparison; numeric pks are
+  // not lexicographically sorted, but our datasets use uniform string pks
+  // (tail_number, pilot_id, code, origin).
   const sorted = rows.slice().sort((a, b) => {
     const ax = a?.[pk];
     const bx = b?.[pk];

@@ -1,8 +1,7 @@
 // ontology/core/BuildEngine.js
-// Orchestrates pipeline builds. Phase 2: SQL + JS execution against
-// DuckDB-Wasm and a Web Worker respectively, full rebuild every time
-// (no fingerprinting yet — that lands in Phase 3). One transform per call
-// to .build(); .buildAll() walks all registered transforms in topo order.
+// Orchestrates pipeline builds. Phase 3: catalog + fingerprint + hybrid
+// staleness. Skip-if-unchanged, event-based downstream invalidation, and
+// branch-discard cleanup added here. SQL + JS execution paths unchanged.
 //
 // SQL execution model:
 // - Each input dataset is registered as a DuckDB view named after the dataset.
@@ -14,22 +13,76 @@
 //   then read back as plain rows and handed to Dataset.setDerivedRows().
 //
 // JS execution model:
-// - Inputs are resolved as plain row arrays (via ontology.all() for raw
-//   datasets, or Dataset.rows() for derived ones).
+// - Inputs are resolved as plain row arrays (via _resolveInputs) once before
+//   fingerprinting; those same resolved rows are forwarded to the worker.
 // - The body function is sent as a source string to workers/builder.js.
 // - The worker reconstitutes it via new Function, runs it, returns rows.
-// - 10s timeout: if the worker doesn't respond in time, it is terminated
-//   and recreated; the build rejects with a timeout error.
+// - 10s timeout: if the worker doesn't respond in time, _failAllPending
+//   rejects every pending build and the worker is recreated.
 
 import { DuckDBProvider } from './DuckDBProvider.js';
+import { BuildCatalog } from './BuildCatalog.js';
+import { hashDataset, hashCombined } from './Fingerprint.js';
 
 export class BuildEngine {
   constructor(ontology) {
     this.ontology = ontology;
+    this.catalog = new BuildCatalog();
     this._registeredJsonInputs = new Set();
     this._worker = null;
     this._pendingByTransform = new Map(); // transformName -> { resolve, reject, timer }
-    this._inFlight = null;               // Carryover #2: serialize concurrent build() calls
+    this._inFlight = null;               // serialize concurrent build() calls
+    this._wireEventInvalidation();
+  }
+
+  // Subscribe to ontology events and branch changes so stale hints stay current.
+  _wireEventInvalidation() {
+    const ont = this.ontology;
+    ont.on('action', (cs) => this._invalidateDownstream(cs?.objectType));
+    ont.on('undo',   (cs) => this._invalidateDownstream(cs?.objectType));
+    ont.on('loaded', () => this._invalidateAll());
+    ont.branches?.onChange?.((kind, branch) => {
+      if (kind === 'switch') this._invalidateAll();
+      if (kind === 'discard') this._purgeBranch(branch);
+    });
+  }
+
+  // Mark all transforms on the active branch stale (e.g., after loaded / switch).
+  _invalidateAll() {
+    const branch = this.ontology.branches?.currentBranch || 'main';
+    for (const [name] of this.ontology.transforms) {
+      this.catalog.setStaleHint(name, branch, true);
+    }
+  }
+
+  // Mark every transform whose input chain reaches objectType as stale.
+  _invalidateDownstream(objectType) {
+    if (!objectType) return;
+    const branch = this.ontology.branches?.currentBranch || 'main';
+    const txByOutput = this.ontology.transformsByOutput();
+    this.catalog.markDownstreamStale(objectType, this.ontology.lineage, branch, txByOutput);
+  }
+
+  // Drop every artifact + catalog entry for a discarded branch.
+  // SQL artifacts: best-effort DROP TABLE. JS artifacts: catalog cleared;
+  // the in-memory rows for a non-active branch are harmless.
+  async _purgeBranch(branch) {
+    if (!branch || branch === 'main') return;
+    const provider = DuckDBProvider.shared();
+    for (const [tName, spec] of this.ontology.transforms) {
+      // Clear catalog records and stale-hint for this branch.
+      const key = `${tName}::${branch}`;
+      this.catalog._records.delete(key);
+      this.catalog._staleHints.delete(key);
+      // Drop SQL artifact table if it exists.
+      if (spec.kind === 'sql') {
+        try {
+          await provider.query(`DROP TABLE IF EXISTS "${spec.output}__${branch}"`);
+        } catch (e) {
+          console.warn(`[build] could not drop ${spec.output}__${branch}:`, e.message);
+        }
+      }
+    }
   }
 
   // Build every registered transform once, in topo order.
@@ -41,8 +94,8 @@ export class BuildEngine {
     }
   }
 
-  // Carryover #2: serialize concurrent build() calls so they don't race on
-  // the shared DuckDB connection or the single JS worker.
+  // Serialize concurrent build() calls so they don't race on the shared
+  // DuckDB connection or the single JS worker.
   async build(transformName) {
     while (this._inFlight) {
       try { await this._inFlight; } catch { /* prior build's error doesn't block this one */ }
@@ -69,41 +122,111 @@ export class BuildEngine {
       }
     }
 
-    const branch = this.ontology.branches.currentBranch || 'main';
+    const branch = this.ontology.branches?.currentBranch || 'main';
     const startedAt = new Date().toISOString();
+    const id = `b_${Math.random().toString(16).slice(2, 8)}`;
+
     console.info(`[build] ${transformName} on branch=${branch}`);
 
-    let rows;
+    // ── Fingerprint inputs ────────────────────────────────────────────────
+    const inputRows = await this._resolveInputs(spec, branch);
+    const perInput = {};
+    for (const [name, rows] of Object.entries(inputRows)) {
+      const ds = this.ontology.datasets.get(name);
+      perInput[name] = hashDataset(rows, ds.pk);
+    }
+    const combined = hashCombined(perInput);
+
+    // ── Skip-if-unchanged ─────────────────────────────────────────────────
+    const last = this.catalog.latestSuccessful(transformName, branch);
+    if (last && last.fingerprint?.combined === combined) {
+      const record = {
+        id,
+        transform: transformName,
+        branch,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        durationMs: 0,
+        status: 'skipped',
+        skippedReason: 'inputs-unchanged',
+        fingerprint: { inputs: perInput, combined },
+        rowCount: last.rowCount,
+        error: null,
+      };
+      this.catalog.appendRecord(record);
+      this.catalog.setStaleHint(transformName, branch, false);
+      this.ontology.emit('build:skipped', record);
+      return record;
+    }
+
+    // ── Execute ───────────────────────────────────────────────────────────
     try {
+      let rows;
       if (spec.kind === 'sql') {
         rows = await this._executeSql(spec, branch);
       } else {
-        rows = await this._executeJs(spec, branch);
+        rows = await this._executeJsWithRows(spec, inputRows);
       }
+
+      const finishedAt = new Date().toISOString();
       const outDs = this.ontology.datasets.get(spec.output);
       outDs.setDerivedRows(rows);
-      this.ontology.emit('build', {
+
+      const record = {
+        id,
         transform: transformName,
-        output: spec.output,
         branch,
-        rowCount: rows.length,
         startedAt,
-        finishedAt: new Date().toISOString(),
+        finishedAt,
+        durationMs: new Date(finishedAt) - new Date(startedAt),
         status: 'ok',
-      });
-      return { status: 'ok', rowCount: rows.length };
+        skippedReason: null,
+        fingerprint: { inputs: perInput, combined },
+        rowCount: rows.length,
+        error: null,
+      };
+      this.catalog.appendRecord(record);
+      this.catalog.setStaleHint(transformName, branch, false);
+      this._invalidateDownstream(spec.output);
+      this.ontology.emit('build', record);
+      return record;
     } catch (err) {
-      this.ontology.emit('build:failed', {
+      const record = {
+        id,
         transform: transformName,
-        output: spec.output,
         branch,
-        error: err.message,
         startedAt,
         finishedAt: new Date().toISOString(),
+        durationMs: 0,
         status: 'failed',
-      });
+        skippedReason: null,
+        fingerprint: { inputs: perInput, combined },
+        rowCount: 0,
+        error: err.message,
+      };
+      this.catalog.appendRecord(record);
+      // Do NOT clear the stale hint; do NOT invalidate downstream.
+      this.ontology.emit('build:failed', record);
       throw err;
     }
+  }
+
+  // Resolve all inputs for a transform into plain row arrays.
+  // For raw datasets: uses ontology.all() so kinetic edits and bi-temporal
+  // context flow through. For derived inputs: uses Dataset.rows() directly.
+  async _resolveInputs(spec, _branch) {
+    const out = {};
+    for (const inp of spec.inputs) {
+      const ds = this.ontology.datasets.get(inp);
+      if (ds.source.kind === 'raw') {
+        // ontology.all() returns ObjectProxy instances; snapshot to plain rows.
+        const objs = this.ontology.all(inp);
+        out[inp] = objs.map((o) => (o.snapshot ? o.snapshot() : { ...o }));
+      } else {
+        out[inp] = ds.rows();
+      }
+    }
+    return out;
   }
 
   _transformProducing(datasetName) {
@@ -172,41 +295,38 @@ export class BuildEngine {
     this._registeredJsonInputs.add(inp);
   }
 
-  // Execute a JS transform body in the Web Worker.
-  async _executeJs(spec, branch) {
-    // Resolve inputs as plain arrays (honor branch + time-travel via the
-    // existing read APIs). For raw datasets, we use ontology.all() so kinetic
-    // edits and bi-temporal context flow through. For derived inputs, use the
-    // raw dataset rows() directly (already branch-scoped via setDerivedRows
-    // calls keyed by branch — Phase 4 makes this fully per-branch).
-    const inputs = {};
-    for (const inp of spec.inputs) {
-      const ds = this.ontology.datasets.get(inp);
-      if (ds.source.kind === 'raw') {
-        // ontology.all() returns ObjectProxy instances; snapshot to plain rows.
-        const objs = this.ontology.all(inp);
-        inputs[inp] = objs.map((o) => o.snapshot ? o.snapshot() : { ...o });
-      } else {
-        inputs[inp] = ds.rows();
-      }
-    }
-
+  // Execute a JS transform body in the Web Worker with pre-resolved input rows.
+  // Inputs are resolved once (in _buildInternal) for fingerprinting; we reuse
+  // them here to avoid a second snapshot that could differ mid-execution.
+  async _executeJsWithRows(spec, inputRows) {
     if (!this._worker) this._worker = this._spawnWorker();
 
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        this._pendingByTransform.delete(spec.name);
+        // Reject ALL pending builds (not just this one) and recreate the worker,
+        // mirroring the worker error handler. The current entry is also in the
+        // map so _failAllPending covers it — no need to special-case it.
         this._restartWorker();
-        reject(new Error(`JS build "${spec.name}" timed out after 10s`));
+        this._failAllPending(new Error(`JS build "${spec.name}" timed out after 10s`));
       }, 10_000);
       this._pendingByTransform.set(spec.name, { resolve, reject, timer });
       this._worker.postMessage({
         kind: 'build',
         transformName: spec.name,
         body: spec.body.toString(),
-        inputs,
+        inputs: inputRows,
       });
     });
+  }
+
+  // Reject every pending JS build with err and clear the pending map.
+  // Used by both the timeout callback and the worker error handler.
+  _failAllPending(err) {
+    for (const [, p] of this._pendingByTransform) {
+      clearTimeout(p.timer);
+      p.reject(err);
+    }
+    this._pendingByTransform.clear();
   }
 
   _spawnWorker() {
@@ -222,12 +342,8 @@ export class BuildEngine {
     });
     w.addEventListener('error', (err) => {
       console.error('[builder.worker] error', err.message);
-      // Reject every in-flight build and recreate the worker.
-      for (const [, p] of this._pendingByTransform) {
-        clearTimeout(p.timer);
-        p.reject(new Error(`worker error: ${err.message}`));
-      }
-      this._pendingByTransform.clear();
+      // Reject every in-flight build via _failAllPending, then recreate worker.
+      this._failAllPending(new Error(`worker error: ${err.message}`));
       this._restartWorker();
     });
     return w;

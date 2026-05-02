@@ -10,6 +10,9 @@ export class BuildCatalog {
     this._staleHints = new Map(); // "transform::branch" -> boolean
   }
 
+  // Identifier safety: transform names are validated to /^[A-Za-z_][A-Za-z0-9_]*$/ in
+  // Transform.js, branch names to /^[a-z0-9_-]+$/i in BranchManager.js. Neither
+  // permits "::", so this delimiter is collision-free.
   _key(transform, branch) { return `${transform}::${branch}`; }
 
   appendRecord(record) {
