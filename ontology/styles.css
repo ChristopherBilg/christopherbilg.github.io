@@ -779,3 +779,15 @@ code, pre, .mono { font-family: var(--mono); }
 .catalog-table  { width: 100%; border-collapse: collapse; font-size: 12px; }
 .catalog-table th, .catalog-table td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
 .catalog-table tr:hover { background: rgba(0,0,0,0.03); }
+
+/* Lineage Panel */
+.lineage-panel { padding: 8px 16px; border-bottom: 1px solid #2a2f3a; }
+.lineage-panel .lineage-content { display: none; }
+.lineage-panel.expanded .lineage-content { display: block; }
+.lineage-expand { background: transparent; color: #cfd2da; border: none; cursor: pointer; padding: 0; margin-right: 8px; }
+.lineage-canvas-wrap { height: 240px; position: relative; }
+.lineage-canvas { width: 100%; height: 100%; }
+.lineage-actions { display: flex; gap: 12px; align-items: center; padding: 6px 0; }
+.lineage-legend { display: flex; gap: 8px; font-size: 11px; color: #9ca3af; }
+.legend-item .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+.legend-item .dot.dashed { background: transparent; border: 1px dashed #15803d; }

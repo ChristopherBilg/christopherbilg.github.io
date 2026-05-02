@@ -10,6 +10,7 @@ import { Omnibar } from './views/Omnibar.js';
 import { renderActionForm } from './views/ActionForm.js';
 import { BuildEngine } from './core/BuildEngine.js';
 import { renderBuildCatalogPanel } from './views/BuildCatalogPanel.js';
+import { LineagePanel, buildAllStaleHandler } from './views/LineagePanel.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -363,6 +364,7 @@ const TIME_PRESETS = [
   { label: '2026-01-01',  value: '2026-01-01T00:00:00Z' },
 ];
 
+// state.selection union: { kind: 'object', type, id } | { kind: 'dataset', name, transform } | legacy { type, id } from omnibar
 const state = {
   selection: null,
   lastError: null,
@@ -1183,6 +1185,25 @@ ontology.on('build:failed',  () => { if (state.selection?.kind === 'dataset') re
     },
   });
   graphView.mount();
+
+  const lineagePanel = new LineagePanel({
+    root: document.getElementById('lineage-panel'),
+    summaryEl: document.getElementById('lineage-summary'),
+    expandBtn: document.getElementById('lineage-expand'),
+    ontology,
+    buildEngine,
+    onSelect: ({ name, transform }) => {
+      state.selection = { kind: 'dataset', name, transform };
+      render();
+    },
+  });
+  lineagePanel.mount();
+
+  document.getElementById('lineage-build-all-stale')
+    .addEventListener('click', buildAllStaleHandler(buildEngine, ontology));
+
+  Object.assign(globalThis, { lineagePanel });
+
   agent = new Agent(ontology, actions);
   omnibar = new Omnibar({
     agent,

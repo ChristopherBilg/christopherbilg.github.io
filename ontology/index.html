@@ -45,6 +45,27 @@
     <button class="btn btn-ghost btn-tiny" id="branch-discard" disabled>discard</button>
   </div>
 
+  <section class="lineage-panel" id="lineage-panel">
+    <button class="lineage-expand" id="lineage-expand">▶ Lineage</button>
+    <span class="lineage-summary" id="lineage-summary">loading…</span>
+    <div class="lineage-content">
+      <div class="lineage-canvas-wrap">
+        <div class="lineage-canvas" id="lineage-canvas"></div>
+      </div>
+      <div class="lineage-actions">
+        <button class="btn btn-ghost btn-tiny" id="lineage-build-all-stale">Build all stale</button>
+        <span class="lineage-legend">
+          <span class="legend-item"><span class="dot" style="background:#15803d"></span> fresh</span>
+          <span class="legend-item"><span class="dot" style="background:#f59e0b"></span> stale</span>
+          <span class="legend-item"><span class="dot" style="background:#2563eb"></span> building</span>
+          <span class="legend-item"><span class="dot" style="background:#b91c1c"></span> failed</span>
+          <span class="legend-item"><span class="dot" style="background:#6b7280"></span> never-built</span>
+          <span class="legend-item"><span class="dot dashed"></span> inherited</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
   <main class="layout">
     <section class="panel panel-graph">
       <h2>Graph <span class="hint">Click a node to select. Drag to pan.</span></h2>

@@ -67,6 +67,7 @@ export class Ontology {
     // Add edges input -> output.
     for (const inp of spec.inputs) this.lineage.addEdge(inp, spec.output);
     this.transforms.set(spec.name, spec);
+    this._txByOutputCache = null;
     return spec;
   }
 
@@ -146,9 +147,12 @@ export class Ontology {
   }
 
   transformsByOutput() {
-    const m = new Map();
-    for (const [name, spec] of this.transforms) m.set(spec.output, name);
-    return m;
+    if (!this._txByOutputCache) {
+      const m = new Map();
+      for (const [name, spec] of this.transforms) m.set(spec.output, name);
+      this._txByOutputCache = m;
+    }
+    return this._txByOutputCache;
   }
 
   getSchema() {
