@@ -9,10 +9,12 @@ import { CRDTClock, crdtCompare } from './CRDTClock.js';
 import { JSONAdapter } from './JSONAdapter.js';
 import { DuckDBAdapter } from './DuckDBAdapter.js';
 import { LocalState } from '../store/LocalState.js';
+import { Dataset } from './Dataset.js';
 
 export class Ontology {
   constructor() {
     this.objectTypes = new Map();
+    this.datasets = new Map();
     this.cache = new Map();
     this.listeners = new Map();
     this.loaded = false;
@@ -24,9 +26,25 @@ export class Ontology {
     this.clock = new CRDTClock();
   }
 
+  defineDataset(spec) {
+    if (this.datasets.has(spec.name)) {
+      throw new Error(`Dataset "${spec.name}" already defined`);
+    }
+    const ds = new Dataset(spec, this);
+    this.datasets.set(spec.name, ds);
+    return ds;
+  }
+
   defineObject(name, config) {
     const adapter = config.adapter || 'json';
-    this.objectTypes.set(name, { ...config, adapter });
+    if (!this.datasets.has(name)) {
+      this.defineDataset({
+        name,
+        pk: config.pk,
+        source: { kind: 'raw', adapter, backingData: config.backingData },
+      });
+    }
+    this.objectTypes.set(name, { ...config, adapter, dataset: name });
   }
 
   _makeAdapter(typeName, config) {
@@ -41,6 +59,8 @@ export class Ontology {
     for (const [name, config] of this.objectTypes) {
       const adapter = this._makeAdapter(name, config);
       this.adapters.set(name, adapter);
+      const ds = this.datasets.get(name);
+      if (ds && ds.source.kind === 'raw') ds.attachAdapter(adapter);
       jobs.push(adapter.load());
     }
     await Promise.all(jobs);
