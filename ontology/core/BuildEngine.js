@@ -59,7 +59,13 @@ export class BuildEngine {
 
   // Mark every transform whose input chain reaches objectType as stale.
   _invalidateDownstream(objectType) {
-    if (!objectType) return;
+    if (!objectType) {
+      // Action/undo emitted without a specific objectType (e.g., CRDT remote
+      // message or orphan-injection test). We can't compute downstream
+      // precisely, so be conservative and mark every transform stale.
+      this._invalidateAll();
+      return;
+    }
     const branch = this.ontology.branches?.currentBranch || 'main';
     const txByOutput = this.ontology.transformsByOutput();
     this.catalog.markDownstreamStale(objectType, this.ontology.lineage, branch, txByOutput);
