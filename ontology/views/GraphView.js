@@ -16,11 +16,12 @@ const STATUS_NODE_COLORS = {
 const FORWARD_LINK_TYPES = ['flight_pilot', 'flight_origin', 'flight_destination'];
 
 export class GraphView {
-  constructor(canvasEl, ontology, { onSelect, getContext }) {
+  constructor(canvasEl, ontology, { onSelect, getContext, getStaleness }) {
     this.canvasEl = canvasEl;
     this.ontology = ontology;
     this.onSelect = onSelect || (() => {});
     this.getContext = getContext || (() => null);
+    this.getStaleness = getStaleness || (() => false);
     this._listeners = [];
     this._fg = null;
     this._mounted = false;
@@ -111,10 +112,11 @@ export class GraphView {
   }
 
   _labelFor(type, obj) {
-    if (type === 'Flight')  return obj.tail_number;
-    if (type === 'Pilot')   return obj.name || obj.pilot_id;
-    if (type === 'Airport') return obj.code;
-    return obj.id;
+    const stale = this.getStaleness(type) ? ' <span style="color:#f59e0b">●</span>' : '';
+    if (type === 'Flight')  return obj.tail_number + stale;
+    if (type === 'Pilot')   return (obj.name || obj.pilot_id) + stale;
+    if (type === 'Airport') return obj.code + stale;
+    return obj.id + stale;
   }
 
   _colorFor(type, obj) {

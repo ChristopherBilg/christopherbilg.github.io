@@ -9,6 +9,7 @@ import { GraphView } from './views/GraphView.js';
 import { Omnibar } from './views/Omnibar.js';
 import { renderActionForm } from './views/ActionForm.js';
 import { BuildEngine } from './core/BuildEngine.js';
+import { renderBuildCatalogPanel } from './views/BuildCatalogPanel.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
@@ -697,7 +698,18 @@ function renderDetail() {
     $detail.innerHTML = '<div class="empty">Select a flight, pilot, or airport to see its merged state, links, and available actions.</div>';
     return;
   }
-  const { type, id } = state.selection;
+  const sel = state.selection;
+  if (sel.kind === 'dataset') {
+    renderBuildCatalogPanel($detail, {
+      dataset: sel.name,
+      transform: sel.transform,
+      catalog: buildEngine.catalog,
+      branchList: ontology.branches.list(),
+    });
+    return;
+  }
+  // kind === 'object' or legacy shape without kind
+  const { type, id } = sel;
   if (type === 'Flight')  return renderFlightDetail(id);
   if (type === 'Pilot')   return renderPilotDetail(id);
   if (type === 'Airport') return renderAirportDetail(id);
@@ -1101,6 +1113,11 @@ ontology.on('undo', requestIntegrityScan);
 ontology.on('action', invalidateComputedFor);
 ontology.on('undo', invalidateComputedFor);
 
+// Build events: refresh catalog panel and stale dots in graph.
+ontology.on('build',         () => { if (state.selection?.kind === 'dataset') renderDetail(); graphView?.refresh(); });
+ontology.on('build:skipped', () => { if (state.selection?.kind === 'dataset') renderDetail(); graphView?.refresh(); });
+ontology.on('build:failed',  () => { if (state.selection?.kind === 'dataset') renderDetail(); graphView?.refresh(); });
+
 (async function main() {
   config = new ConfigProvider();
   await config.load();
@@ -1146,11 +1163,24 @@ ontology.on('undo', invalidateComputedFor);
   }
   graphView = new GraphView($graphCanvas, ontology, {
     onSelect: ({ type, id }) => {
-      state.selection = { type, id };
+      const cfg = ontology.objectTypes.get(type);
+      if (cfg?.adapter === 'derived') {
+        const transformName = ontology.transformsByOutput().get(type);
+        state.selection = { kind: 'dataset', name: type, transform: transformName };
+      } else {
+        state.selection = { kind: 'object', type, id };
+      }
       state.lastError = null;
       render();
     },
     getContext: () => state.context,
+    getStaleness: (typeName) => {
+      const cfg = ontology.objectTypes.get(typeName);
+      if (cfg?.adapter !== 'derived') return false;
+      const tx = ontology.transformsByOutput().get(typeName);
+      if (!tx) return false;
+      return buildEngine.catalog.getStaleHint(tx, ontology.branches.currentBranch);
+    },
   });
   graphView.mount();
   agent = new Agent(ontology, actions);

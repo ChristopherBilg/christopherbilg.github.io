@@ -773,3 +773,9 @@ code, pre, .mono { font-family: var(--mono); }
   border-top: 1px solid var(--border);
   padding-top: 8px;
 }
+
+/* Build Catalog Panel */
+.catalog-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.catalog-table  { width: 100%; border-collapse: collapse; font-size: 12px; }
+.catalog-table th, .catalog-table td { padding: 4px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+.catalog-table tr:hover { background: rgba(0,0,0,0.03); }
