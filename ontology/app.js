@@ -717,6 +717,8 @@ function renderDetail() {
       catalog: buildEngine.catalog,
       branchList: ontology.branches.list(),
       asOfTx: state.context?.asOfTx || null,
+      rows: ontology.datasets.get(sel.name)?.rows() || [],
+      transformSpec: ontology.transforms.get(sel.transform) || null,
     });
     return;
   }

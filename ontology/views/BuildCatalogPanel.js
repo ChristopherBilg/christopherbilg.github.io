@@ -1,10 +1,12 @@
 // ontology/views/BuildCatalogPanel.js
 // Render the build history table for one dataset. Pure DOM — no framework.
 
+import { attachColumnLineagePopover } from './ColumnLineagePopover.js';
+
 const STATUS_LABEL = { ok: 'ok', skipped: 'skipped', failed: 'failed', building: 'building' };
 const STATUS_COLOR = { ok: '#15803d', skipped: '#6b7280', failed: '#b91c1c', building: '#2563eb' };
 
-export function renderBuildCatalogPanel(container, { dataset, transform, catalog, branchList, asOfTx = null }) {
+export function renderBuildCatalogPanel(container, { dataset, transform, catalog, branchList, asOfTx = null, rows = [], transformSpec = null }) {
   const records = [];
   for (const branch of branchList) {
     for (const r of catalog.history(transform, branch)) {
@@ -37,6 +39,40 @@ export function renderBuildCatalogPanel(container, { dataset, transform, catalog
       `}
   `;
   container.innerHTML = html;
+  if (rows && rows.length) {
+    container.appendChild(renderRowsPreview(rows, transformSpec));
+  }
+}
+
+function renderRowsPreview(rows, spec) {
+  const wrap = document.createElement('div');
+  wrap.className = 'rows-preview';
+  const cols = Object.keys(rows[0]);
+  const table = document.createElement('table');
+  table.className = 'catalog-table';
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  for (const col of cols) {
+    const th = document.createElement('th');
+    th.textContent = col;
+    if (spec) attachColumnLineagePopover(th, { outputCol: col, refs: spec.lineage?.[col] });
+    headRow.appendChild(th);
+  }
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  for (const row of rows.slice(0, 50)) {
+    const tr = document.createElement('tr');
+    for (const col of cols) {
+      const td = document.createElement('td');
+      td.textContent = row[col] == null ? '' : String(row[col]);
+      tr.appendChild(td);
+    }
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  return wrap;
 }
 
 function rowHtml(r) {

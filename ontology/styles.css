@@ -791,3 +791,17 @@ code, pre, .mono { font-family: var(--mono); }
 .lineage-legend { display: flex; gap: 8px; font-size: 11px; color: #9ca3af; }
 .legend-item .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
 .legend-item .dot.dashed { background: transparent; border: 1px dashed #15803d; }
+
+/* Column Lineage Popover */
+.lineage-info-icon { color: #6b7280; cursor: help; }
+.lineage-tooltip {
+  position: absolute;
+  background: #1f2937;
+  color: #e5e7eb;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+.rows-preview { margin-top: 16px; }
