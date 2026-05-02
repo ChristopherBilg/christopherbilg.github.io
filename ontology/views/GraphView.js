@@ -1,5 +1,9 @@
 import ForceGraph from 'https://esm.sh/force-graph@1.43.0';
 
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+}
+
 const NODE_COLORS = {
   Flight:  '#4f8eff',
   Pilot:   '#34c759',
@@ -30,7 +34,9 @@ export class GraphView {
   mount() {
     if (this._mounted) return;
     this._fg = ForceGraph()(this.canvasEl)
-      .nodeLabel((n) => `<b>${n.type}</b> · ${n.label}<br/><span style="color:#999">${n.id}</span>`)
+      // n.label is built by _labelFor which returns trusted HTML (escaped data + literal stale-dot span).
+      // Other interpolations (n.type, n.id) are escaped here at the call site.
+      .nodeLabel((n) => `<b>${escapeHtml(n.type)}</b> · ${n.label}<br/><span style="color:#999">${escapeHtml(n.id)}</span>`)
       .nodeColor((n) => n.color)
       .nodeRelSize(4)
       .linkColor(() => 'rgba(120,120,140,0.3)')
@@ -113,10 +119,10 @@ export class GraphView {
 
   _labelFor(type, obj) {
     const stale = this.getStaleness(type) ? ' <span style="color:#f59e0b">●</span>' : '';
-    if (type === 'Flight')  return obj.tail_number + stale;
-    if (type === 'Pilot')   return (obj.name || obj.pilot_id) + stale;
-    if (type === 'Airport') return obj.code + stale;
-    return obj.id + stale;
+    if (type === 'Flight')  return escapeHtml(obj.tail_number) + stale;
+    if (type === 'Pilot')   return escapeHtml(obj.name || obj.pilot_id) + stale;
+    if (type === 'Airport') return escapeHtml(obj.code) + stale;
+    return escapeHtml(obj.id) + stale;
   }
 
   _colorFor(type, obj) {
