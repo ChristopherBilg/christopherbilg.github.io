@@ -47,16 +47,21 @@ export class Dataset {
     if (this.source.kind !== 'derived') {
       throw new Error(`Dataset "${this.name}" is not derived; cannot setDerivedRows`);
     }
-    this._derivedRows = new Map();
-    // Clear any prior cache entries for this dataset's bound object type.
-    this._clearCacheForDataset();
+    // Validate every row's pk first into a fresh Map. Only after the loop
+    // succeeds do we touch the cache or this._derivedRows. This makes the
+    // operation transactional — a thrown row never leaves us half-built.
+    const next = new Map();
     for (const row of rows) {
       const pkVal = row[this.pk];
       if (pkVal == null) {
         throw new Error(`Dataset "${this.name}": derived row missing pk "${this.pk}"`);
       }
-      this._derivedRows.set(String(pkVal), row);
-      this.ontology.cache.set(`${this.name}:${pkVal}`, row);
+      next.set(String(pkVal), row);
+    }
+    this._clearCacheForDataset();
+    this._derivedRows = next;
+    for (const [k, row] of next) {
+      this.ontology.cache.set(`${this.name}:${k}`, row);
     }
   }
 

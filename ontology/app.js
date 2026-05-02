@@ -8,9 +8,11 @@ import { LocalState } from './store/LocalState.js';
 import { GraphView } from './views/GraphView.js';
 import { Omnibar } from './views/Omnibar.js';
 import { renderActionForm } from './views/ActionForm.js';
+import { BuildEngine } from './core/BuildEngine.js';
 
 const ontology = new Ontology();
 const actions = new ActionEngine(ontology);
+const buildEngine = new BuildEngine(ontology);
 let agent = null;
 let config = null;
 
@@ -36,6 +38,33 @@ function setupOntology() {
   ontology.links.define('flight_origin',      { source: 'Flight', target: 'Airport', fk: 'origin' });
   ontology.links.define('flight_destination', { source: 'Flight', target: 'Airport', fk: 'destination' });
   ontology.links.define('pilot_flights',      { source: 'Pilot',  target: 'Flight',  fk: 'pilot_id', direction: 'reverse' });
+
+  ontology.defineTransform({
+    name: 'avgDelayByOrigin',
+    inputs: ['Flight'],
+    output: 'AvgDelayByOrigin',
+    pk: 'origin',
+    kind: 'sql',
+    body: `
+      SELECT
+        origin,
+        AVG(COALESCE(delay_minutes, 0)) AS avg_delay,
+        COUNT(*) AS flight_count
+      FROM Flight
+      WHERE status != 'Cancelled'
+      GROUP BY origin
+    `,
+  });
+
+  // Bind an object type to the derived dataset so the existing graph view,
+  // ObjectProxy, and query() all work over it transparently.
+  // NOTE: Do NOT use defineObject — that would try to create a raw dataset of
+  // the same name, colliding with the derived one registered by defineTransform.
+  ontology.objectTypes.set('AvgDelayByOrigin', {
+    pk: 'origin',
+    adapter: 'derived', // sentinel — no adapter is created; dataset is fed by BuildEngine
+    dataset: 'AvgDelayByOrigin',
+  });
 }
 
 const FLIGHT_STATES = {
@@ -323,6 +352,7 @@ const $detail = document.getElementById('detail');
 const $log = document.getElementById('log');
 const $manifestBadge = document.getElementById('manifest-badge');
 const $resetBtn = document.getElementById('reset-btn');
+const $buildBtn = document.getElementById('build-btn');
 const $txInput = document.getElementById('tx-input');
 const $txNow = document.getElementById('tx-now');
 const $txBadge = document.getElementById('tx-badge');
@@ -344,6 +374,21 @@ $resetBtn.addEventListener('click', () => {
   state.lastError = null;
   ontology.clock.publishReset();
   ontology.emit('undo', null);
+});
+
+$buildBtn?.addEventListener('click', async () => {
+  $buildBtn.disabled = true;
+  $buildBtn.textContent = 'Building…';
+  try {
+    await buildEngine.buildAll();
+    notify('Build complete', 'info');
+  } catch (err) {
+    console.error('[build] failed:', err);
+    notify(`Build failed: ${err.message}`, 'warn');
+  } finally {
+    $buildBtn.disabled = false;
+    $buildBtn.textContent = 'Build';
+  }
 });
 
 function setContextFromIso(iso) {
@@ -1097,6 +1142,7 @@ ontology.on('undo', invalidateComputedFor);
 })();
 
 window.ontology = ontology;
+Object.assign(globalThis, { ontology, actions, buildEngine, agent: () => agent, config: () => config });
 window.actions = actions;
 window.links = ontology.links;
 window.appState = state;

@@ -10,6 +10,8 @@ import { JSONAdapter } from './JSONAdapter.js';
 import { DuckDBAdapter } from './DuckDBAdapter.js';
 import { LocalState } from '../store/LocalState.js';
 import { Dataset } from './Dataset.js';
+import { validateTransformSpec } from './Transform.js';
+import { LineageGraph } from './LineageGraph.js';
 
 export class Ontology {
   constructor() {
@@ -24,14 +26,21 @@ export class Ontology {
     this.security = new SecurityProvider();
     this.branches = new BranchManager();
     this.clock = new CRDTClock();
+    this.transforms = new Map();
+    this.lineage = new LineageGraph();
   }
 
   defineDataset(spec) {
     if (this.datasets.has(spec.name)) {
+      const existing = this.datasets.get(spec.name);
+      if (spec.source?.kind === 'derived' && existing.source.kind === 'raw') {
+        throw new Error(`Cannot define derived dataset "${spec.name}": name already used by a raw dataset`);
+      }
       throw new Error(`Dataset "${spec.name}" already defined`);
     }
     const ds = new Dataset(spec, this);
     this.datasets.set(spec.name, ds);
+    this.lineage.addNode(spec.name);
     return ds;
   }
 
@@ -47,6 +56,20 @@ export class Ontology {
     this.objectTypes.set(name, { ...config, adapter, dataset: name });
   }
 
+  defineTransform(spec) {
+    validateTransformSpec(spec, { datasets: this.datasets, transforms: this.transforms });
+    // Register derived dataset for the output.
+    this.defineDataset({
+      name: spec.output,
+      pk: spec.pk,
+      source: { kind: 'derived', transform: spec.name },
+    });
+    // Add edges input -> output.
+    for (const inp of spec.inputs) this.lineage.addEdge(inp, spec.output);
+    this.transforms.set(spec.name, spec);
+    return spec;
+  }
+
   _makeAdapter(typeName, config) {
     if (config.adapter === 'json')   return new JSONAdapter(typeName, config, this);
     if (config.adapter === 'duckdb') return new DuckDBAdapter(typeName, config, this);
@@ -57,6 +80,7 @@ export class Ontology {
     const jobs = [];
     this.adapters = new Map();
     for (const [name, config] of this.objectTypes) {
+      if (config.adapter === 'derived') continue; // populated by BuildEngine after a build
       const adapter = this._makeAdapter(name, config);
       this.adapters.set(name, adapter);
       const ds = this.datasets.get(name);
