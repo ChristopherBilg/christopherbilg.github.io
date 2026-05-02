@@ -117,13 +117,6 @@ export class BuildEngine {
     const spec = this.ontology.transforms.get(transformName);
     if (!spec) throw new Error(`Unknown transform "${transformName}"`);
 
-    // Validate column-level lineage references once per transform (lazy: datasets
-    // must be loaded before columns are known).
-    if (!this._lineageValidated.has(transformName)) {
-      validateLineageReferences(spec, this.ontology.datasets);
-      this._lineageValidated.add(transformName);
-    }
-
     // Build any upstream derived inputs first. Call _buildInternal directly
     // (not build()) because we are already inside the serialization lock;
     // calling build() here would deadlock waiting on this._inFlight.
@@ -132,6 +125,14 @@ export class BuildEngine {
       if (inputDs && inputDs.source.kind === 'derived') {
         await this._buildInternal(inputDs.source.transform, context);
       }
+    }
+
+    // Validate lineage column references AFTER upstream recursion. Lazy validation needs
+    // every input dataset's rows() to be populated; derived inputs only have rows after
+    // their build completes.
+    if (!this._lineageValidated.has(transformName)) {
+      validateLineageReferences(spec, this.ontology.datasets);
+      this._lineageValidated.add(transformName);
     }
 
     const branch = this.ontology.branches?.currentBranch || 'main';
