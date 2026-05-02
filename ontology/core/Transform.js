@@ -3,11 +3,19 @@
 // contract the BuildEngine, lineage UI, and (in Phase 5) the column-lineage
 // validator all rely on.
 
+const IDENT_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
+function ensureIdent(label, value) {
+  if (typeof value !== 'string' || !IDENT_RE.test(value)) {
+    throw new Error(`${label} "${value}" is not a valid identifier (must match /^[A-Za-z_][A-Za-z0-9_]*$/)`);
+  }
+}
+
 export function validateTransformSpec(spec, { datasets, transforms }) {
   if (!spec || typeof spec !== 'object') throw new Error('Transform spec must be an object');
   const { name, inputs, output, pk, kind, body, lineage } = spec;
 
   if (!name || typeof name !== 'string') throw new Error('Transform.name is required');
+  ensureIdent('Transform name', name);
   if (transforms && transforms.has(name)) throw new Error(`Transform "${name}" already defined`);
   if (datasets && datasets.has(name)) throw new Error(`Transform "${name}" collides with existing dataset name`);
 
@@ -16,12 +24,14 @@ export function validateTransformSpec(spec, { datasets, transforms }) {
   }
   for (const inp of inputs) {
     if (typeof inp !== 'string') throw new Error(`Transform "${name}" inputs must be strings`);
+    ensureIdent(`Transform "${name}" input`, inp);
     if (datasets && !datasets.has(inp)) {
       throw new Error(`Transform "${name}" input "${inp}" is not a registered dataset`);
     }
   }
 
   if (!output || typeof output !== 'string') throw new Error(`Transform "${name}" output is required`);
+  ensureIdent(`Transform "${name}" output`, output);
   if (datasets && datasets.has(output)) {
     throw new Error(`Transform "${name}" output "${output}" collides with existing dataset`);
   }

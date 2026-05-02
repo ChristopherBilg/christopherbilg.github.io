@@ -65,6 +65,34 @@ function setupOntology() {
     adapter: 'derived', // sentinel — no adapter is created; dataset is fed by BuildEngine
     dataset: 'AvgDelayByOrigin',
   });
+
+  ontology.defineTransform({
+    name: 'pilotWorkload',
+    inputs: ['Flight'],
+    output: 'PilotWorkload',
+    pk: 'pilot_id',
+    kind: 'js',
+    body: (inputs) => {
+      const counts = new Map();
+      for (const f of inputs.Flight) {
+        if (f.status !== 'Scheduled') continue;
+        if (!f.pilot_id) continue;
+        counts.set(f.pilot_id, (counts.get(f.pilot_id) || 0) + 1);
+      }
+      const rows = [];
+      for (const [pilot_id, scheduled_flights] of counts) {
+        rows.push({ pilot_id, scheduled_flights });
+      }
+      return rows;
+    },
+  });
+
+  // NOTE: Do NOT use defineObject — same reason as AvgDelayByOrigin above.
+  ontology.objectTypes.set('PilotWorkload', {
+    pk: 'pilot_id',
+    adapter: 'derived',
+    dataset: 'PilotWorkload',
+  });
 }
 
 const FLIGHT_STATES = {
