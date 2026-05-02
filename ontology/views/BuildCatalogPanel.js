@@ -7,6 +7,11 @@ const STATUS_LABEL = { ok: 'ok', skipped: 'skipped', failed: 'failed', building:
 const STATUS_COLOR = { ok: '#15803d', skipped: '#6b7280', failed: '#b91c1c', building: '#2563eb' };
 
 export function renderBuildCatalogPanel(container, { dataset, transform, catalog, branchList, asOfTx = null, rows = [], transformSpec = null }) {
+  // Sweep any orphaned popover tooltips left over from a previous render
+  // mid-hover (a build event fires while hovering an ⓘ — the icon dies
+  // with the panel's innerHTML rewrite but the body-attached tooltip
+  // survives). Cheap defensive sweep on every panel render.
+  document.querySelectorAll('.lineage-tooltip').forEach((el) => el.remove());
   const records = [];
   for (const branch of branchList) {
     for (const r of catalog.history(transform, branch)) {
