@@ -132,43 +132,52 @@ export class BuildEngine {
     console.info(`[build] ${transformName} on branch=${branch}`);
 
     // ── Emit build:start so UI can show 'building' state ─────────────────
+    // The entire post-emit path is wrapped in one try/catch so that EVERY
+    // throw — including those from _resolveInputs, fingerprinting, or the
+    // skip-path appendRecord — produces a 'build:failed' event and a failed
+    // catalog record.  This preserves the invariant: exactly one of
+    // 'build', 'build:skipped', 'build:failed' fires after every 'build:start'.
     this.ontology.emit('build:start', { transform: transformName, branch });
 
-    // ── Fingerprint inputs ────────────────────────────────────────────────
-    const inputRows = await this._resolveInputs(spec, branch, context);
-    const perInput = {};
-    for (const [name, rows] of Object.entries(inputRows)) {
-      const ds = this.ontology.datasets.get(name);
-      perInput[name] = hashDataset(rows, ds.pk);
-    }
-    const combined = hashCombined(perInput);
+    // Accumulate fingerprint state here so the catch block can reference it
+    // even if we only got partway through fingerprinting before an error.
+    let perInput = {};
+    let combined = null;
 
-    // ── Skip-if-unchanged ─────────────────────────────────────────────────
-    const last = this.catalog.latestSuccessful(transformName, branch);
-    if (last && last.fingerprint?.combined === combined) {
-      const record = {
-        id,
-        transform: transformName,
-        branch,
-        startedAt,
-        finishedAt: new Date().toISOString(),
-        durationMs: 0,
-        status: 'skipped',
-        skippedReason: 'inputs-unchanged',
-        fingerprint: { inputs: perInput, combined },
-        rowCount: last.rowCount,
-        error: null,
-        asOfTx: context?.asOfTx ?? null,
-        asOfValid: context?.asOfValid ?? null,
-      };
-      this.catalog.appendRecord(record);
-      this.catalog.setStaleHint(transformName, branch, false);
-      this.ontology.emit('build:skipped', record);
-      return record;
-    }
-
-    // ── Execute ───────────────────────────────────────────────────────────
     try {
+      // ── Fingerprint inputs ──────────────────────────────────────────────
+      const inputRows = await this._resolveInputs(spec, branch, context);
+      for (const [name, rows] of Object.entries(inputRows)) {
+        const ds = this.ontology.datasets.get(name);
+        perInput[name] = hashDataset(rows, ds.pk);
+      }
+      combined = hashCombined(perInput);
+
+      // ── Skip-if-unchanged ───────────────────────────────────────────────
+      const last = this.catalog.latestSuccessful(transformName, branch);
+      if (last && last.fingerprint?.combined === combined) {
+        const record = {
+          id,
+          transform: transformName,
+          branch,
+          startedAt,
+          finishedAt: new Date().toISOString(),
+          durationMs: 0,
+          status: 'skipped',
+          skippedReason: 'inputs-unchanged',
+          fingerprint: { inputs: perInput, combined },
+          rowCount: last.rowCount,
+          error: null,
+          asOfTx: context?.asOfTx ?? null,
+          asOfValid: context?.asOfValid ?? null,
+        };
+        this.catalog.appendRecord(record);
+        this.catalog.setStaleHint(transformName, branch, false);
+        this.ontology.emit('build:skipped', record);
+        return record;
+      }
+
+      // ── Execute ─────────────────────────────────────────────────────────
       let rows;
       if (spec.kind === 'sql') {
         rows = await this._executeSql(spec, branch);
@@ -211,6 +220,8 @@ export class BuildEngine {
         durationMs: new Date(finishedAt) - new Date(startedAt),
         status: 'failed',
         skippedReason: null,
+        // perInput / combined may be partially populated if the error was thrown
+        // mid-fingerprint; include whatever we have for diagnostic value.
         fingerprint: { inputs: perInput, combined },
         rowCount: 0,
         error: err.message,
