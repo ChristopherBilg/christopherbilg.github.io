@@ -66,8 +66,11 @@ export class LineagePanel {
 
   _initGraph() {
     const canvas = this.root.querySelector('.lineage-canvas');
-    const w = canvas.clientWidth  || canvas.parentElement?.clientWidth  || 800;
-    const h = canvas.clientHeight || canvas.parentElement?.clientHeight || 240;
+    const measure = () => ({
+      w: canvas.clientWidth  || canvas.parentElement?.clientWidth  || 800,
+      h: canvas.clientHeight || canvas.parentElement?.clientHeight || 240,
+    });
+    const { w, h } = measure();
     this._fg = ForceGraph()(canvas)
       .width(w)
       .height(h)
@@ -92,15 +95,30 @@ export class LineagePanel {
       .linkColor(() => 'rgba(120,120,140,0.4)')
       .onNodeClick((n) => this.onSelect({ name: n.id, transform: n.transform }));
 
-    // Keep force-graph dimensions in sync with the container as the page resizes
-    // or the panel is collapsed/expanded. Without this, the canvas would keep
-    // its initial dimensions and either clip or overflow on resize.
+    // Backstop: force-graph 1.43's .width()/.height() setters update internal
+    // state but don't always re-size the inner <canvas> element after the
+    // initial render. Without this override the canvas stays at the default
+    // window-size, overflowing the panel. Set the bitmap (attributes) AND
+    // visible size (style) directly.
+    const applyInnerCanvasSize = () => {
+      const inner = canvas.querySelector('canvas');
+      if (!inner) return;
+      const { w, h } = measure();
+      if (w <= 0 || h <= 0) return;
+      if (inner.width  !== w) inner.width  = w;
+      if (inner.height !== h) inner.height = h;
+      inner.style.width  = w + 'px';
+      inner.style.height = h + 'px';
+    };
+    applyInnerCanvasSize();
+
+    // Keep force-graph dimensions in sync as the page or panel resizes.
     if ('ResizeObserver' in window) {
       this._resizeObserver = new ResizeObserver(() => {
         if (!this._fg || !this.expanded) return;
-        const cw = canvas.clientWidth;
-        const ch = canvas.clientHeight;
-        if (cw > 0 && ch > 0) this._fg.width(cw).height(ch);
+        const { w, h } = measure();
+        if (w > 0 && h > 0) this._fg.width(w).height(h);
+        applyInnerCanvasSize();
       });
       this._resizeObserver.observe(canvas);
     }
