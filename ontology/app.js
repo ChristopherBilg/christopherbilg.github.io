@@ -42,24 +42,25 @@ function setupOntology() {
   ontology.links.define('pilot_flights',      { source: 'Pilot',  target: 'Flight',  fk: 'pilot_id', direction: 'reverse' });
 
   ontology.defineTransform({
-    name: 'avgDelayByOrigin',
+    name: 'flightStatsByOrigin',
     inputs: ['Flight'],
-    output: 'AvgDelayByOrigin',
+    output: 'FlightStatsByOrigin',
     pk: 'origin',
     kind: 'sql',
     body: `
       SELECT
         origin,
-        AVG(COALESCE(delay_minutes, 0)) AS avg_delay,
-        COUNT(*) AS flight_count
+        COUNT(*) AS flight_count,
+        COUNT(*) FILTER (WHERE status = 'Scheduled') AS scheduled_count,
+        COUNT(*) FILTER (WHERE status = 'Cancelled') AS cancelled_count
       FROM Flight
-      WHERE status != 'Cancelled'
       GROUP BY origin
     `,
     lineage: {
-      origin:       ['Flight.origin'],
-      avg_delay:    ['Flight.delay_minutes', 'Flight.status'],
-      flight_count: ['Flight.status'],
+      origin:          ['Flight.origin'],
+      flight_count:    ['Flight.origin'],
+      scheduled_count: ['Flight.status'],
+      cancelled_count: ['Flight.status'],
     },
   });
 
@@ -67,10 +68,10 @@ function setupOntology() {
   // ObjectProxy, and query() all work over it transparently.
   // NOTE: Do NOT use defineObject — that would try to create a raw dataset of
   // the same name, colliding with the derived one registered by defineTransform.
-  ontology.objectTypes.set('AvgDelayByOrigin', {
+  ontology.objectTypes.set('FlightStatsByOrigin', {
     pk: 'origin',
     adapter: 'derived', // sentinel — no adapter is created; dataset is fed by BuildEngine
-    dataset: 'AvgDelayByOrigin',
+    dataset: 'FlightStatsByOrigin',
   });
 
   ontology.defineTransform({
@@ -98,7 +99,7 @@ function setupOntology() {
     },
   });
 
-  // NOTE: Do NOT use defineObject — same reason as AvgDelayByOrigin above.
+  // NOTE: Do NOT use defineObject — same reason as FlightStatsByOrigin above.
   ontology.objectTypes.set('PilotWorkload', {
     pk: 'pilot_id',
     adapter: 'derived',

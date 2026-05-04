@@ -56,8 +56,8 @@ try {
 assert('identifier whitelist rejects bad output names', badOutputThrew);
 
 // Carryover: in-flight serialization
-const p1 = be.build('avgDelayByOrigin');
-const p2 = be.build('avgDelayByOrigin');
+const p1 = be.build('flightStatsByOrigin');
+const p2 = be.build('flightStatsByOrigin');
 const [r1, r2] = await Promise.all([p1, p2]);
 assert('concurrent build calls both succeed', r1?.status === 'ok' && r2?.status === 'ok');
 

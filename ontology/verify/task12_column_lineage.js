@@ -4,10 +4,10 @@ import { assert, summary } from './_assert.js';
 const ont = globalThis.ontology;
 const be  = globalThis.buildEngine;
 
-const avgSpec = ont.transforms.get('avgDelayByOrigin');
-assert('avgDelayByOrigin has lineage', !!avgSpec.lineage);
-assert('avgDelay column lineage references Flight.delay_minutes',
-  avgSpec.lineage.avg_delay?.includes('Flight.delay_minutes'));
+const statsSpec = ont.transforms.get('flightStatsByOrigin');
+assert('flightStatsByOrigin has lineage', !!statsSpec.lineage);
+assert('flight_count column lineage references Flight.origin',
+  statsSpec.lineage.flight_count?.includes('Flight.origin'));
 
 // Register a bad transform with a bogus column and try to build → should throw.
 ont.defineTransform({
