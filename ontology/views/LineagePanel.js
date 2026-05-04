@@ -52,13 +52,25 @@ export class LineagePanel {
     this.expanded = !this.expanded;
     this.root.classList.toggle('expanded', this.expanded);
     this.expandBtn.textContent = this.expanded ? '▼ Lineage' : '▶ Lineage';
-    if (this.expanded && !this._fg) this._initGraph();
-    if (this.expanded) this.refresh();
+    if (!this.expanded) return;
+    // Defer init/refresh until layout settles. force-graph reads the container's
+    // bounding rect synchronously at construction; if we measure during the same
+    // tick as the .expanded class flip, the rect is still 0×0 and force-graph
+    // falls back to window dimensions — producing a viewport-sized canvas that
+    // overlays the rest of the page.
+    requestAnimationFrame(() => {
+      if (!this._fg) this._initGraph();
+      this.refresh();
+    });
   }
 
   _initGraph() {
     const canvas = this.root.querySelector('.lineage-canvas');
+    const w = canvas.clientWidth  || canvas.parentElement?.clientWidth  || 800;
+    const h = canvas.clientHeight || canvas.parentElement?.clientHeight || 240;
     this._fg = ForceGraph()(canvas)
+      .width(w)
+      .height(h)
       .nodeLabel((n) => `${n.id} · ${n.state}`)
       .nodeCanvasObject((n, ctx, scale) => {
         const r = 6;
@@ -79,6 +91,19 @@ export class LineagePanel {
       })
       .linkColor(() => 'rgba(120,120,140,0.4)')
       .onNodeClick((n) => this.onSelect({ name: n.id, transform: n.transform }));
+
+    // Keep force-graph dimensions in sync with the container as the page resizes
+    // or the panel is collapsed/expanded. Without this, the canvas would keep
+    // its initial dimensions and either clip or overflow on resize.
+    if ('ResizeObserver' in window) {
+      this._resizeObserver = new ResizeObserver(() => {
+        if (!this._fg || !this.expanded) return;
+        const cw = canvas.clientWidth;
+        const ch = canvas.clientHeight;
+        if (cw > 0 && ch > 0) this._fg.width(cw).height(ch);
+      });
+      this._resizeObserver.observe(canvas);
+    }
   }
 
   refresh() {
