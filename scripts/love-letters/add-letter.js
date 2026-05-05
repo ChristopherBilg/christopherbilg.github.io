@@ -3,12 +3,12 @@
 /**
  * Script to add a new love letter to a collection.
  *
- * Usage: node scripts/love-letters/add-letter.js <directory> <password>
+ * Usage: node scripts/love-letters/add-letter.js ../<directory> <password>
  *
  * Examples:
- *   node scripts/love-letters/add-letter.js victoria-bilger mypassword
- *   node scripts/love-letters/add-letter.js charlotte-bilger mypassword
- *   node scripts/love-letters/add-letter.js projects/xyz-love-letters mypassword
+ *   node scripts/love-letters/add-letter.js ../victoria-bilger mypassword
+ *   node scripts/love-letters/add-letter.js ../charlotte-bilger mypassword
+ *   node scripts/love-letters/add-letter.js ../projects/xyz-love-letters mypassword
  *
  * This script will:
  * 1. Prompt for letter details (title, date, body)
@@ -117,16 +117,16 @@ async function promptMultiline(rl, question) {
 }
 
 function printUsage() {
-  console.log("Usage: node scripts/love-letters/add-letter.js <directory> <password>");
+  console.log("Usage: node scripts/love-letters/add-letter.js ../<directory> <password>");
   console.log("");
   console.log("Arguments:");
-  console.log("  <directory>  Path to love letters directory (e.g., victoria-bilger)");
+  console.log("  <directory>  Path to love letters directory (e.g., ../victoria-bilger)");
   console.log("  <password>   Encryption password");
   console.log("");
   console.log("Examples:");
-  console.log("  node scripts/love-letters/add-letter.js victoria-bilger mypassword");
-  console.log("  node scripts/love-letters/add-letter.js charlotte-bilger mypassword");
-  console.log("  node scripts/love-letters/add-letter.js projects/xyz-love-letters mypassword");
+  console.log("  node scripts/love-letters/add-letter.js ../victoria-bilger mypassword");
+  console.log("  node scripts/love-letters/add-letter.js ../charlotte-bilger mypassword");
+  console.log("  node scripts/love-letters/add-letter.js ../projects/xyz-love-letters mypassword");
 }
 
 async function main() {

@@ -3,12 +3,12 @@
 /**
  * Script to split encrypted love letters into individual files.
  *
- * Usage: node scripts/love-letters/split-letters.js <directory> <password> [--dry-run]
+ * Usage: node scripts/love-letters/split-letters.js ../<directory> <password> [--dry-run]
  *
  * Examples:
- *   node scripts/love-letters/split-letters.js victoria-bilger mypassword
- *   node scripts/love-letters/split-letters.js charlotte-bilger mypassword --dry-run
- *   node scripts/love-letters/split-letters.js projects/xyz-love-letters mypassword
+ *   node scripts/love-letters/split-letters.js ../victoria-bilger mypassword
+ *   node scripts/love-letters/split-letters.js ../charlotte-bilger mypassword --dry-run
+ *   node scripts/love-letters/split-letters.js ../projects/xyz-love-letters mypassword
  *
  * This script will:
  * 1. Decrypt the existing encrypted-data.txt file in the specified directory
@@ -77,19 +77,19 @@ async function encryptData(plaintext, password) {
 }
 
 function printUsage() {
-  console.log("Usage: node scripts/love-letters/split-letters.js <directory> <password> [--dry-run]");
+  console.log("Usage: node scripts/love-letters/split-letters.js ../<directory> <password> [--dry-run]");
   console.log("");
   console.log("Arguments:");
-  console.log("  <directory>  Path to love letters directory (e.g., victoria-bilger)");
+  console.log("  <directory>  Path to love letters directory (e.g., ../victoria-bilger)");
   console.log("  <password>   Decryption password");
   console.log("");
   console.log("Options:");
   console.log("  --dry-run    Show what would be done without making changes");
   console.log("");
   console.log("Examples:");
-  console.log("  node scripts/love-letters/split-letters.js victoria-bilger mypassword");
-  console.log("  node scripts/love-letters/split-letters.js charlotte-bilger mypassword --dry-run");
-  console.log("  node scripts/love-letters/split-letters.js projects/xyz-love-letters mypassword");
+  console.log("  node scripts/love-letters/split-letters.js ../victoria-bilger mypassword");
+  console.log("  node scripts/love-letters/split-letters.js ../charlotte-bilger mypassword --dry-run");
+  console.log("  node scripts/love-letters/split-letters.js ../projects/xyz-love-letters mypassword");
 }
 
 async function main() {
