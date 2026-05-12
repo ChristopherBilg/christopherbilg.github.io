@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Chess Engine</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <div id="work-in-progress"></div>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>Chess Engine</h1>
+
+      <p>
+        This project is a chess engine implemented in JavaScript. It includes a basic user interface for playing against
+        the engine, as well as an implementation of the minimax algorithm with alpha-beta pruning for decision making.
+        The engine evaluates board positions based on material count and piece activity, and it can search to a
+        specified depth to determine the best move. This project serves as a learning experience in chess engine
+        development and algorithm implementation.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        class App extends Component {
+          init() {}
+
+          compose() {
+            return vdom``;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>
