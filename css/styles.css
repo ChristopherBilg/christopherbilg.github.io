@@ -4,23 +4,6 @@
   --handwritten-font-family: "Segoe Print", "Bradley Hand", Chilanka, TSCu_Comic, casual, cursive;
 }
 
-/* Cross-document view transitions */
-@view-transition {
-  navigation: auto;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.3s;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-  }
-}
-
 /* This essentially resets dark mode from mvp.css because I don't like dark mode on this website. */
 @media (prefers-color-scheme: dark) {
   :root[color-mode="user"] {
@@ -174,9 +157,7 @@ figure {
     border-right: 0.3rem solid var(--color-text);
     padding-right: 0.3rem;
     margin: 1.34rem auto;
-    animation:
-      typing 2s steps(30, end),
-      blink-caret 0.75s step-end infinite;
+    animation: typing 2s steps(30, end), blink-caret 0.75s step-end infinite;
   }
 
   @keyframes typing {
