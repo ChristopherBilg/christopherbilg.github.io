@@ -45,8 +45,7 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        const TIMEZONES =
-          typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : ["UTC"];
+        const TIMEZONES = typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : ["UTC"];
 
         class App extends StyledComponent {
           init() {

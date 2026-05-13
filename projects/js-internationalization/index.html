@@ -16,14 +16,23 @@
   <body>
     <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
 
-    <div id="work-in-progress"></div>
-
     <main hidden>
       <a href="/projects">Back to Projects List</a>
 
       <h1>JS Internationalization</h1>
 
-      <p>Description...</p>
+      <p>
+        The <b>Intl</b> namespace exposes a collection of locale-aware formatters and helpers built into every modern
+        JavaScript runtime. It powers culturally correct number formatting, date and time presentation, relative time
+        phrasing, list joining, pluralization, display-name lookups, and Unicode-aware text segmentation &mdash; without
+        shipping a translation library.
+      </p>
+
+      <p>
+        Pick a locale below and watch every demo on the page reformat itself accordingly. Try switching to a
+        right-to-left locale like <code>ar-SA</code> or a non-Latin script like <code>ja-JP</code> to see how the same
+        input is rendered for different audiences.
+      </p>
     </main>
 
     <script type="module">
@@ -36,11 +45,483 @@
       (() => {
         document.getElementsByTagName("main")[0].hidden = false;
 
-        class App extends Component {
-          init() {}
+        const LOCALE_CODES = (() => {
+          if (typeof Intl.DisplayNames !== "function") return ["en"];
+          const namer = new Intl.DisplayNames(["en"], { type: "language", fallback: "none" });
+          const codes = [];
+          for (let a = 97; a <= 122; a++) {
+            for (let b = 97; b <= 122; b++) {
+              const code = String.fromCharCode(a, b);
+              if (namer.of(code)) codes.push(code);
+            }
+          }
+          return codes.sort((x, y) => namer.of(x).localeCompare(namer.of(y)));
+        })();
+
+        const labelForLocale = (code) => {
+          try {
+            const loc = new Intl.Locale(code);
+            const lang = new Intl.DisplayNames([code], { type: "language" }).of(loc.language);
+            const region = loc.region ? new Intl.DisplayNames([code], { type: "region" }).of(loc.region) : "";
+            return region ? `${code} — ${lang} (${region})` : `${code} — ${lang}`;
+          } catch (_err) {
+            return code;
+          }
+        };
+
+        const initialDate = (() => {
+          const d = new Date();
+          d.setDate(d.getDate() - 30);
+          return d.toISOString().slice(0, 10);
+        })();
+
+        class App extends StyledComponent {
+          init() {
+            const browserLang = new Intl.Locale(navigator.language || "en").language;
+            this.locale = LOCALE_CODES.includes(browserLang) ? browserLang : "en";
+            this.numberInput = 1234567.89;
+            this.dateInput = initialDate;
+            this.listInput = "apples, oranges, bananas, kiwi";
+            this.segmenterInput = "👨‍👩‍👧‍👦 Hello, world! 你好世界。";
+
+            this.tick();
+            this.intervalId = setInterval(() => this.tick(), 60_000);
+          }
+
+          tick() {
+            this.now = new Date();
+            this.render();
+          }
+
+          updateLocale(value) {
+            this.locale = value;
+            this.render();
+          }
+
+          updateNumber(value) {
+            this.numberInput = value;
+            this.render();
+          }
+
+          updateDate(value) {
+            this.dateInput = value;
+            this.render();
+          }
+
+          updateList(value) {
+            this.listInput = value;
+            this.render();
+          }
+
+          updateSegmenterText(value) {
+            this.segmenterInput = value;
+            this.render();
+          }
+
+          styles() {
+            return css`
+              section {
+                border-top: 1px solid var(--color-bg-secondary, #ddd);
+                padding-top: 1em;
+                margin-top: 1.5em;
+                flex-direction: column;
+                align-items: stretch;
+              }
+
+              code.value {
+                display: inline-block;
+                padding: 2px 6px;
+                background: var(--color-bg-secondary, #f4f4f4);
+                border-radius: 4px;
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+                max-width: 100%;
+                overflow-x: auto;
+              }
+
+              .grid {
+                display: grid;
+                grid-template-columns: max-content minmax(0, 1fr);
+                gap: 0.25em 1em;
+                align-items: baseline;
+              }
+
+              .grid > div {
+                min-height: 1.5em;
+              }
+
+              .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75em;
+                align-items: center;
+                margin: 0.75em 0;
+                min-height: 2.25em;
+              }
+
+              .segments {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.25em;
+                margin-top: 0.25em;
+              }
+
+              .segment {
+                display: inline-block;
+                padding: 2px 6px;
+                background: var(--color-bg-secondary, #f4f4f4);
+                border-radius: 4px;
+                font-variant-numeric: tabular-nums;
+              }
+            `;
+          }
+
+          renderLocaleSection() {
+            let nativeLanguage = "";
+            let englishLanguage = "";
+            let maximizedTag = "";
+            let likelyScript = "";
+            let likelyRegion = "";
+            try {
+              const loc = new Intl.Locale(this.locale);
+              const max = loc.maximize();
+              maximizedTag = max.toString();
+              nativeLanguage = new Intl.DisplayNames([this.locale], { type: "language" }).of(loc.language) || "";
+              englishLanguage = new Intl.DisplayNames(["en"], { type: "language" }).of(loc.language) || "";
+              likelyScript = max.script
+                ? new Intl.DisplayNames([this.locale], { type: "script" }).of(max.script) || ""
+                : "";
+              likelyRegion = max.region
+                ? new Intl.DisplayNames([this.locale], { type: "region" }).of(max.region) || ""
+                : "";
+            } catch (_err) {
+              /* ignore */
+            }
+
+            return vdom`
+              <section>
+                <h2>Locale</h2>
+                <p>
+                  An <code>Intl.Locale</code> is the identifier every other formatter accepts. Picking one here will
+                  drive every demo on the page.
+                </p>
+                <div class="controls">
+                  <label for="locale-select">Locale:</label>
+                  <select id="locale-select" onchange=${(e) => this.updateLocale(e.target.value)}>
+                    ${LOCALE_CODES.map(
+                      (code) => vdom`
+                        <option value=${code} selected=${code === this.locale}>${labelForLocale(code)}</option>
+                      `,
+                    )}
+                  </select>
+                </div>
+                <div class="grid">
+                  <div><b>Locale code:</b></div>
+                  <div><code class="value">${this.locale}</code></div>
+
+                  <div><b>Native language name:</b></div>
+                  <div><code class="value">${nativeLanguage}</code></div>
+
+                  <div><b>English language name:</b></div>
+                  <div><code class="value">${englishLanguage}</code></div>
+
+                  <div><b>Maximized tag:</b></div>
+                  <div><code class="value">${maximizedTag || "—"}</code></div>
+
+                  <div><b>Likely script (in locale):</b></div>
+                  <div><code class="value">${likelyScript || "—"}</code></div>
+
+                  <div><b>Likely region (in locale):</b></div>
+                  <div><code class="value">${likelyRegion || "—"}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderNumberSection() {
+            const n = Number(this.numberInput);
+            const valid = Number.isFinite(n);
+            const fmt = (options) => (valid ? new Intl.NumberFormat(this.locale, options).format(n) : "—");
+
+            return vdom`
+              <section>
+                <h2>Number formatting</h2>
+                <p>
+                  <code>Intl.NumberFormat</code> handles grouping separators, decimal points, currency symbols, percent
+                  signs, units, and even compact "1.2M"-style notation — all per-locale.
+                </p>
+                <div class="controls">
+                  <label for="number-input">Number:</label>
+                  <input
+                    id="number-input"
+                    type="number"
+                    step="any"
+                    value=${this.numberInput}
+                    oninput=${(e) => this.updateNumber(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Decimal:</b></div>
+                  <div><code class="value">${fmt({})}</code></div>
+
+                  <div><b>Currency (USD):</b></div>
+                  <div><code class="value">${fmt({ style: "currency", currency: "USD" })}</code></div>
+
+                  <div><b>Percent (n / 100):</b></div>
+                  <div>
+                    <code class="value">
+                      ${valid ? new Intl.NumberFormat(this.locale, { style: "percent" }).format(n / 100) : "—"}
+                    </code>
+                  </div>
+
+                  <div><b>Unit (kilometer):</b></div>
+                  <div><code class="value">${fmt({ style: "unit", unit: "kilometer" })}</code></div>
+
+                  <div><b>Compact short:</b></div>
+                  <div><code class="value">${fmt({ notation: "compact", compactDisplay: "short" })}</code></div>
+
+                  <div><b>Compact long:</b></div>
+                  <div><code class="value">${fmt({ notation: "compact", compactDisplay: "long" })}</code></div>
+
+                  <div><b>Scientific:</b></div>
+                  <div><code class="value">${fmt({ notation: "scientific" })}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderDateTimeSection() {
+            const date = new Date(this.dateInput);
+            const valid = !Number.isNaN(date.getTime());
+            const fmt = (options) => (valid ? new Intl.DateTimeFormat(this.locale, options).format(date) : "—");
+
+            return vdom`
+              <section>
+                <h2>Date and time formatting</h2>
+                <p>
+                  <code>Intl.DateTimeFormat</code> renders a <code>Date</code> in the calendar, numbering system, and
+                  format conventions of the chosen locale.
+                </p>
+                <div class="controls">
+                  <label for="date-input">Date:</label>
+                  <input
+                    id="date-input"
+                    type="date"
+                    value=${this.dateInput}
+                    oninput=${(e) => this.updateDate(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Full date:</b></div>
+                  <div><code class="value">${fmt({ dateStyle: "full" })}</code></div>
+
+                  <div><b>Long date:</b></div>
+                  <div><code class="value">${fmt({ dateStyle: "long" })}</code></div>
+
+                  <div><b>Medium date:</b></div>
+                  <div><code class="value">${fmt({ dateStyle: "medium" })}</code></div>
+
+                  <div><b>Short date:</b></div>
+                  <div><code class="value">${fmt({ dateStyle: "short" })}</code></div>
+
+                  <div><b>Custom (weekday + month):</b></div>
+                  <div>
+                    <code class="value">
+                      ${fmt({ weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                    </code>
+                  </div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderRelativeTimeSection() {
+            const date = new Date(this.dateInput);
+            const valid = !Number.isNaN(date.getTime());
+
+            let phrasing = "—";
+            let pickedUnit = "—";
+            let pickedValue = "—";
+            if (valid) {
+              const diffMs = date.getTime() - this.now.getTime();
+              const abs = Math.abs(diffMs);
+              const units = [
+                ["year", 365 * 86_400_000],
+                ["month", 30 * 86_400_000],
+                ["week", 7 * 86_400_000],
+                ["day", 86_400_000],
+                ["hour", 3_600_000],
+                ["minute", 60_000],
+                ["second", 1_000],
+              ];
+              const [unit, ms] = units.find(([, threshold]) => abs >= threshold) || ["second", 1_000];
+              const value = Math.round(diffMs / ms);
+              pickedUnit = unit;
+              pickedValue = value;
+              phrasing = new Intl.RelativeTimeFormat(this.locale, { numeric: "auto" }).format(value, unit);
+            }
+
+            return vdom`
+              <section>
+                <h2>Relative time</h2>
+                <p>
+                  <code>Intl.RelativeTimeFormat</code> turns a signed number plus a unit into phrases like "yesterday"
+                  or "in 3 months" — with <code>numeric: "auto"</code> the formatter picks idiomatic wording
+                  automatically. The diff below is computed between the date selected above and now.
+                </p>
+                <div class="grid">
+                  <div><b>Phrasing:</b></div>
+                  <div><code class="value">${phrasing}</code></div>
+
+                  <div><b>Picked unit:</b></div>
+                  <div><code class="value">${pickedUnit}</code></div>
+
+                  <div><b>Picked value:</b></div>
+                  <div><code class="value">${pickedValue}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderListSection() {
+            const items = this.listInput
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean);
+            const conjunction = new Intl.ListFormat(this.locale, { type: "conjunction" }).format(items);
+            const disjunction = new Intl.ListFormat(this.locale, { type: "disjunction" }).format(items);
+            const unitList = new Intl.ListFormat(this.locale, { type: "unit" }).format(items);
+
+            return vdom`
+              <section>
+                <h2>Lists</h2>
+                <p>
+                  <code>Intl.ListFormat</code> joins an array of strings with locale-appropriate separators and
+                  conjunctions/disjunctions — not every language uses "and"/"or" with a comma before it.
+                </p>
+                <div class="controls">
+                  <label for="list-input">Items (comma-separated):</label>
+                  <input
+                    id="list-input"
+                    type="text"
+                    size="40"
+                    value=${this.listInput}
+                    oninput=${(e) => this.updateList(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Conjunction (and):</b></div>
+                  <div><code class="value">${conjunction}</code></div>
+
+                  <div><b>Disjunction (or):</b></div>
+                  <div><code class="value">${disjunction}</code></div>
+
+                  <div><b>Unit (no conjunction):</b></div>
+                  <div><code class="value">${unitList}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderPluralSection() {
+            const n = Number(this.numberInput);
+            const valid = Number.isFinite(n);
+            const cardinal = valid ? new Intl.PluralRules(this.locale).select(n) : "—";
+            const ordinal = valid ? new Intl.PluralRules(this.locale, { type: "ordinal" }).select(n) : "—";
+
+            return vdom`
+              <section>
+                <h2>Plural rules</h2>
+                <p>
+                  <code>Intl.PluralRules</code> reports which plural category a number falls into in the chosen
+                  language. English has just two cardinal forms (<code>one</code>, <code>other</code>), but languages
+                  like Arabic and Russian have several.
+                </p>
+                <div class="grid">
+                  <div><b>Number:</b></div>
+                  <div><code class="value">${valid ? n : "—"}</code></div>
+
+                  <div><b>Cardinal category:</b></div>
+                  <div><code class="value">${cardinal}</code></div>
+
+                  <div><b>Ordinal category:</b></div>
+                  <div><code class="value">${ordinal}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderSegmenterSection() {
+            if (typeof Intl.Segmenter !== "function") {
+              return vdom`
+                <section>
+                  <h2>Segmenter</h2>
+                  <p>This runtime does not support <code>Intl.Segmenter</code>.</p>
+                </section>
+              `;
+            }
+
+            const text = this.segmenterInput;
+            const graphemes = [...new Intl.Segmenter(this.locale, { granularity: "grapheme" }).segment(text)].map(
+              (s) => s.segment,
+            );
+            const words = [...new Intl.Segmenter(this.locale, { granularity: "word" }).segment(text)]
+              .filter((s) => s.isWordLike)
+              .map((s) => s.segment);
+            const codepointCount = [...text].length;
+
+            return vdom`
+              <section>
+                <h2>Segmenter</h2>
+                <p>
+                  <code>Intl.Segmenter</code> splits text into user-perceived characters (graphemes), words, or
+                  sentences. Notice how a family ZWJ-emoji counts as <i>one</i> grapheme but several codepoints, and
+                  how word segmentation handles scripts without spaces like Chinese.
+                </p>
+                <div class="controls">
+                  <label for="segmenter-input">Text:</label>
+                  <input
+                    id="segmenter-input"
+                    type="text"
+                    size="40"
+                    value=${this.segmenterInput}
+                    oninput=${(e) => this.updateSegmenterText(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Codepoints:</b></div>
+                  <div><code class="value">${codepointCount}</code></div>
+
+                  <div><b>Graphemes (${graphemes.length}):</b></div>
+                  <div>
+                    <div class="segments">
+                      ${graphemes.map((g) => vdom`<span class="segment">${g}</span>`)}
+                    </div>
+                  </div>
+
+                  <div><b>Words (${words.length}):</b></div>
+                  <div>
+                    <div class="segments">
+                      ${words.map((w) => vdom`<span class="segment">${w}</span>`)}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            `;
+          }
 
           compose() {
-            return vdom``;
+            return vdom`
+              <div>
+                ${this.renderLocaleSection()}
+                ${this.renderNumberSection()}
+                ${this.renderDateTimeSection()}
+                ${this.renderRelativeTimeSection()}
+                ${this.renderListSection()}
+                ${this.renderPluralSection()}
+                ${this.renderSegmenterSection()}
+              </div>
+            `;
           }
         }
 
