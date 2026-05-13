@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -56,7 +56,7 @@
             .then(
               (clipText) =>
                 (document.querySelector("#clipboard-contents").innerText =
-                  clipText || "No clipboard contents found or clipboard contains non-text contents.")
+                  clipText || "No clipboard contents found or clipboard contains non-text contents."),
             )
             .catch(() => {});
         }, 250);

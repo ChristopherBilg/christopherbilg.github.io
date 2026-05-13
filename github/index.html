@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -80,7 +80,7 @@
             for (let page = 1; page <= githubPages; page++) {
               try {
                 const response = await fetch(
-                  `https://api.github.com/users/${githubUser}/repos?per_page=${githubPerPage}&page=${page}`
+                  `https://api.github.com/users/${githubUser}/repos?per_page=${githubPerPage}&page=${page}`,
                 );
                 const json = await response.json();
                 githubData.push(...json);
@@ -135,15 +135,15 @@
                             Math.max(
                               Date.parse(a?.pushed_at || ""),
                               Date.parse(a?.created_at || ""),
-                              Date.parse(a?.updated_at || "")
-                            )
+                              Date.parse(a?.updated_at || ""),
+                            ),
                           );
                           const bDate = new Date(
                             Math.max(
                               Date.parse(b?.pushed_at || ""),
                               Date.parse(b?.created_at || ""),
-                              Date.parse(b?.updated_at || "")
-                            )
+                              Date.parse(b?.updated_at || ""),
+                            ),
                           );
                           return bDate - aDate;
                         })

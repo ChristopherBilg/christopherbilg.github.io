@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -216,7 +216,7 @@
 
             const pb = document.createElement("p");
             const tempPB = this.convertTimeToHumanReadableString(
-              Math.min(...this.timerHistory.slice(12, this.timerHistory.length))
+              Math.min(...this.timerHistory.slice(12, this.timerHistory.length)),
             );
             pb.innerHTML = `PB: ${
               this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 1
@@ -227,7 +227,7 @@
 
             const currentAo5 = document.createElement("p");
             const tempAo5 = this.convertTimeToHumanReadableString(
-              this.timerHistory.slice(-5).reduce((a, b) => a + b) / 5
+              this.timerHistory.slice(-5).reduce((a, b) => a + b) / 5,
             );
             currentAo5.innerHTML = `Current Ao5: ${
               this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 5
@@ -247,7 +247,7 @@
 
             const currentAo12 = document.createElement("p");
             const tempAo12 = this.convertTimeToHumanReadableString(
-              this.timerHistory.slice(-12).reduce((a, b) => a + b) / 12
+              this.timerHistory.slice(-12).reduce((a, b) => a + b) / 12,
             );
             currentAo12.innerHTML = `Current Ao12: ${
               this.timerHistory.length >= TIMER_HISTORY_TEMPLATE.length + 12

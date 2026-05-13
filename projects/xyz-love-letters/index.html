@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -87,7 +87,7 @@
               if (this.additionalLoveLetters.length > 0) {
                 const ciphertextString = await this.encryptData(
                   JSON.stringify(this.decrypted.concat(this.additionalLoveLetters)),
-                  this.password
+                  this.password,
                 );
                 console.log("Encrypted Data + Additional Love Letters:", ciphertextString);
               }
@@ -169,7 +169,7 @@
               passwordKey,
               { name: "AES-GCM", length: 256 },
               false,
-              keyUsage
+              keyUsage,
             );
           }
 
@@ -185,7 +185,7 @@
                   iv: iv,
                 },
                 aesKey,
-                this.encoder.encode(plaintext)
+                this.encoder.encode(plaintext),
               );
 
               const encryptedDataArray = new Uint8Array(encryptedData);
@@ -214,7 +214,7 @@
                   iv: iv,
                 },
                 aesKey,
-                data
+                data,
               );
               return this.decoder.decode(decryptedData);
             } catch (error) {
@@ -322,7 +322,7 @@
                                 }
                               })}
                             </div>
-                          `
+                          `,
                         )
                 }
               </div>

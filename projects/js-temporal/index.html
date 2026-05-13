@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>JS Temporal</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>JS Temporal</h1>
+
+      <p>
+        The <b>Temporal API</b> is a modern replacement for JavaScript's legacy <code>Date</code> object. It provides
+        immutable, well-typed objects for instants, plain dates, plain times, zoned date-times, durations, and
+        arithmetic across calendars and timezones &mdash; without the footguns of <code>Date</code>'s mutable,
+        locale-leaky behavior.
+      </p>
+
+      <p>
+        Below are a few live demonstrations of the API. If your browser does not yet ship <code>Temporal</code>, you
+        will see a notice instead. As of mid-2026 it is available in recent Firefox, Safari, and Chromium-based browsers
+        behind no flag.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        const TIMEZONES =
+          typeof Intl.supportedValuesOf === "function" ? Intl.supportedValuesOf("timeZone") : ["UTC"];
+
+        class App extends StyledComponent {
+          init() {
+            this.supported = typeof Temporal !== "undefined";
+
+            if (!this.supported) {
+              return;
+            }
+
+            this.selectedZone = Temporal.Now.timeZoneId();
+            this.addDays = 7;
+            this.addHours = 0;
+            this.birthdayInput = "2000-01-01";
+
+            this.tick();
+            this.intervalId = setInterval(() => this.tick(), 1000);
+          }
+
+          tick() {
+            this.now = Temporal.Now.instant();
+            this.render();
+          }
+
+          updateZone(zone) {
+            this.selectedZone = zone;
+            this.render();
+          }
+
+          updateAddDays(value) {
+            this.addDays = Number(value) || 0;
+            this.render();
+          }
+
+          updateAddHours(value) {
+            this.addHours = Number(value) || 0;
+            this.render();
+          }
+
+          updateBirthday(value) {
+            this.birthdayInput = value;
+            this.render();
+          }
+
+          styles() {
+            return css`
+              section {
+                border-top: 1px solid var(--color-bg-secondary, #ddd);
+                padding-top: 1em;
+                margin-top: 1.5em;
+                flex-direction: column;
+                align-items: stretch;
+              }
+
+              code.value {
+                display: inline-block;
+                padding: 2px 6px;
+                background: var(--color-bg-secondary, #f4f4f4);
+                border-radius: 4px;
+                font-variant-numeric: tabular-nums;
+                white-space: nowrap;
+                max-width: 100%;
+                overflow-x: auto;
+              }
+
+              .grid {
+                display: grid;
+                grid-template-columns: max-content minmax(0, 1fr);
+                gap: 0.25em 1em;
+                align-items: baseline;
+              }
+
+              .grid > div {
+                min-height: 1.5em;
+              }
+
+              .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.75em;
+                align-items: center;
+                margin: 0.75em 0;
+                min-height: 2.25em;
+              }
+
+              .error-line {
+                color: #880606;
+                font-weight: bold;
+                min-height: 1.5em;
+                margin: 0.25em 0 0;
+              }
+
+              .unsupported {
+                color: #880606;
+                font-weight: bold;
+              }
+            `;
+          }
+
+          renderUnsupported() {
+            return vdom`
+              <div>
+                <p class="unsupported">
+                  Your browser does not expose <code>Temporal</code> yet. Try Firefox 139+, Safari 18.2+, or
+                  a recent Chromium-based browser.
+                </p>
+              </div>
+            `;
+          }
+
+          renderNowSection() {
+            const zoned = this.now.toZonedDateTimeISO(this.selectedZone);
+            const plainDateTime = zoned.toPlainDateTime();
+            const plainDate = zoned.toPlainDate();
+            const plainTime = zoned.toPlainTime();
+
+            return vdom`
+              <section>
+                <h2>Temporal.Now</h2>
+                <p>
+                  A single moment in time can be projected into several different Temporal types depending on what
+                  detail you care about. Pick a timezone to project the current instant into:
+                </p>
+                <div class="controls">
+                  <label for="zone-select">Timezone:</label>
+                  <select id="zone-select" onchange=${(e) => this.updateZone(e.target.value)}>
+                    ${TIMEZONES.map(
+                      (tz) => vdom`
+                        <option value=${tz} selected=${tz === this.selectedZone}>${tz}</option>
+                      `,
+                    )}
+                  </select>
+                </div>
+                <div class="grid">
+                  <div><b>Instant (UTC):</b></div>
+                  <div><code class="value">${this.now.toString()}</code></div>
+
+                  <div><b>ZonedDateTime:</b></div>
+                  <div><code class="value">${zoned.toString()}</code></div>
+
+                  <div><b>PlainDateTime:</b></div>
+                  <div><code class="value">${plainDateTime.toString()}</code></div>
+
+                  <div><b>PlainDate:</b></div>
+                  <div><code class="value">${plainDate.toString()}</code></div>
+
+                  <div><b>PlainTime:</b></div>
+                  <div><code class="value">${plainTime.toString()}</code></div>
+
+                  <div><b>Epoch ms:</b></div>
+                  <div><code class="value">${this.now.epochMilliseconds}</code></div>
+
+                  <div><b>Day of week:</b></div>
+                  <div><code class="value">${zoned.dayOfWeek} (1 = Monday, 7 = Sunday)</code></div>
+
+                  <div><b>Days in month:</b></div>
+                  <div><code class="value">${zoned.daysInMonth}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderArithmeticSection() {
+            const zoned = this.now.toZonedDateTimeISO(this.selectedZone);
+            const duration = Temporal.Duration.from({ days: this.addDays, hours: this.addHours });
+            const future = zoned.add(duration);
+
+            return vdom`
+              <section>
+                <h2>Duration arithmetic</h2>
+                <p>
+                  <code>Temporal.Duration</code> represents a length of time. Adding it to a <code>ZonedDateTime</code>
+                  is calendar- and DST-aware — no more "off by an hour" bugs on the days the clocks change.
+                </p>
+                <div class="controls">
+                  <label for="add-days">Add days:</label>
+                  <input
+                    id="add-days"
+                    type="number"
+                    value=${this.addDays}
+                    oninput=${(e) => this.updateAddDays(e.target.value)}
+                  />
+                  <label for="add-hours">Add hours:</label>
+                  <input
+                    id="add-hours"
+                    type="number"
+                    value=${this.addHours}
+                    oninput=${(e) => this.updateAddHours(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Duration:</b></div>
+                  <div><code class="value">${duration.toString()}</code></div>
+
+                  <div><b>Now → Future:</b></div>
+                  <div><code class="value">${future.toString()}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          renderDifferenceSection() {
+            const today = Temporal.Now.plainDateISO();
+            let birthday = null;
+            let since = null;
+            let totalDays = null;
+            let errorMessage = "";
+
+            try {
+              birthday = Temporal.PlainDate.from(this.birthdayInput);
+              since = today.since(birthday, {
+                largestUnit: "year",
+                smallestUnit: "day",
+              });
+              totalDays = today.since(birthday, { largestUnit: "day" }).days;
+            } catch (_err) {
+              errorMessage = "Please enter a valid ISO date (YYYY-MM-DD).";
+            }
+
+            const ageText = since ? `${since.years} years, ${since.months} months, ${since.days} days` : "—";
+            const totalDaysText = totalDays !== null ? totalDays.toLocaleString() : "—";
+
+            return vdom`
+              <section>
+                <h2>Computing a difference</h2>
+                <p>
+                  <code>PlainDate.prototype.since()</code> returns a <code>Duration</code> between two dates with the
+                  units of your choice. Try plugging in a birthday:
+                </p>
+                <div class="controls">
+                  <label for="birthday">Date:</label>
+                  <input
+                    id="birthday"
+                    type="date"
+                    value=${this.birthdayInput}
+                    oninput=${(e) => this.updateBirthday(e.target.value)}
+                  />
+                </div>
+                <div class="grid">
+                  <div><b>Today:</b></div>
+                  <div><code class="value">${today.toString()}</code></div>
+
+                  <div><b>Age:</b></div>
+                  <div><code class="value">${ageText}</code></div>
+
+                  <div><b>Total days lived:</b></div>
+                  <div><code class="value">${totalDaysText}</code></div>
+                </div>
+                <p class="error-line">${errorMessage}</p>
+              </section>
+            `;
+          }
+
+          renderCalendarSection() {
+            const zoned = this.now.toZonedDateTimeISO(this.selectedZone);
+            const hebrew = zoned.withCalendar("hebrew");
+            const islamic = zoned.withCalendar("islamic-umalqura");
+            const japanese = zoned.withCalendar("japanese");
+
+            return vdom`
+              <section>
+                <h2>Non-Gregorian calendars</h2>
+                <p>
+                  The same instant can be expressed in any calendar system that the runtime supports. Here is "now"
+                  projected into a few of them:
+                </p>
+                <div class="grid">
+                  <div><b>Hebrew:</b></div>
+                  <div><code class="value">${hebrew.toLocaleString("en-US", { calendar: "hebrew", dateStyle: "full" })}</code></div>
+
+                  <div><b>Islamic (Umm al-Qura):</b></div>
+                  <div><code class="value">${islamic.toLocaleString("en-US", { calendar: "islamic-umalqura", dateStyle: "full" })}</code></div>
+
+                  <div><b>Japanese:</b></div>
+                  <div><code class="value">${japanese.toLocaleString("en-US", { calendar: "japanese", dateStyle: "full" })}</code></div>
+                </div>
+              </section>
+            `;
+          }
+
+          compose() {
+            if (!this.supported) {
+              return this.renderUnsupported();
+            }
+
+            return vdom`
+              <div>
+                ${this.renderNowSection()}
+                ${this.renderArithmeticSection()}
+                ${this.renderDifferenceSection()}
+                ${this.renderCalendarSection()}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>

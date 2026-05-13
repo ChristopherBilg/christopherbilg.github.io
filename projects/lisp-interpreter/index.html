@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -186,7 +186,7 @@
               "Welcome to the Lisp REPL!\n" +
                 "Type Lisp expressions and press Enter to evaluate.\n" +
                 "Use Up/Down arrows to navigate command history.\n" +
-                "Type (help) for available functions."
+                "Type (help) for available functions.",
             );
 
             // Define help function
@@ -213,7 +213,7 @@
                   (display "  (map (lambda (x) (* x 2)) '(1 2 3 4))")
                   (display "  (query-selector \\"body\\")")
                   nil)
-              `)
+              `),
               );
             } catch (e) {
               console.error("Error defining help:", e);
@@ -226,7 +226,7 @@
     (if (= count 0)
         a
         (fib-iter b (+ a b) (- count 1))))
-  (fib-iter 0 1 n))`
+  (fib-iter 0 1 n))`,
             );
             this.runExample("(fib 100)");
 

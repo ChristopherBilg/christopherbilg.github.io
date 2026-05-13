@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -79,7 +79,7 @@
               .map((substring) =>
                 ["M", "F"].includes(substring.toUpperCase())
                   ? `(${substring.charAt(0).toUpperCase()})`
-                  : substring.charAt(0).toUpperCase() + substring.slice(1)
+                  : substring.charAt(0).toUpperCase() + substring.slice(1),
               )
               .join(" ");
           }

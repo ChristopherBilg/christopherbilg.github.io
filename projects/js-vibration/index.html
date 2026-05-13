@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -123,14 +123,14 @@
                 <div class="button-container">
                   <h2>Try It Out:</h2>
                   <div><button onclick=${() => this.vibrateShort()} disabled=${!this
-              .supported}>Short Vibration (200ms)</button></div>
+                    .supported}>Short Vibration (200ms)</button></div>
                   <div><button onclick=${() => this.vibrateLong()} disabled=${!this
-              .supported}>Long Vibration (1000ms)</button></div>
+                    .supported}>Long Vibration (1000ms)</button></div>
                   <div><button onclick=${() => this.vibratePattern()} disabled=${!this
-              .supported}>Pattern Vibration</button></div>
+                    .supported}>Pattern Vibration</button></div>
                   <div><button onclick=${() => this.vibrateSOS()} disabled=${!this.supported}>SOS Pattern</button></div>
                   <div><button onclick=${() => this.stopVibration()} disabled=${!this
-              .supported}>Stop Vibration</button></div>
+                    .supported}>Stop Vibration</button></div>
                 </div>
 
                 <p class="status">${this.statusMessage}</p>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" color-mode="user">
   <head>
     <meta charset="UTF-8" />
@@ -35,7 +35,7 @@
               length: 256,
             },
             false,
-            ["encrypt", "decrypt"]
+            ["encrypt", "decrypt"],
           );
         };
 
@@ -47,7 +47,7 @@
               iv,
             },
             key,
-            new TextEncoder().encode(payload)
+            new TextEncoder().encode(payload),
           );
 
           return { encrypted, iv };
@@ -60,7 +60,7 @@
               iv,
             },
             key,
-            payload
+            payload,
           );
 
           return new TextDecoder().decode(decrypted);

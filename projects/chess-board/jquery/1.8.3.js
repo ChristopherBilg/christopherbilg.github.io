@@ -188,9 +188,9 @@
         ? // Return a 'clean' array
           this.toArray()
         : // Return just the object
-        num < 0
-        ? this[this.length + num]
-        : this[num];
+          num < 0
+          ? this[this.length + num]
+          : this[num];
     },
 
     // Take an array of elements and push it onto the stack
@@ -249,7 +249,7 @@
       return this.pushStack(
         jQuery.map(this, function (elem, i) {
           return callback.call(elem, i, elem);
-        })
+        }),
       );
     },
 
@@ -819,11 +819,11 @@
       return chainable
         ? elems
         : // Gets
-        bulk
-        ? fn.call(elems)
-        : length
-        ? fn(elems[0], key)
-        : emptyGet;
+          bulk
+          ? fn.call(elems)
+          : length
+            ? fn(elems[0], key)
+            : emptyGet;
     },
 
     now: function () {
@@ -1122,7 +1122,7 @@
                             newDefer[action + "With"](this === deferred ? newDefer : this, [returned]);
                           }
                         }
-                      : newDefer[action]
+                      : newDefer[action],
                   );
                 });
                 fns = null;
@@ -1158,7 +1158,7 @@
               // [ reject_list | resolve_list ].disable; progress_list.lock
             },
             tuples[i ^ 1][2].disable,
-            tuples[2][2].lock
+            tuples[2][2].lock,
           );
         }
 
@@ -1349,7 +1349,7 @@
           // Cloning a node shouldn't copy over any
           // bound event handlers (IE does this)
           support.noCloneEvent = false;
-        })
+        }),
       );
       div.cloneNode(true).fireEvent("onclick");
       div.detachEvent("onclick", clickFn);
@@ -1783,7 +1783,7 @@
         value,
         arguments.length > 1,
         null,
-        false
+        false,
       );
     },
 
@@ -1808,15 +1808,15 @@
             data === "true"
               ? true
               : data === "false"
-              ? false
-              : data === "null"
-              ? null
-              : // Only convert to a number if it doesn't change the string
-              +data + "" === data
-              ? +data
-              : rbrace.test(data)
-              ? jQuery.parseJSON(data)
-              : data;
+                ? false
+                : data === "null"
+                  ? null
+                  : // Only convert to a number if it doesn't change the string
+                    +data + "" === data
+                    ? +data
+                    : rbrace.test(data)
+                      ? jQuery.parseJSON(data)
+                      : data;
         } catch (e) {}
 
         // Make sure we set the data so it isn't changed later
@@ -2165,9 +2165,9 @@
             ? // handle most common string cases
               ret.replace(rreturn, "")
             : // handle cases where value is null/undef or number
-            ret == null
-            ? ""
-            : ret;
+              ret == null
+              ? ""
+              : ret;
         }
 
         return;
@@ -2457,8 +2457,8 @@
           return attributeNode && attributeNode.specified
             ? parseInt(attributeNode.value, 10)
             : rfocusable.test(elem.nodeName) || (rclickable.test(elem.nodeName) && elem.href)
-            ? 0
-            : undefined;
+              ? 0
+              : undefined;
         },
       },
     },
@@ -2701,7 +2701,7 @@
             needsContext: selector && jQuery.expr.match.needsContext.test(selector),
             namespace: namespaces.join("."),
           },
-          handleObjIn
+          handleObjIn,
         );
 
         // Init the event handler queue if we're the first
@@ -3085,7 +3085,7 @@
 
             ret = ((jQuery.event.special[handleObj.origType] || {}).handle || handleObj.handler).apply(
               matched.elem,
-              args
+              args,
             );
 
             if (ret !== undefined) {
@@ -3111,7 +3111,7 @@
     // *** attrChange attrName relatedNode srcElement  are not normalized, non-W3C, deprecated, will be removed in 1.8 ***
     props:
       "attrChange attrName relatedNode srcElement altKey bubbles cancelable ctrlKey currentTarget eventPhase metaKey relatedTarget shiftKey target timeStamp view which".split(
-        " "
+        " ",
       ),
 
     fixHooks: {},
@@ -3130,7 +3130,7 @@
 
     mouseHooks: {
       props: "button buttons clientX clientY fromElement offsetX offsetY pageX pageY screenX screenY toElement".split(
-        " "
+        " ",
       ),
       filter: function (event, original) {
         var eventDoc,
@@ -3387,7 +3387,7 @@
           return ret;
         },
       };
-    }
+    },
   );
 
   // IE submit delegation
@@ -3587,7 +3587,7 @@
         jQuery(types.delegateTarget).off(
           handleObj.namespace ? handleObj.origType + "." + handleObj.namespace : handleObj.origType,
           handleObj.selector,
-          handleObj.handler
+          handleObj.handler,
         );
         return this;
       }
@@ -3701,7 +3701,7 @@
       if (rmouseEvent.test(name)) {
         jQuery.event.fixHooks[name] = jQuery.event.mouseHooks;
       }
-    }
+    },
   );
   /*!
    * Sizzle CSS Selector Engine
@@ -3838,7 +3838,7 @@
             "*(\\d+)|))" +
             whitespace +
             "*\\)|)",
-          "i"
+          "i",
         ),
         // For use in libraries implementing .is()
         needsContext: new RegExp("^" + whitespace + "*[>+~]|" + pos, "i"),
@@ -4090,17 +4090,17 @@
           return a === bup || !!(bup && bup.nodeType === 1 && adown.contains && adown.contains(bup));
         }
       : docElem.compareDocumentPosition
-      ? function (a, b) {
-          return b && !!(a.compareDocumentPosition(b) & 16);
-        }
-      : function (a, b) {
-          while ((b = b.parentNode)) {
-            if (b === a) {
-              return true;
-            }
+        ? function (a, b) {
+            return b && !!(a.compareDocumentPosition(b) & 16);
           }
-          return false;
-        };
+        : function (a, b) {
+            while ((b = b.parentNode)) {
+              if (b === a) {
+                return true;
+              }
+            }
+            return false;
+          };
 
     Sizzle.attr = function (elem, name) {
       var val,
@@ -4122,8 +4122,8 @@
             ? name
             : null
           : val.specified
-          ? val.value
-          : null
+            ? val.value
+            : null
         : null;
     };
 
@@ -4330,7 +4330,7 @@
             ((pattern = new RegExp("(^|" + whitespace + ")" + className + "(" + whitespace + "|$)")) &&
               classCache(className, function (elem) {
                 return pattern.test(
-                  elem.className || (typeof elem.getAttribute !== strundefined && elem.getAttribute("class")) || ""
+                  elem.className || (typeof elem.getAttribute !== strundefined && elem.getAttribute("class")) || "",
                 );
               }))
           );
@@ -4352,18 +4352,18 @@
             return operator === "="
               ? result === check
               : operator === "!="
-              ? result !== check
-              : operator === "^="
-              ? check && result.indexOf(check) === 0
-              : operator === "*="
-              ? check && result.indexOf(check) > -1
-              : operator === "$="
-              ? check && result.substr(result.length - check.length) === check
-              : operator === "~="
-              ? (" " + result + " ").indexOf(check) > -1
-              : operator === "|="
-              ? result === check || result.substr(0, check.length + 1) === check + "-"
-              : false;
+                ? result !== check
+                : operator === "^="
+                  ? check && result.indexOf(check) === 0
+                  : operator === "*="
+                    ? check && result.indexOf(check) > -1
+                    : operator === "$="
+                      ? check && result.substr(result.length - check.length) === check
+                      : operator === "~="
+                        ? (" " + result + " ").indexOf(check) > -1
+                        : operator === "|="
+                          ? result === check || result.substr(0, check.length + 1) === check + "-"
+                          : false;
           };
         },
 
@@ -4828,9 +4828,9 @@
       return parseOnly
         ? soFar.length
         : soFar
-        ? Sizzle.error(selector)
-        : // Cache the tokens
-          tokenCache(selector, groups).slice(0);
+          ? Sizzle.error(selector)
+          : // Cache the tokens
+            tokenCache(selector, groups).slice(0);
     }
 
     function addCombinator(matcher, combinator, base) {
@@ -4992,7 +4992,7 @@
           // Add elements to results, through postFinder if defined
         } else {
           matcherOut = condense(
-            matcherOut === results ? matcherOut.splice(preexisting, matcherOut.length) : matcherOut
+            matcherOut === results ? matcherOut.splice(preexisting, matcherOut.length) : matcherOut,
           );
           if (postFinder) {
             postFinder(null, results, matcherOut, xml);
@@ -5017,14 +5017,14 @@
             return elem === checkContext;
           },
           implicitRelative,
-          true
+          true,
         ),
         matchAnyContext = addCombinator(
           function (elem) {
             return indexOf.call(checkContext, elem) > -1;
           },
           implicitRelative,
-          true
+          true,
         ),
         matchers = [
           function (elem, context, xml) {
@@ -5062,7 +5062,7 @@
               matcher,
               i < j && matcherFromTokens(tokens.slice(i, j)),
               j < len && matcherFromTokens((tokens = tokens.slice(j))),
-              j < len && tokens.join("")
+              j < len && tokens.join(""),
             );
           }
           matchers.push(matcher);
@@ -5246,7 +5246,7 @@
                 (seed = find(
                   token.matches[0].replace(rbackslash, ""),
                   (rsibling.test(tokens[0].type) && context.parentNode) || context,
-                  xml
+                  xml,
                 ))
               ) {
                 // If seed is empty or no tokens remain, we can return early
@@ -5578,7 +5578,7 @@
       return jQuery.inArray(
         // If it receives a jQuery object, the first element is used
         elem.jquery ? elem[0] : elem,
-        this
+        this,
       );
     },
 
@@ -5675,7 +5675,7 @@
 
         return this.pushStack(ret, name, core_slice.call(arguments).join(","));
       };
-    }
+    },
   );
 
   jQuery.extend({
@@ -5811,7 +5811,7 @@
         },
         null,
         value,
-        arguments.length
+        arguments.length,
       );
     },
 
@@ -6018,7 +6018,7 @@
         },
         null,
         value,
-        arguments.length
+        arguments.length,
       );
     },
 
@@ -6107,7 +6107,7 @@
           for (iNoClone = results.cacheable || l - 1; i < l; i++) {
             callback.call(
               table && jQuery.nodeName(this[i], "table") ? findOrAppend(this[i], "tbody") : this[i],
-              i === iNoClone ? fragment : jQuery.clone(fragment, true, true)
+              i === iNoClone ? fragment : jQuery.clone(fragment, true, true),
             );
           }
         }
@@ -6327,7 +6327,7 @@
           return this.pushStack(ret, name, insert.selector);
         }
       };
-    }
+    },
   );
 
   function getAll(elem) {
@@ -6471,9 +6471,9 @@
                 tag === "table" && !hasBody
                   ? div.firstChild && div.firstChild.childNodes
                   : // String was a bare <thead> or <tfoot>
-                  wrap[1] === "<table>" && !hasBody
-                  ? div.childNodes
-                  : [];
+                    wrap[1] === "<table>" && !hasBody
+                    ? div.childNodes
+                    : [];
 
               for (j = tbody.length - 1; j >= 0; --j) {
                 if (jQuery.nodeName(tbody[j], "tbody") && !tbody[j].childNodes.length) {
@@ -6774,7 +6774,7 @@
         },
         name,
         value,
-        arguments.length > 1
+        arguments.length > 1,
       );
     },
     show: function () {
@@ -7046,9 +7046,9 @@
           ? // If we already have the right measurement, avoid augmentation
             4
           : // Otherwise initialize for horizontal or vertical properties
-          name === "width"
-          ? 1
-          : 0,
+            name === "width"
+            ? 1
+            : 0,
       val = 0;
 
     for (; i < 4; i += 2) {
@@ -7139,7 +7139,7 @@
             frameBorder: 0,
             width: 0,
             height: 0,
-          })
+          }),
       );
 
       // Create a cacheable copy of the iframe document on first call.
@@ -7188,9 +7188,9 @@
                 elem,
                 name,
                 extra,
-                jQuery.support.boxSizing && jQuery.css(elem, "boxSizing") === "border-box"
+                jQuery.support.boxSizing && jQuery.css(elem, "boxSizing") === "border-box",
               )
-            : 0
+            : 0,
         );
       },
     };
@@ -7203,8 +7203,8 @@
         return ropacity.test((computed && elem.currentStyle ? elem.currentStyle.filter : elem.style.filter) || "")
           ? 0.01 * parseFloat(RegExp.$1) + ""
           : computed
-          ? "1"
-          : "";
+            ? "1"
+            : "";
       },
 
       set: function (elem, value) {
@@ -7311,7 +7311,7 @@
       if (!rmargin.test(prefix)) {
         jQuery.cssHooks[prefix + suffix].set = setPositiveNumber;
       }
-    }
+    },
   );
   var r20 = /%20/g,
     rbracket = /\[\]$/,
@@ -7341,10 +7341,10 @@
           return val == null
             ? null
             : jQuery.isArray(val)
-            ? jQuery.map(val, function (val, i) {
-                return { name: elem.name, value: val.replace(rCRLF, "\r\n") };
-              })
-            : { name: elem.name, value: val.replace(rCRLF, "\r\n") };
+              ? jQuery.map(val, function (val, i) {
+                  return { name: elem.name, value: val.replace(rCRLF, "\r\n") };
+                })
+              : { name: elem.name, value: val.replace(rCRLF, "\r\n") };
         })
         .get();
     },
@@ -7504,7 +7504,7 @@
     originalOptions,
     jqXHR,
     dataType /* internal */,
-    inspected /* internal */
+    inspected /* internal */,
   ) {
     dataType = dataType || options.dataTypes[0];
     inspected = inspected || {};
@@ -7620,7 +7620,7 @@
                 // Locate the specified elements
                 .find(selector)
             : // If not, just inject the full result
-              responseText
+              responseText,
         );
       });
 
@@ -8078,7 +8078,7 @@
         "Accept",
         s.dataTypes[0] && s.accepts[s.dataTypes[0]]
           ? s.accepts[s.dataTypes[0]] + (s.dataTypes[0] !== "*" ? ", " + allTypes + "; q=0.01" : "")
-          : s.accepts["*"]
+          : s.accepts["*"],
       );
 
       // Check for headers option
@@ -8793,7 +8793,7 @@
             animation.opts,
             prop,
             end,
-            animation.opts.specialEasing[prop] || animation.opts.easing
+            animation.opts.specialEasing[prop] || animation.opts.easing,
           );
           animation.tweens.push(tween);
           return tween;
@@ -8840,7 +8840,7 @@
         anim: animation,
         queue: animation.opts.queue,
         elem: elem,
-      })
+      }),
     );
 
     // attach callbacks from options
@@ -9076,7 +9076,7 @@
           this.options.duration * percent,
           0,
           1,
-          this.options.duration
+          this.options.duration,
         );
       } else {
         this.pos = eased = percent;
@@ -9270,7 +9270,7 @@
       jQuery.fn[name] = function (speed, easing, callback) {
         return this.animate(props, speed, easing, callback);
       };
-    }
+    },
   );
 
   jQuery.speed = function (speed, easing, fn) {
@@ -9286,10 +9286,10 @@
     opt.duration = jQuery.fx.off
       ? 0
       : typeof opt.duration === "number"
-      ? opt.duration
-      : opt.duration in jQuery.fx.speeds
-      ? jQuery.fx.speeds[opt.duration]
-      : jQuery.fx.speeds._default;
+        ? opt.duration
+        : opt.duration in jQuery.fx.speeds
+          ? jQuery.fx.speeds[opt.duration]
+          : jQuery.fx.speeds._default;
 
     // normalize opt.queue - true/undefined/null -> "fx"
     if (opt.queue == null || opt.queue === true) {
@@ -9556,7 +9556,7 @@
         method,
         val,
         arguments.length,
-        null
+        null,
       );
     };
   });
@@ -9595,7 +9595,7 @@
                 doc["scroll" + name],
                 elem.body["offset" + name],
                 doc["offset" + name],
-                doc["client" + name]
+                doc["client" + name],
               );
             }
 
@@ -9608,7 +9608,7 @@
           type,
           chainable ? margin : undefined,
           chainable,
-          null
+          null,
         );
       };
     });
