@@ -22,16 +22,15 @@
       <h1>JS Internationalization</h1>
 
       <p>
-        The <b>Intl</b> namespace exposes a collection of locale-aware formatters and helpers built into every modern
-        JavaScript runtime. It powers culturally correct number formatting, date and time presentation, relative time
-        phrasing, list joining, pluralization, display-name lookups, and Unicode-aware text segmentation &mdash; without
-        shipping a translation library.
+        The <b>Intl</b> namespace is a set of locale-aware formatters and helpers built into the JavaScript runtime. It
+        handles number formatting, date and time presentation, relative time phrasing, list joining, pluralization,
+        display-name lookups, and Unicode text segmentation, without a translation library.
       </p>
 
       <p>
-        Pick a locale below and watch every demo on the page reformat itself accordingly. Try switching to a
-        right-to-left locale like <code>ar-SA</code> or a non-Latin script like <code>ja-JP</code> to see how the same
-        input is rendered for different audiences.
+        Pick a locale below and watch every demo on the page reformat itself. Try switching to a right-to-left locale
+        like <code>ar</code> or a non-Latin script like <code>ja</code> to see how the same input renders for different
+        audiences.
       </p>
     </main>
 
@@ -63,7 +62,7 @@
             const loc = new Intl.Locale(code);
             const lang = new Intl.DisplayNames([code], { type: "language" }).of(loc.language);
             const region = loc.region ? new Intl.DisplayNames([code], { type: "region" }).of(loc.region) : "";
-            return region ? `${code} — ${lang} (${region})` : `${code} — ${lang}`;
+            return region ? `${code}: ${lang} (${region})` : `${code}: ${lang}`;
           } catch (_err) {
             return code;
           }
@@ -226,13 +225,13 @@
                   <div><code class="value">${englishLanguage}</code></div>
 
                   <div><b>Maximized tag:</b></div>
-                  <div><code class="value">${maximizedTag || "—"}</code></div>
+                  <div><code class="value">${maximizedTag || "-"}</code></div>
 
                   <div><b>Likely script (in locale):</b></div>
-                  <div><code class="value">${likelyScript || "—"}</code></div>
+                  <div><code class="value">${likelyScript || "-"}</code></div>
 
                   <div><b>Likely region (in locale):</b></div>
-                  <div><code class="value">${likelyRegion || "—"}</code></div>
+                  <div><code class="value">${likelyRegion || "-"}</code></div>
                 </div>
               </section>
             `;
@@ -241,14 +240,14 @@
           renderNumberSection() {
             const n = Number(this.numberInput);
             const valid = Number.isFinite(n);
-            const fmt = (options) => (valid ? new Intl.NumberFormat(this.locale, options).format(n) : "—");
+            const fmt = (options) => (valid ? new Intl.NumberFormat(this.locale, options).format(n) : "-");
 
             return vdom`
               <section>
                 <h2>Number formatting</h2>
                 <p>
                   <code>Intl.NumberFormat</code> handles grouping separators, decimal points, currency symbols, percent
-                  signs, units, and even compact "1.2M"-style notation — all per-locale.
+                  signs, units, and compact "1.2M"-style notation. Each option formats per-locale.
                 </p>
                 <div class="controls">
                   <label for="number-input">Number:</label>
@@ -270,7 +269,7 @@
                   <div><b>Percent (n / 100):</b></div>
                   <div>
                     <code class="value">
-                      ${valid ? new Intl.NumberFormat(this.locale, { style: "percent" }).format(n / 100) : "—"}
+                      ${valid ? new Intl.NumberFormat(this.locale, { style: "percent" }).format(n / 100) : "-"}
                     </code>
                   </div>
 
@@ -293,7 +292,7 @@
           renderDateTimeSection() {
             const date = new Date(this.dateInput);
             const valid = !Number.isNaN(date.getTime());
-            const fmt = (options) => (valid ? new Intl.DateTimeFormat(this.locale, options).format(date) : "—");
+            const fmt = (options) => (valid ? new Intl.DateTimeFormat(this.locale, options).format(date) : "-");
 
             return vdom`
               <section>
@@ -339,9 +338,9 @@
             const date = new Date(this.dateInput);
             const valid = !Number.isNaN(date.getTime());
 
-            let phrasing = "—";
-            let pickedUnit = "—";
-            let pickedValue = "—";
+            let phrasing = "-";
+            let pickedUnit = "-";
+            let pickedValue = "-";
             if (valid) {
               const diffMs = date.getTime() - this.now.getTime();
               const abs = Math.abs(diffMs);
@@ -366,8 +365,8 @@
                 <h2>Relative time</h2>
                 <p>
                   <code>Intl.RelativeTimeFormat</code> turns a signed number plus a unit into phrases like "yesterday"
-                  or "in 3 months" — with <code>numeric: "auto"</code> the formatter picks idiomatic wording
-                  automatically. The diff below is computed between the date selected above and now.
+                  or "in 3 months". With <code>numeric: "auto"</code> the formatter picks the natural phrasing for
+                  you. The diff below is computed between the date selected above and now.
                 </p>
                 <div class="grid">
                   <div><b>Phrasing:</b></div>
@@ -397,7 +396,7 @@
                 <h2>Lists</h2>
                 <p>
                   <code>Intl.ListFormat</code> joins an array of strings with locale-appropriate separators and
-                  conjunctions/disjunctions — not every language uses "and"/"or" with a comma before it.
+                  conjunctions or disjunctions. Not every language uses "and" or "or" with a comma before it.
                 </p>
                 <div class="controls">
                   <label for="list-input">Items (comma-separated):</label>
@@ -426,8 +425,8 @@
           renderPluralSection() {
             const n = Number(this.numberInput);
             const valid = Number.isFinite(n);
-            const cardinal = valid ? new Intl.PluralRules(this.locale).select(n) : "—";
-            const ordinal = valid ? new Intl.PluralRules(this.locale, { type: "ordinal" }).select(n) : "—";
+            const cardinal = valid ? new Intl.PluralRules(this.locale).select(n) : "-";
+            const ordinal = valid ? new Intl.PluralRules(this.locale, { type: "ordinal" }).select(n) : "-";
 
             return vdom`
               <section>
@@ -439,7 +438,7 @@
                 </p>
                 <div class="grid">
                   <div><b>Number:</b></div>
-                  <div><code class="value">${valid ? n : "—"}</code></div>
+                  <div><code class="value">${valid ? n : "-"}</code></div>
 
                   <div><b>Cardinal category:</b></div>
                   <div><code class="value">${cardinal}</code></div>

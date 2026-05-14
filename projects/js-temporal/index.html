@@ -22,16 +22,15 @@
       <h1>JS Temporal</h1>
 
       <p>
-        The <b>Temporal API</b> is a modern replacement for JavaScript's legacy <code>Date</code> object. It provides
-        immutable, well-typed objects for instants, plain dates, plain times, zoned date-times, durations, and
-        arithmetic across calendars and timezones &mdash; without the footguns of <code>Date</code>'s mutable,
-        locale-leaky behavior.
+        The <b>Temporal API</b> replaces JavaScript's <code>Date</code> object with immutable, typed objects for
+        instants, plain dates, plain times, zoned date-times, durations, and arithmetic across calendars and timezones.
+        It avoids the mutable, locale-leaky behavior of <code>Date</code>.
       </p>
 
       <p>
-        Below are a few live demonstrations of the API. If your browser does not yet ship <code>Temporal</code>, you
-        will see a notice instead. As of mid-2026 it is available in recent Firefox, Safari, and Chromium-based browsers
-        behind no flag.
+        Below are a few live demos of the API. If your browser does not yet ship <code>Temporal</code>, you will see a
+        notice instead. As of mid-2026 it is available in recent Firefox, Safari, and Chromium-based browsers behind no
+        flag.
       </p>
     </main>
 
@@ -217,7 +216,7 @@
                 <h2>Duration arithmetic</h2>
                 <p>
                   <code>Temporal.Duration</code> represents a length of time. Adding it to a <code>ZonedDateTime</code>
-                  is calendar- and DST-aware — no more "off by an hour" bugs on the days the clocks change.
+                  is calendar- and DST-aware, so you don't get "off by an hour" bugs on the days the clocks change.
                 </p>
                 <div class="controls">
                   <label for="add-days">Add days:</label>
@@ -264,8 +263,8 @@
               errorMessage = "Please enter a valid ISO date (YYYY-MM-DD).";
             }
 
-            const ageText = since ? `${since.years} years, ${since.months} months, ${since.days} days` : "—";
-            const totalDaysText = totalDays !== null ? totalDays.toLocaleString() : "—";
+            const ageText = since ? `${since.years} years, ${since.months} months, ${since.days} days` : "-";
+            const totalDaysText = totalDays !== null ? totalDays.toLocaleString() : "-";
 
             return vdom`
               <section>
