@@ -83,26 +83,40 @@
           { id: "fig", name: "Fig", count: 1, color: "#5d3a1a" },
         ];
 
+        const elevationStyle = document.createElement("style");
+        elevationStyle.textContent = FRUITS.map(
+          (f) => `html.vt-elevate-${f.id}::view-transition-group(card-${f.id}) { z-index: 100; }`,
+        ).join("\n");
+        document.head.appendChild(elevationStyle);
+
         const withTransition = (callback, options = {}) => {
           if (typeof document.startViewTransition !== "function") {
             callback();
             return null;
           }
 
+          const root = document.documentElement;
+
           if (options.themeOrigin) {
-            const root = document.documentElement;
             root.style.setProperty("--vt-origin-x", options.themeOrigin.x + "px");
             root.style.setProperty("--vt-origin-y", options.themeOrigin.y + "px");
             root.classList.add("vt-theme-swap");
           }
 
+          if (options.elevate) {
+            root.classList.add(`vt-elevate-${options.elevate}`);
+          }
+
           const transition = document.startViewTransition(() => callback());
 
-          if (options.themeOrigin) {
-            transition.finished.finally(() => {
-              document.documentElement.classList.remove("vt-theme-swap");
-            });
-          }
+          transition.finished.finally(() => {
+            if (options.themeOrigin) {
+              root.classList.remove("vt-theme-swap");
+            }
+            if (options.elevate) {
+              root.classList.remove(`vt-elevate-${options.elevate}`);
+            }
+          });
 
           return transition;
         };
@@ -180,17 +194,24 @@
           }
 
           expand(id) {
-            withTransition(() => {
-              this.expandedId = id;
-              this.render();
-            });
+            withTransition(
+              () => {
+                this.expandedId = id;
+                this.render();
+              },
+              { elevate: id },
+            );
           }
 
           collapse() {
-            withTransition(() => {
-              this.expandedId = null;
-              this.render();
-            });
+            const id = this.expandedId;
+            withTransition(
+              () => {
+                this.expandedId = null;
+                this.render();
+              },
+              { elevate: id },
+            );
           }
 
           sortedFruits() {
