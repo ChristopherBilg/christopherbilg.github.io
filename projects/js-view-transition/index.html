@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en" color-mode="user">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Christopher Bilger's Portfolio" />
+    <meta name="keywords" content="Resume, Portfolio, Personal, Projects, Presentations" />
+    <meta name="author" content="Christopher Bilger" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>JS View Transition</title>
+    <link rel="icon" type="image/x-icon" href="../../images/favicon.ico" />
+    <link rel="stylesheet" media="screen" href="../../css/mvp.css" />
+    <link rel="stylesheet" media="screen" href="../../css/styles.css" />
+
+    <style>
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: 0.35s;
+      }
+
+      @keyframes vt-circle-in {
+        from {
+          clip-path: circle(0 at var(--vt-origin-x, 50%) var(--vt-origin-y, 50%));
+        }
+        to {
+          clip-path: circle(150vmax at var(--vt-origin-x, 50%) var(--vt-origin-y, 50%));
+        }
+      }
+
+      html.vt-theme-swap::view-transition-old(root) {
+        animation: none;
+      }
+
+      html.vt-theme-swap::view-transition-new(root) {
+        animation: vt-circle-in 0.5s ease-out forwards;
+      }
+
+      ::view-transition-group(*) {
+        animation-duration: 0.4s;
+        animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript id="full-screen-noscript-message">Please enable JavaScript in order to view this webpage.</noscript>
+
+    <main hidden>
+      <a href="/projects">Back to Projects List</a>
+
+      <h1>JS View Transition</h1>
+
+      <p>
+        The <b>View Transitions API</b> animates between two DOM states with a single call. You pass
+        <code>document.startViewTransition(callback)</code> a function that mutates the DOM, the browser snapshots the
+        page before and after, and the difference is crossfaded for you. Tagging elements with the CSS
+        <code>view-transition-name</code> property pairs them across states, so they animate position and size instead
+        of fading independently.
+      </p>
+
+      <p>
+        Below are a few live demos. If your browser does not yet support <code>startViewTransition</code> you will see a
+        notice instead. As of mid-2026 it is available unflagged in recent Chromium and Safari, and shipping in Firefox.
+      </p>
+    </main>
+
+    <script type="module">
+      import * as Arlo from "../../js/arlo/index.js";
+
+      for (const exportedName in Arlo) {
+        window[exportedName] = Arlo[exportedName];
+      }
+
+      (() => {
+        document.getElementsByTagName("main")[0].hidden = false;
+
+        const FRUITS = [
+          { id: "apple", name: "Apple", count: 3, color: "#e74c3c" },
+          { id: "banana", name: "Banana", count: 7, color: "#f1c40f" },
+          { id: "cherry", name: "Cherry", count: 2, color: "#c0392b" },
+          { id: "date", name: "Date", count: 11, color: "#8e6e3a" },
+          { id: "elder", name: "Elderberry", count: 5, color: "#6c3483" },
+          { id: "fig", name: "Fig", count: 1, color: "#5d3a1a" },
+        ];
+
+        const withTransition = (callback, options = {}) => {
+          if (typeof document.startViewTransition !== "function") {
+            callback();
+            return null;
+          }
+
+          if (options.themeOrigin) {
+            const root = document.documentElement;
+            root.style.setProperty("--vt-origin-x", options.themeOrigin.x + "px");
+            root.style.setProperty("--vt-origin-y", options.themeOrigin.y + "px");
+            root.classList.add("vt-theme-swap");
+          }
+
+          const transition = document.startViewTransition(() => callback());
+
+          if (options.themeOrigin) {
+            transition.finished.finally(() => {
+              document.documentElement.classList.remove("vt-theme-swap");
+            });
+          }
+
+          return transition;
+        };
+
+        class App extends StyledComponent {
+          init() {
+            this.supported = typeof document.startViewTransition === "function";
+
+            if (!this.supported) {
+              return;
+            }
+
+            this.crossfadeAlt = false;
+
+            this.fruits = FRUITS.slice();
+            this.sortBy = "name";
+            this.sortDir = "asc";
+
+            this.theme = document.documentElement.getAttribute("data-vt-theme") || "light";
+            this.applyTheme();
+
+            this.expandedId = null;
+          }
+
+          applyTheme() {
+            document.documentElement.setAttribute("data-vt-theme", this.theme);
+          }
+
+          toggleCrossfade() {
+            withTransition(() => {
+              this.crossfadeAlt = !this.crossfadeAlt;
+              this.render();
+            });
+          }
+
+          changeSort(key) {
+            withTransition(() => {
+              if (this.sortBy === key) {
+                this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+              } else {
+                this.sortBy = key;
+                this.sortDir = "asc";
+              }
+              this.render();
+            });
+          }
+
+          shuffleList() {
+            withTransition(() => {
+              const arr = this.fruits.slice();
+              for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+              }
+              this.fruits = arr;
+              this.sortBy = "manual";
+              this.render();
+            });
+          }
+
+          toggleTheme(event) {
+            const next = this.theme === "light" ? "dark" : "light";
+            const origin = event
+              ? { x: event.clientX, y: event.clientY }
+              : { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+            withTransition(
+              () => {
+                this.theme = next;
+                this.applyTheme();
+                this.render();
+              },
+              { themeOrigin: origin },
+            );
+          }
+
+          expand(id) {
+            withTransition(() => {
+              this.expandedId = id;
+              this.render();
+            });
+          }
+
+          collapse() {
+            withTransition(() => {
+              this.expandedId = null;
+              this.render();
+            });
+          }
+
+          sortedFruits() {
+            if (this.sortBy === "manual") return this.fruits;
+            const sign = this.sortDir === "asc" ? 1 : -1;
+            return this.fruits.slice().sort((a, b) => {
+              if (this.sortBy === "count") return sign * (a.count - b.count);
+              return sign * a.name.localeCompare(b.name);
+            });
+          }
+
+          styles() {
+            const dark = this.theme === "dark";
+
+            return css`
+              section {
+                border-top: 1px solid var(--color-bg-secondary, #ddd);
+                padding-top: 1em;
+                margin-top: 1.5em;
+                flex-direction: column;
+                align-items: stretch;
+              }
+
+              .controls {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 0.5em;
+                align-items: center;
+                margin: 0.75em 0;
+              }
+
+              .unsupported {
+                color: #880606;
+                font-weight: bold;
+              }
+
+              .theme-shell {
+                padding: 1em;
+                border-radius: 8px;
+                background: ${dark ? "#1f2430" : "#fafbfc"};
+                color: ${dark ? "#f1f3f5" : "#1f2430"};
+                border: 1px solid ${dark ? "#3a4150" : "#dde1e6"};
+                transition: none;
+              }
+
+              .crossfade-box {
+                padding: 1.25em;
+                border-radius: 8px;
+                background: var(--color-bg-secondary, #f4f4f4);
+                font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+                white-space: pre-wrap;
+                view-transition-name: crossfade-box;
+              }
+
+              .fruit-list {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-direction: column;
+                gap: 0.4em;
+              }
+
+              .fruit-row {
+                display: grid;
+                grid-template-columns: 1.5em 1fr max-content;
+                gap: 0.75em;
+                align-items: center;
+                padding: 0.5em 0.75em;
+                border-radius: 6px;
+                background: var(--color-bg-secondary, #f4f4f4);
+              }
+
+              .swatch {
+                width: 1em;
+                height: 1em;
+                border-radius: 50%;
+              }
+
+              .count-pill {
+                font-variant-numeric: tabular-nums;
+                padding: 2px 8px;
+                border-radius: 999px;
+                background: var(--color-bg, #fff);
+                border: 1px solid var(--color-bg-secondary, #ddd);
+              }
+
+              .card-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 0.75em;
+              }
+
+              .card {
+                cursor: pointer;
+                padding: 1em;
+                border-radius: 8px;
+                color: white;
+                font-weight: bold;
+                text-align: center;
+                user-select: none;
+              }
+
+              .detail-overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 1em;
+                z-index: 10;
+              }
+
+              .detail-panel {
+                width: min(420px, 100%);
+                padding: 2em;
+                border-radius: 12px;
+                color: white;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                display: flex;
+                flex-direction: column;
+                gap: 1em;
+              }
+
+              .detail-panel h3 {
+                margin: 0;
+                font-size: 2em;
+              }
+
+              .detail-panel button {
+                align-self: flex-end;
+              }
+
+              button[aria-pressed="true"] {
+                outline: 2px solid var(--color-text, #333);
+                outline-offset: 2px;
+              }
+            `;
+          }
+
+          renderUnsupported() {
+            return vdom`
+              <div>
+                <p class="unsupported">
+                  Your browser does not expose <code>document.startViewTransition</code> yet. Try a recent
+                  Chromium-based browser, Safari 18+, or a recent Firefox.
+                </p>
+              </div>
+            `;
+          }
+
+          renderCrossfadeSection() {
+            return vdom`
+              <section>
+                <h2>Default crossfade</h2>
+                <p>
+                  The simplest demo: call <code>document.startViewTransition</code> with a callback that mutates the
+                  DOM. With no extra CSS, the browser crossfades the old and new snapshots. No transition library, no
+                  state diff, no extra DOM.
+                </p>
+                <div class="controls">
+                  <button onclick=${() => this.toggleCrossfade()}>Toggle content</button>
+                </div>
+                <div class="crossfade-box">
+                  ${
+                    this.crossfadeAlt
+                      ? "// after\nconst greeting = `Hi, ${name}!`;\nconsole.log(greeting);"
+                      : "// before\nfunction greet(name) {\n  return 'Hello, ' + name;\n}"
+                  }
+                </div>
+              </section>
+            `;
+          }
+
+          renderReorderSection() {
+            const rows = this.sortedFruits();
+
+            return vdom`
+              <section>
+                <h2>Reordering a list</h2>
+                <p>
+                  Each row gets a unique <code>view-transition-name</code> set via inline style. When the order
+                  changes, the browser pairs old and new snapshots of each name and animates them to their new
+                  positions instead of crossfading independently.
+                </p>
+                <div class="controls">
+                  <span>Sort by:</span>
+                  <button
+                    aria-pressed=${this.sortBy === "name"}
+                    onclick=${() => this.changeSort("name")}
+                  >
+                    Name ${this.sortBy === "name" ? (this.sortDir === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button
+                    aria-pressed=${this.sortBy === "count"}
+                    onclick=${() => this.changeSort("count")}
+                  >
+                    Count ${this.sortBy === "count" ? (this.sortDir === "asc" ? "↑" : "↓") : ""}
+                  </button>
+                  <button onclick=${() => this.shuffleList()}>Shuffle</button>
+                </div>
+                <ul class="fruit-list">
+                  ${rows.map(
+                    (f) => vdom`
+                      <li class="fruit-row" style="view-transition-name: row-${f.id}">
+                        <span class="swatch" style="background: ${f.color}"></span>
+                        <span>${f.name}</span>
+                        <span class="count-pill">${f.count}</span>
+                      </li>
+                    `,
+                  )}
+                </ul>
+              </section>
+            `;
+          }
+
+          renderThemeSection() {
+            return vdom`
+              <section>
+                <h2>Theme switch with a circular reveal</h2>
+                <p>
+                  By default the API crossfades the root, but you can replace that with any animation. Here the
+                  click coordinates are written into CSS custom properties, and the
+                  <code>::view-transition-new(root)</code> pseudo-element animates a <code>clip-path: circle()</code>
+                  outward from that point.
+                </p>
+                <div class="controls">
+                  <button onclick=${(e) => this.toggleTheme(e)}>
+                    Switch to ${this.theme === "light" ? "dark" : "light"} mode
+                  </button>
+                </div>
+                <div class="theme-shell">
+                  <p style="margin: 0">
+                    Current theme: <b>${this.theme}</b>. The reveal originates from wherever you clicked the button.
+                  </p>
+                </div>
+              </section>
+            `;
+          }
+
+          renderDetailSection() {
+            const expanded = this.expandedId ? this.fruits.find((f) => f.id === this.expandedId) : null;
+
+            return vdom`
+              <section>
+                <h2>Shared-element expand</h2>
+                <p>
+                  Clicking a card sets <code>view-transition-name: card-{id}</code> on its element. The detail
+                  overlay applies the same name to its own panel, so the browser pairs them and animates between the
+                  card position and the panel position — the classic "tap to expand" effect.
+                </p>
+                <div class="card-grid">
+                  ${this.sortedFruits().map(
+                    (f) =>
+                      this.expandedId === f.id
+                        ? vdom`<div class="card" style="background: ${f.color}; visibility: hidden">${f.name}</div>`
+                        : vdom`
+                            <div
+                              class="card"
+                              style="background: ${f.color}; view-transition-name: card-${f.id}"
+                              onclick=${() => this.expand(f.id)}
+                            >
+                              ${f.name}
+                            </div>
+                          `,
+                  )}
+                </div>
+                ${
+                  expanded
+                    ? vdom`
+                        <div class="detail-overlay" onclick=${() => this.collapse()}>
+                          <div
+                            class="detail-panel"
+                            style="background: ${expanded.color}; view-transition-name: card-${expanded.id}"
+                            onclick=${(e) => e.stopPropagation()}
+                          >
+                            <h3>${expanded.name}</h3>
+                            <p style="margin: 0">
+                              You have <b>${expanded.count}</b> in the basket. Click outside or the close button to
+                              animate back.
+                            </p>
+                            <button onclick=${() => this.collapse()}>Close</button>
+                          </div>
+                        </div>
+                      `
+                    : ""
+                }
+              </section>
+            `;
+          }
+
+          compose() {
+            if (!this.supported) {
+              return this.renderUnsupported();
+            }
+
+            return vdom`
+              <div>
+                ${this.renderCrossfadeSection()}
+                ${this.renderReorderSection()}
+                ${this.renderThemeSection()}
+                ${this.renderDetailSection()}
+              </div>
+            `;
+          }
+        }
+
+        const app = new App();
+        document.getElementsByTagName("main")[0].appendChild(app.node);
+      })();
+    </script>
+  </body>
+</html>
