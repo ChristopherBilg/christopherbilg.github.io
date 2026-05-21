@@ -38,31 +38,583 @@
 
           <p>Christopher R. Bilger</p>
           <p>May 22nd, 2026</p>
+
+          <aside class="notes">
+            Rosetta is how every Claude Code session at Talkiatry gets the right context for the repo it just opened,
+            without anyone having to re-explain it. Over the next ~15 minutes we'll look at the problem it solves, what
+            it actually is, how to get it running, and what it unlocks for both engineers and the org.
+          </aside>
         </section>
 
         <section>
-          <img data-src="./images/blank-white-card.jpg" />
-        </section>
-
-        <section>
-          <pre>
-            <code class="language-html">
-&lt;a href="#"&gt;Link&lt;/a&gt;
-            </code>
-          </pre>
-        </section>
-
-        <section>
-          <h2>Fragments</h2>
+          <h2>Agenda</h2>
 
           <br />
-          <br />
 
-          <ul>
-            <li class="fragment">First Fragment</li>
-            <li class="fragment">Second Fragment</li>
-            <li class="fragment">Third Fragment</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr">
+            <div style="align-self: center">
+              <ul>
+                <li>Problem Statement</li>
+                <li>What Rosetta Is</li>
+                <li>Get It Running</li>
+                <li>What It Unlocks</li>
+                <li>Roadmap + Q&A</li>
+              </ul>
+            </div>
+
+            <div>
+              <img data-src="./images/rosetta-stone-drawing.avif" width="400" />
+            </div>
+          </div>
+
+          <aside class="notes">
+            Quick map of the next 15 to 20 minutes. We'll start with why this exists, then a short tour of what Rosetta
+            is and how it's structured. After that I'll walk through the setup steps and play a short screencast of the
+            install. Then the fun part - concrete use cases and why leadership should care. We'll close with what's next
+            and Q&A.
+          </aside>
+        </section>
+
+        <section>
+          <section>
+            <h2>Context Decay Is a Tax on Every Multi-Repo Session</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment">11 services across as many repos</li>
+              <li class="fragment">Each repo has its own conventions, test commands, deploy story</li>
+              <li class="fragment">Documentation drifts the moment code changes</li>
+              <li class="fragment">Agents either hallucinate or interrupt the engineer to re-ask</li>
+            </ul>
+
+            <aside class="notes">
+              Every time you open a Claude Code session in a service repo, the agent has to figure out the same things
+              from scratch - how do we test here, where do migrations live, what's the deploy command, what conventions
+              apply. Documentation almost never keeps up with the code. So agents either guess wrong, or they stop and
+              ask you. Both burn time. With 11 services, that tax adds up fast.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Cross-Service Wiring Is Where It Hurts Most</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: center">
+              <p class="blue" style="font-size: 0.85em; text-align: left">
+                "Catch wiring drift during service-adds, not six months later."
+              </p>
+
+              <img data-src="./images/tangled-dependencies-meme.png" width="450" />
+            </div>
+
+            <aside class="notes">
+              Single-repo context decay is annoying. Cross-service context decay is dangerous. When service A changes
+              its API contract and service B doesn't notice, you don't find out until a customer hits the bug. The
+              pattern Rosetta exists to enforce is - catch the drift the moment a wiring change happens, not six months
+              later.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Things We Tried First</h2>
+
+            <br />
+
+            <ul>
+              <li class="fragment"
+                ><code>CLAUDE.md</code> / <code>AGENTS.md</code> in each repo - drift the moment code changes</li
+              >
+              <li class="fragment">Scattered READMEs - agents have to know to look at all of them</li>
+              <li class="fragment">Pasting context into the chat by hand - burns engineer time, never consistent</li>
+              <li class="fragment"
+                >Vector search over docs - retrieves text, misses the <em>relationships</em> between services</li
+              >
+            </ul>
+
+            <aside class="notes">
+              We didn't jump straight to building this. We tried the obvious things first. CLAUDE.md files are great
+              until the code changes and nobody updates the file. Scattered READMEs assume the agent knows where to
+              look. Manual context-pasting is a per-engineer tax, and what gets pasted varies. Vector search retrieves
+              chunks of text but loses the structural relationship between services. None of those solved the actual
+              problem.
+            </aside>
+          </section>
+
+          <section>
+            <h2>What We Needed</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li class="fragment">Single source of truth that agents can pull from on demand</li>
+              <li class="fragment">Updated when the code updates, not when someone remembers</li>
+              <li class="fragment">Repo-aware, not one-size-fits-all</li>
+              <li class="fragment">Drop-in for Claude Code - no bespoke client</li>
+            </ul>
+
+            <aside class="notes">
+              So we wrote down the criteria. On-demand, current, repo-aware, and zero client work for the engineer.
+              That's what led us to MCP. Claude Code already speaks the protocol - we just had to be the server.
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Rosetta in One Slide</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment">An MCP server that ships as one npm package</li>
+                  <li class="fragment">Registered once at user scope - every Claude Code session picks it up</li>
+                  <li class="fragment">Serves <em>bootstrap payloads</em> tailored to the repo you're in</li>
+                  <li class="fragment">Two content streams: hand-curated skills + auto-synced API contracts</li>
+                </ul>
+              </div>
+
+              <div class="fragment">
+                <img data-src="./images/rosetta-bootstrap.png" width="400" />
+              </div>
+            </div>
+
+            <aside class="notes">
+              Rosetta is an MCP server. Claude Code already knows how to talk to MCP servers, so there's no new tooling
+              for the engineer. You register Rosetta once at user scope and every session automatically connects. The
+              agent calls a single tool - bootstrap - and gets back a payload tailored to whichever repo it's working
+              in. The content behind that payload comes from two sources: hand-written skills for workflow knowledge,
+              and auto-synced skills for API contracts.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Three Flavors of Skills</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; font-size: 0.9em">
+              <div class="fragment">
+                <h4>
+                  <span class="blue">Shared</span>
+                </h4>
+
+                <p style="font-size: 0.85em">Identical across every repo - HIPAA, auth, naming</p>
+              </div>
+
+              <div class="fragment">
+                <h4>
+                  <span class="blue">Repo-Specific</span>
+                </h4>
+
+                <p style="font-size: 0.85em">How to test, deploy, run migrations <em>here</em></p>
+              </div>
+
+              <div class="fragment">
+                <h4>
+                  <span class="blue">Cross-Service</span>
+                </h4>
+
+                <p style="font-size: 0.85em">API contracts between this repo and the ones that call it</p>
+              </div>
+            </div>
+
+            <br />
+
+            <p class="fragment" style="font-size: 0.85em">
+              <span class="blue">Same MCP server, three indexes</span> - picked at bootstrap time based on which repo
+              you opened.
+            </p>
+
+            <aside class="notes">
+              Skills live in three categories. Shared skills are things every engineer needs - HIPAA handling, auth
+              patterns, naming conventions. Repo-specific skills are how this particular service tests, deploys, and
+              migrates. Cross-service skills describe the API contracts between repos. When you call bootstrap with a
+              repo name, Rosetta picks the right slice across all three categories and ships it back.
+            </aside>
+          </section>
+
+          <section>
+            <h2>The 5 Tools You'll See Most</h2>
+
+            <br />
+
+            <table style="font-size: 0.8em">
+              <tr>
+                <th>Tool</th>
+                <th>Purpose</th>
+              </tr>
+
+              <tr>
+                <td><span class="blue">bootstrap(repo)</span></td>
+                <td>Session entry point - tailored payload</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_skill()</span></td>
+                <td>Fetch full skill content</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_cross_repo_impact()</span></td>
+                <td>Impact analysis when a service changes</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_map()</span></td>
+                <td>Service registry + dependency graph</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_global_context()</span></td>
+                <td>Org-wide standards (HIPAA, auth, naming)</td>
+              </tr>
+            </table>
+
+            <aside class="notes">
+              You don't need to memorize these. Bootstrap is the only one most sessions actually call - the others are
+              there when the agent decides to dig deeper. Get_cross_repo_impact and get_skill are the two I find myself
+              watching agents reach for most often during real work.
+            </aside>
+          </section>
+
+          <section>
+            <h2>5 More for Deeper Dives</h2>
+
+            <br />
+
+            <table style="font-size: 0.8em">
+              <tr>
+                <th>Tool</th>
+                <th>Purpose</th>
+              </tr>
+
+              <tr>
+                <td><span class="blue">list_skills()</span></td>
+                <td>Search skills by repo/category</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_service_overview()</span></td>
+                <td>Service README</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">search()</span></td>
+                <td>Keyword search across all .md files</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_agent()</span></td>
+                <td>Load specialized agent personas</td>
+              </tr>
+
+              <tr>
+                <td><span class="blue">get_domain()</span></td>
+                <td>Cross-cutting domain knowledge (reserved)</td>
+              </tr>
+            </table>
+
+            <aside class="notes">
+              These are the discovery and niche tools. List_skills and search help when the agent doesn't know what's
+              available yet. Get_service_overview pulls the README. Get_agent loads specialized personas for cross-repo
+              work. Get_domain is reserved for cross-cutting knowledge - the namespace exists but the content is still
+              being authored.
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Two One-Time Setup Steps</h2>
+
+            <pre>
+              <code class="language-bash">
+# 1. Authenticate with GitHub Packages
+echo "//npm.pkg.github.com/:_authToken=YOUR_PAT" >> ~/.npmrc
+echo "@talkiatry:registry=https://npm.pkg.github.com" >> ~/.npmrc
+
+# 2. Register the MCP server (user scope, every session picks it up)
+claude mcp add -s user rosetta -- npx -y @talkiatry/rosetta-mcp-server@latest
+              </code>
+            </pre>
+
+            <p class="fragment" style="font-size: 0.8em">
+              PAT needs <code class="blue">read:packages</code> - generate at GitHub → Settings → Developer settings →
+              Personal access tokens.
+            </p>
+
+            <aside class="notes">
+              Two commands, run once per machine. The first authenticates npm with GitHub Packages so npx can pull the
+              private @talkiatry scope. The second tells Claude Code to start the MCP server on every session. Notice
+              the dash-s user flag - that makes it global. You don't have to repeat this in every repo.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Per-Repo: The Bootstrap Reminder Hook</h2>
+
+            <pre style="font-size: 0.35em">
+              <code class="language-json">
+// &lt;repo&gt;/.claude/settings.json -- Ensure that you update &lt;repo&gt; to the actual repository name
+{
+  "hooks": {
+    "UserPromptSubmit": [{
+      "matcher": "",
+      "hooks": [{
+        "type": "command",
+        "command": "echo '[rosetta] REMINDER: Call bootstrap(repo: \"&lt;repo&gt;\") before proceeding.'"
+      }]
+    }]
+  }
+}
+              </code>
+            </pre>
+
+            <aside class="notes">
+              This is the only per-repo step. The hook nudges the agent on every prompt - Claude Code surfaces the
+              reminder, and the agent calls bootstrap on its own. Replace the repo placeholder with the actual repo
+              name. That's it. Once this is in place, every session in this repo starts pre-briefed.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Watch It Work</h2>
+
+            <br />
+
+            <video controls width="700" data-src="./images/rosetta-setup-screencast.mp4">
+              Your browser does not support embedded video.
+            </video>
+
+            <p class="fragment" style="font-size: 0.9em; margin-top: 4rem">
+              <span class="blue">From zero to a bootstrap'd session in ~90 seconds.</span>
+            </p>
+
+            <aside class="notes">
+              Rather than do this live, here's a 90-second recording. You'll see the two install commands, the Claude
+              Code restart, a fresh session, and the agent calling bootstrap automatically. The response comes back with
+              skills categorized by Shared, Repo-Specific, and Cross-Service.
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>Cross-Repo Impact, Before You Write the Diff</h2>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment">
+                    Agent calls <code class="blue">get_cross_repo_impact("ehr-service")</code> before touching the API
+                  </li>
+                  <li class="fragment">Sees every downstream consumer in one shot</li>
+                  <li class="fragment">Catches breaking changes during draft, not in PR review (or later)</li>
+                </ul>
+              </div>
+
+              <div class="fragment">
+                <img data-src="./images/cross-repo-impact.png" width="300" />
+              </div>
+            </div>
+
+            <aside class="notes">
+              Picture this: you're adding a field to ehr-service. Before Rosetta, you'd write the migration, cut a PR,
+              and find out in review that scheduling-service consumes that endpoint and expected the old shape. With
+              Rosetta, the agent calls get_cross_repo_impact before it writes the diff - it sees every downstream
+              consumer up-front and can plan the contract change accordingly.
+            </aside>
+          </section>
+
+          <section>
+            <h2>API Contracts That Don't Lie</h2>
+
+            <br />
+
+            <div style="text-align: left; font-size: 0.9em">
+              <div class="fragment" style="margin-bottom: 30px">
+                <h4 style="color: #e53935">Before</h4>
+
+                <p>Agent guesses field names from outdated README → integration breaks at runtime</p>
+              </div>
+
+              <div class="fragment">
+                <h4 style="color: #7cb342">After</h4>
+
+                <p>
+                  Agent calls <code class="blue">get_skill("cross-service", "ehr-service", "patient-api")</code> →
+                  contract is regenerated from current source on every sync
+                </p>
+              </div>
+            </div>
+
+            <aside class="notes">
+              This is the auto-synced side of Rosetta. Hand-curated skills cover the how - how to test, how to deploy.
+              Cross-service skills cover the what - what fields exist, what types, what's required. And because
+              rosetta-sync regenerates them from source on every PR, they don't go stale silently.
+            </aside>
+          </section>
+
+          <section>
+            <h2>rosetta-sync: How It Stays Current</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div class="fragment">
+                <img data-src="./images/rosetta-sync.jpeg" width="300" />
+              </div>
+
+              <div style="align-self: center">
+                <ul>
+                  <li class="fragment"><span class="blue">Update</span> existing skills against fresh diffs</li>
+                  <li class="fragment"><span class="blue">Discover</span> skills the repo is missing</li>
+                  <li class="fragment"><span class="blue">Mark stale</span> when source no longer matches</li>
+                  <li class="fragment">
+                    <span class="blue">Delete</span> skills that no longer apply (cross-service only)
+                  </li>
+                </ul>
+
+                <br />
+
+                <p class="fragment" style="font-size: 0.85em">
+                  <span class="blue">Sonnet first. Opus on retry. Keep the last good version if both fail.</span>
+                </p>
+              </div>
+            </div>
+
+            <aside class="notes">
+              The sync workflow is the engine that keeps the auto-synced content honest. Three phases - update what
+              exists, discover what's missing, mark stale what no longer matches the source. We use Sonnet first because
+              it's fast and cheap; on eval failure we retry with Opus; if both fail we keep the previous version. That
+              last rule is important - we'd rather ship slightly stale content than regress.
+            </aside>
+          </section>
+
+          <section>
+            <h2>"Why do I care?"</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; font-size: 0.75em">
+              <div class="fragment" style="background: #e3f2fd; padding: 20px; border-radius: 10px">
+                <h3 style="color: #1976d2; margin: 0">Less Drift</h3>
+
+                <p style="margin: 10px 0 0 0">Context refreshed from source, not memory</p>
+              </div>
+
+              <div class="fragment" style="background: #f3e5f5; padding: 20px; border-radius: 10px">
+                <h3 style="color: #7b1fa2; margin: 0">Faster Onboarding</h3>
+
+                <p style="margin: 10px 0 0 0">Every Claude Code session starts pre-briefed</p>
+              </div>
+
+              <div class="fragment" style="background: #e8f5e9; padding: 20px; border-radius: 10px">
+                <h3 style="color: #388e3c; margin: 0">Fewer Cross-Service Incidents</h3>
+
+                <p style="margin: 10px 0 0 0">Contracts surfaced before code lands</p>
+              </div>
+
+              <div class="fragment" style="background: #f9ead3; padding: 20px; border-radius: 10px">
+                <h3 style="color: #f57c00; margin: 0">HIPAA + Auth Defaults</h3>
+
+                <p style="margin: 10px 0 0 0">Org standards delivered to every agent session</p>
+              </div>
+            </div>
+
+            <br />
+
+            <p class="fragment" style="font-size: 0.75em">No hard numbers yet - early adopter feedback to come.</p>
+
+            <aside class="notes">
+              The qualitative pitch for leadership. Less drift, faster onboarding, fewer cross-service incidents,
+              consistent defaults. We don't have hard numbers yet - this is early days for the rollout. But these are
+              the four buckets we'd expect to move first. If we get adoption data before the next leadership review,
+              we'll quantify them.
+            </aside>
+          </section>
+        </section>
+
+        <section>
+          <section>
+            <h2>What's Next</h2>
+
+            <br />
+            <br />
+
+            <ul>
+              <li class="fragment"><code>domains/</code> namespace for cross-cutting knowledge (reserved, empty)</li>
+              <li class="fragment"
+                ><code>ignore_discoveries</code> to mute noisy skill suggestions in <code>sync-config.yml</code></li
+              >
+            </ul>
+
+            <aside class="notes">
+              Two near-term things. The domains directory is reserved for cross-cutting knowledge that doesn't belong to
+              any one repo - think clinical workflows that touch four services. It's empty today; the structure is in
+              place for when we author content. Ignore_discoveries is the escape hatch for the sync workflow proposing
+              skills the repo doesn't actually want - useful when discovery gets too noisy.
+            </aside>
+          </section>
+
+          <section>
+            <h2>Conclusion + Q&A</h2>
+
+            <br />
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr">
+              <div style="align-self: center">
+                <ul>
+                  <li>Problem Statement</li>
+                  <li>What Rosetta Is</li>
+                  <li>Get It Running</li>
+                  <li>What It Unlocks</li>
+                  <li>Roadmap + Q&A</li>
+                </ul>
+              </div>
+
+              <div>
+                <img data-src="./images/rosetta-closer.jpeg" width="300" />
+              </div>
+            </div>
+
+            <aside class="notes">
+              Quick recap, then questions. The problem was context decay across 11 repos. Rosetta is a single MCP server
+              with three flavors of skills. You set it up with two commands plus a per-repo hook. It unlocks cross-repo
+              impact analysis, current API contracts, and consistent org defaults. What's on your mind?
+            </aside>
+          </section>
+
+          <section>
+            <h2>Powered By</h2>
+
+            <br />
+            <br />
+
+            <ol>
+              <li>A single, static webpage.</li>
+              <li>
+                <a href="https://revealjs.com/" target="_blank">reveal.js</a>
+              </li>
+              <li>
+                <a href="https://highlightjs.org/" target="_blank">highlight.js</a>
+              </li>
+              <li>
+                <a href="https://github.com/Talkiatry/rosetta" target="_blank">Rosetta GitHub repo</a>
+              </li>
+            </ol>
+
+            <aside class="notes">
+              And just for fun - this deck is one HTML file using reveal.js and highlight.js. No build process. Source
+              is on the repo if you want to fork it. The Rosetta repo is linked here too if you want to read the code or
+              open a PR. Thanks everyone.
+            </aside>
+          </section>
         </section>
       </div>
     </div>
