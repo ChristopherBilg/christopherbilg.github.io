@@ -8,6 +8,7 @@
  * Examples:
  *   node scripts/love-letters/add-letter.js ../victoria-bilger mypassword
  *   node scripts/love-letters/add-letter.js ../charlotte-bilger mypassword
+ *   node scripts/love-letters/add-letter.js ../cassandra-bilger mypassword
  *   node scripts/love-letters/add-letter.js ../projects/xyz-love-letters mypassword
  *
  * This script will:
@@ -126,6 +127,7 @@ function printUsage() {
   console.log("Examples:");
   console.log("  node scripts/love-letters/add-letter.js ../victoria-bilger mypassword");
   console.log("  node scripts/love-letters/add-letter.js ../charlotte-bilger mypassword");
+  console.log("  node scripts/love-letters/add-letter.js ../cassandra-bilger mypassword");
   console.log("  node scripts/love-letters/add-letter.js ../projects/xyz-love-letters mypassword");
 }
 

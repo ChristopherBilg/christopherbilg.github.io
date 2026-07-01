@@ -4,7 +4,7 @@ Scripts for managing encrypted love letter collections.
 
 ## Overview
 
-Each love letters directory (e.g., `victoria-bilger/`, `charlotte-bilger/`) contains:
+Each love letters directory (e.g., `victoria-bilger/`, `charlotte-bilger/`, `cassandra-bilger/`) contains:
 
 - `index.html` - The webpage that decrypts and displays letters
 - `manifest.json` - Lists all letter files
@@ -69,6 +69,7 @@ node scripts/love-letters/add-letter.js <directory> <password>
 ```bash
 node scripts/love-letters/add-letter.js victoria-bilger mypassword
 node scripts/love-letters/add-letter.js charlotte-bilger mypassword
+node scripts/love-letters/add-letter.js cassandra-bilger mypassword
 node scripts/love-letters/add-letter.js projects/xyz-love-letters mypassword
 ```
 

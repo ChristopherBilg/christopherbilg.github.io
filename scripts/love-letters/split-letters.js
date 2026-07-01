@@ -8,6 +8,7 @@
  * Examples:
  *   node scripts/love-letters/split-letters.js ../victoria-bilger mypassword
  *   node scripts/love-letters/split-letters.js ../charlotte-bilger mypassword --dry-run
+ *   node scripts/love-letters/split-letters.js ../cassandra-bilger mypassword --dry-run
  *   node scripts/love-letters/split-letters.js ../projects/xyz-love-letters mypassword
  *
  * This script will:
@@ -89,6 +90,7 @@ function printUsage() {
   console.log("Examples:");
   console.log("  node scripts/love-letters/split-letters.js ../victoria-bilger mypassword");
   console.log("  node scripts/love-letters/split-letters.js ../charlotte-bilger mypassword --dry-run");
+  console.log("  node scripts/love-letters/split-letters.js ../cassandra-bilger mypassword --dry-run");
   console.log("  node scripts/love-letters/split-letters.js ../projects/xyz-love-letters mypassword");
 }
 
